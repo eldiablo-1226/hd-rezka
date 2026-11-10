@@ -1,0 +1,752 @@
+Element	0x78	libswiftCore/_swift_deletedMethodError
+Element	0x80	libswiftCore/_swift_deletedMethodError
+Element	0x88	libswiftCore/_swift_deletedMethodError
+Element	0x90	libswiftCore/_swift_deletedMethodError
+Element	0x98	libswiftCore/_swift_deletedMethodError
+Element	0xa0	libswiftCore/_swift_deletedMethodError
+Element	0xa8	libswiftCore/_swift_deletedMethodError
+Element	0xb0	libswiftCore/_swift_deletedMethodError
+Element	0xb8	libswiftCore/_swift_deletedMethodError
+Element	0xc0	libswiftCore/_swift_deletedMethodError
+Element	0xc8	libswiftCore/_swift_deletedMethodError
+Element	0xd0	libswiftCore/_swift_deletedMethodError
+Element	0xd8	SwiftSoup.Node.siblingIndex.getter : Swift.Int
+Element	0xe0	libswiftCore/_swift_deletedMethodError
+Element	0xe8	libswiftCore/_swift_deletedMethodError
+Element	0xf0	SwiftSoup.Element.__allocating_init(Swift.String, SwiftSoup.Attributes) -> SwiftSoup.Element
+Element	0xf8	SwiftSoup.Element.__allocating_init(Swift.String) -> SwiftSoup.Element
+Element	0x100	SwiftSoup.Element.__allocating_init() -> SwiftSoup.Element
+Element	0x108	SwiftSoup.Element.nodeName() -> Swift.String
+Element	0x110	SwiftSoup.Node.attr(Swift.String) throws -> Swift.String
+Element	0x118	SwiftSoup.Node.getAttributes() -> SwiftSoup.Attributes?
+Element	0x120	SwiftSoup.Node.attr(Swift.String, Swift.String) throws -> SwiftSoup.Node
+Element	0x128	SwiftSoup.Node.hasAttr(Swift.String) -> Swift.Bool
+Element	0x130	SwiftSoup.Node.removeAttr(Swift.String) throws -> SwiftSoup.Node
+Element	0x138	SwiftSoup.Node.getBaseUri() -> Swift.String
+Element	0x140	SwiftSoup.Node.setBaseUri(Swift.String) throws -> ()
+Element	0x148	SwiftSoup.Node.absUrl(Swift.String) throws -> Swift.String
+Element	0x150	SwiftSoup.Node.childNode(Swift.Int) -> SwiftSoup.Node
+Element	0x158	SwiftSoup.Node.getChildNodes() -> [SwiftSoup.Node]
+Element	0x160	SwiftSoup.Node.childNodesCopy() -> [SwiftSoup.Node]
+Element	0x168	SwiftSoup.Node.childNodeSize() -> Swift.Int
+Element	0x170	SwiftSoup.Element.parent() -> SwiftSoup.Element?
+Element	0x178	SwiftSoup.Node.ownerDocument() -> SwiftSoup.Document?
+Element	0x180	SwiftSoup.Node.remove() throws -> ()
+Element	0x188	SwiftSoup.Node.before(Swift.String) throws -> SwiftSoup.Node
+Element	0x190	SwiftSoup.Element.before(SwiftSoup.Node) throws -> SwiftSoup.Element
+Element	0x198	merged SwiftSoup.Node.after(Swift.String) throws -> SwiftSoup.Node
+Element	0x1a0	SwiftSoup.Element.after(SwiftSoup.Node) throws -> SwiftSoup.Element
+Element	0x1a8	SwiftSoup.Node.(addSiblingHtml in _88DB12878250A47CDE78A89F4976DAEE)(Swift.Int, Swift.String) throws -> ()
+Element	0x1b0	SwiftSoup.Node.after(html: Swift.String) throws -> SwiftSoup.Node
+Element	0x1b8	SwiftSoup.Node.after(node: SwiftSoup.Node) throws -> SwiftSoup.Node
+Element	0x1c0	SwiftSoup.Node.addSiblingHtml(index: Swift.Int, _: Swift.String) throws -> ()
+Element	0x1c8	SwiftSoup.Element.wrap(Swift.String) throws -> SwiftSoup.Element
+Element	0x1d0	SwiftSoup.Node.unwrap() throws -> SwiftSoup.Node?
+Element	0x1d8	SwiftSoup.Node.(getDeepChild in _88DB12878250A47CDE78A89F4976DAEE)(el: SwiftSoup.Element) -> SwiftSoup.Element
+Element	0x1e0	SwiftSoup.Node.replaceWith(SwiftSoup.Node) throws -> ()
+Element	0x1e8	SwiftSoup.Node.setParentNode(SwiftSoup.Node) throws -> ()
+Element	0x1f0	SwiftSoup.Node.replaceChild(SwiftSoup.Node, SwiftSoup.Node) throws -> ()
+Element	0x1f8	SwiftSoup.Node.removeChild(SwiftSoup.Node) throws -> ()
+Element	0x200	SwiftSoup.Node.addChildren(SwiftSoup.Node...) throws -> ()
+Element	0x208	SwiftSoup.Node.addChildren([SwiftSoup.Node]) throws -> ()
+Element	0x210	SwiftSoup.Node.addChildren(Swift.Int, SwiftSoup.Node...) throws -> ()
+Element	0x218	SwiftSoup.Node.addChildren(Swift.Int, [SwiftSoup.Node]) throws -> ()
+Element	0x220	function signature specialization <Arg[2] = [Constant Propagated Function : closure #2 (Foundation.IndexSet) -> () in closure #1 () -> <<opaque return type of (extension in SwiftUI):SwiftUI.DynamicViewContent.onMove(perform: Swift.Optional<(Foundation.IndexSet, Swift.Int) -> ()>) -> some>>.0 in HDrezka.BookmarksView.body.getter : some]> of reabstraction thunk helper from @escaping @callee_guaranteed (@in_guaranteed Foundation.IndexSet) -> () to @escaping @callee_guaranteed (@in_guaranteed Foundation.IndexSet) -> (@out ())
+Element	0x228	SwiftSoup.Node.reparentChild(SwiftSoup.Node) throws -> ()
+Element	0x230	libswiftCore/_swift_deletedMethodError
+Element	0x238	SwiftSoup.Node.siblingNodes() -> [SwiftSoup.Node]
+Element	0x240	SwiftSoup.Node.nextSibling() -> SwiftSoup.Node?
+Element	0x248	SwiftSoup.Node.previousSibling() -> SwiftSoup.Node?
+Element	0x250	SwiftSoup.Node.setSiblingIndex(Swift.Int) -> ()
+Element	0x258	SwiftSoup.Node.traverse(SwiftSoup.NodeVisitor) throws -> SwiftSoup.Node
+Element	0x260	SwiftSoup.Node.outerHtml() throws -> Swift.String
+Element	0x268	SwiftSoup.Node.outerHtml(SwiftSoup.StringBuilder) throws -> ()
+Element	0x270	libswiftCore/_swift_deletedMethodError
+Element	0x278	SwiftSoup.Element.outerHtmlHead(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) throws -> ()
+Element	0x280	SwiftSoup.Element.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Element	0x288	SwiftSoup.Element.html(SwiftSoup.StringBuilder) throws -> SwiftSoup.StringBuilder
+Element	0x290	SwiftSoup.Node.indent(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Element	0x298	SwiftSoup.Node.equals(SwiftSoup.Node) -> Swift.Bool
+Element	0x2a0	SwiftSoup.Node.hasSameValue(SwiftSoup.Node) throws -> Swift.Bool
+Element	0x2a8	SwiftSoup.Element.copy(with: ObjectiveC.NSZone?) -> Any
+Element	0x2b0	SwiftSoup.Element.copy(parent: SwiftSoup.Node?) -> SwiftSoup.Node
+Element	0x2b8	SwiftSoup.Node.copy(clone: SwiftSoup.Node) -> SwiftSoup.Node
+Element	0x2c0	SwiftSoup.DocumentType.copy(clone: SwiftSoup.Node, parent: SwiftSoup.Node?) -> SwiftSoup.Node
+Element	0x2c8	SwiftSoup.Element.hash(into: inout Swift.Hasher) -> ()
+Element	0x2d0	SwiftSoup.Node.hashValue.getter : Swift.Int
+Element	0x2e0	libswiftCore/_swift_deletedMethodError
+Element	0x2e8	libswiftCore/_swift_deletedMethodError
+Element	0x2f0	libswiftCore/_swift_deletedMethodError
+Element	0x2f8	SwiftSoup.Element.__allocating_init(SwiftSoup.Tag, Swift.String, SwiftSoup.Attributes) -> SwiftSoup.Element
+Element	0x300	SwiftSoup.Element.__allocating_init(SwiftSoup.Tag, Swift.String) -> SwiftSoup.Element
+Element	0x308	SwiftSoup.Element.tagName() -> Swift.String
+Element	0x310	SwiftSoup.Element.tagNameNormal() -> Swift.String
+Element	0x318	SwiftSoup.Element.tagName(Swift.String) throws -> SwiftSoup.Element
+Element	0x320	SwiftSoup.Element.tag() -> SwiftSoup.Tag
+Element	0x328	SwiftSoup.Element.isBlock() -> Swift.Bool
+Element	0x330	SwiftSoup.Element.id() -> Swift.String
+Element	0x338	SwiftSoup.Element.attr(Swift.String, Swift.Bool) throws -> SwiftSoup.Element
+Element	0x340	SwiftSoup.Element.dataset() -> [Swift.String : Swift.String]
+Element	0x348	SwiftSoup.Element.parents() -> SwiftSoup.Elements
+Element	0x350	SwiftSoup.Element.child(Swift.Int) -> SwiftSoup.Element
+Element	0x358	SwiftSoup.Element.children() -> SwiftSoup.Elements
+Element	0x360	SwiftSoup.Element.textNodes() -> [SwiftSoup.TextNode]
+Element	0x368	SwiftSoup.Element.dataNodes() -> [SwiftSoup.DataNode]
+Element	0x370	SwiftSoup.Element.select(Swift.String) throws -> SwiftSoup.Elements
+Element	0x378	SwiftSoup.Element.iS(Swift.String) throws -> Swift.Bool
+Element	0x380	SwiftSoup.Element.iS(SwiftSoup.Evaluator) throws -> Swift.Bool
+Element	0x388	SwiftSoup.Element.appendChild(SwiftSoup.Node) throws -> SwiftSoup.Element
+Element	0x390	SwiftSoup.Element.prependChild(SwiftSoup.Node) throws -> SwiftSoup.Element
+Element	0x398	SwiftSoup.Element.insertChildren(Swift.Int, [SwiftSoup.Node]) throws -> SwiftSoup.Element
+Element	0x3a0	SwiftSoup.Element.appendElement(Swift.String) throws -> SwiftSoup.Element
+Element	0x3a8	SwiftSoup.Element.prependElement(Swift.String) throws -> SwiftSoup.Element
+Element	0x3b0	SwiftSoup.Element.appendText(Swift.String) throws -> SwiftSoup.Element
+Element	0x3b8	SwiftSoup.Element.prependText(Swift.String) throws -> SwiftSoup.Element
+Element	0x3c0	SwiftSoup.Element.append(Swift.String) throws -> SwiftSoup.Element
+Element	0x3c8	SwiftSoup.Element.prepend(Swift.String) throws -> SwiftSoup.Element
+Element	0x3d0	SwiftSoup.Element.empty() -> SwiftSoup.Element
+Element	0x3d8	SwiftSoup.Element.cssSelector() throws -> Swift.String
+Element	0x3e0	SwiftSoup.Element.siblingElements() -> SwiftSoup.Elements
+Element	0x3e8	SwiftSoup.Element.nextElementSibling() throws -> SwiftSoup.Element?
+Element	0x3f0	SwiftSoup.Element.previousElementSibling() throws -> SwiftSoup.Element?
+Element	0x3f8	SwiftSoup.Element.firstElementSibling() -> SwiftSoup.Element?
+Element	0x400	SwiftSoup.Element.elementSiblingIndex() throws -> Swift.Int
+Element	0x408	SwiftSoup.Element.lastElementSibling() -> SwiftSoup.Element?
+Element	0x410	SwiftSoup.Element.getElementsByTag(Swift.String) throws -> SwiftSoup.Elements
+Element	0x418	SwiftSoup.Element.getElementById(Swift.String) throws -> SwiftSoup.Element?
+Element	0x420	SwiftSoup.Element.getElementsByClass(Swift.String) throws -> SwiftSoup.Elements
+Element	0x428	SwiftSoup.Element.getElementsByAttribute(Swift.String) throws -> SwiftSoup.Elements
+Element	0x430	SwiftSoup.Element.getElementsByAttributeStarting(Swift.String) throws -> SwiftSoup.Elements
+Element	0x438	SwiftSoup.Element.getElementsByAttributeValue(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x440	SwiftSoup.Element.getElementsByAttributeValueNot(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x448	SwiftSoup.Element.getElementsByAttributeValueStarting(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x450	SwiftSoup.Element.getElementsByAttributeValueEnding(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x458	SwiftSoup.Element.getElementsByAttributeValueContaining(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x460	SwiftSoup.Element.getElementsByAttributeValueMatching(Swift.String, SwiftSoup.Pattern) throws -> SwiftSoup.Elements
+Element	0x468	SwiftSoup.Element.getElementsByAttributeValueMatching(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x470	SwiftSoup.Element.getElementsByIndexLessThan(Swift.Int) throws -> SwiftSoup.Elements
+Element	0x478	SwiftSoup.Element.getElementsByIndexGreaterThan(Swift.Int) throws -> SwiftSoup.Elements
+Element	0x480	SwiftSoup.Element.getElementsByIndexEquals(Swift.Int) throws -> SwiftSoup.Elements
+Element	0x488	SwiftSoup.Element.getElementsContainingText(Swift.String) throws -> SwiftSoup.Elements
+Element	0x490	SwiftSoup.Element.getElementsContainingOwnText(Swift.String) throws -> SwiftSoup.Elements
+Element	0x498	SwiftSoup.Element.getElementsMatchingText(SwiftSoup.Pattern) throws -> SwiftSoup.Elements
+Element	0x4a0	SwiftSoup.Element.getElementsMatchingText(Swift.String) throws -> SwiftSoup.Elements
+Element	0x4a8	SwiftSoup.Element.getElementsMatchingOwnText(SwiftSoup.Pattern) throws -> SwiftSoup.Elements
+Element	0x4b0	SwiftSoup.Element.getElementsMatchingOwnText(Swift.String) throws -> SwiftSoup.Elements
+Element	0x4b8	SwiftSoup.Element.getAllElements() throws -> SwiftSoup.Elements
+Element	0x4c0	SwiftSoup.Element.text(trimAndNormaliseWhitespace: Swift.Bool) throws -> Swift.String
+Element	0x4c8	SwiftSoup.Element.ownText() -> Swift.String
+Element	0x4d0	SwiftSoup.Element.(ownText in _6F5AC634502CE0BB1DB195E440F1E1BC)(SwiftSoup.StringBuilder) -> ()
+Element	0x4d8	SwiftSoup.Element.text(Swift.String) throws -> SwiftSoup.Element
+Element	0x4e0	SwiftSoup.Element.hasText() -> Swift.Bool
+Element	0x4e8	SwiftSoup.Element.data() -> Swift.String
+Element	0x4f0	SwiftSoup.Element.className() throws -> Swift.String
+Element	0x4f8	SwiftSoup.Element.classNames() throws -> SwiftSoup.OrderedSet<Swift.String>
+Element	0x500	SwiftSoup.Element.classNames(SwiftSoup.OrderedSet<Swift.String>) throws -> SwiftSoup.Element
+Element	0x508	SwiftSoup.Element.hasClass(Swift.String) -> Swift.Bool
+Element	0x510	SwiftSoup.Element.addClass(Swift.String) throws -> SwiftSoup.Element
+Element	0x518	SwiftSoup.Element.removeClass(Swift.String) throws -> SwiftSoup.Element
+Element	0x520	SwiftSoup.Element.toggleClass(Swift.String) throws -> SwiftSoup.Element
+Element	0x528	SwiftSoup.Element.val() throws -> Swift.String
+Element	0x530	SwiftSoup.Element.val(Swift.String) throws -> SwiftSoup.Element
+Element	0x538	SwiftSoup.Element.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Element	0x540	SwiftSoup.Element.html() throws -> Swift.String
+Element	0x548	libswiftCore/_swift_deletedMethodError
+Element	0x550	SwiftSoup.Element.html(Swift.String) throws -> SwiftSoup.Element
+Element	0x558	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Element	0x560	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Element	0x568	libobjc/__objc_empty_cache
+Element	0x578	__METACLASS_DATA_SwiftSoup.Element.textNodeVisitor
+Element	0x588	Alamofire.URLEncodedFormParameterEncoder.__deallocating_deinit
+Element	0x590	libswiftCore/value witness table for Builtin.NativeObject
+Element	0x598	metaclass for SwiftSoup.Element.textNodeVisitor
+Element	0x5a0	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Element	0x5a8	libobjc/__objc_empty_cache
+Element	0x5b8	?
+Element	0x5d8	nominal type descriptor for SwiftSoup.Element.textNodeVisitor
+Element	0x5f8	libswiftCore/_swift_deletedMethodError
+Element	0x600	libswiftCore/_swift_deletedMethodError
+Element	0x608	libswiftCore/_swift_deletedMethodError
+Element	0x680	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Element	0x688	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Element	0x690	libobjc/__objc_empty_cache
+Element	0x6a0	__METACLASS_DATA_SwiftSoup.Elements
+Element	0x6b0	Alamofire.CompositeTrustEvaluator.__deallocating_deinit
+Element	0x6b8	libswiftCore/value witness table for Builtin.NativeObject
+Element	0x6c0	metaclass for SwiftSoup.Elements
+Element	0x6c8	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Element	0x6d0	libobjc/__objc_empty_cache
+Element	0x6e0	?
+Element	0x700	nominal type descriptor for SwiftSoup.Elements
+Element	0x718	libswiftCore/_swift_deletedMethodError
+Element	0x720	libswiftCore/_swift_deletedMethodError
+Element	0x728	libswiftCore/_swift_deletedMethodError
+Element	0x730	SwiftSoup.Attributes.__allocating_init() -> SwiftSoup.Attributes
+Element	0x738	SwiftSoup.Elements.__allocating_init([SwiftSoup.Element]) -> SwiftSoup.Elements
+Element	0x740	SwiftSoup.Elements.__allocating_init(SwiftSoup.OrderedSet<SwiftSoup.Element>) -> SwiftSoup.Elements
+Element	0x748	SwiftSoup.Elements.copy(with: ObjectiveC.NSZone?) -> Any
+Element	0x750	SwiftSoup.Elements.attr(Swift.String) throws -> Swift.String
+Element	0x758	SwiftSoup.Elements.hasAttr(Swift.String) -> Swift.Bool
+Element	0x760	SwiftSoup.Elements.attr(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Element	0x768	SwiftSoup.Elements.removeAttr(Swift.String) throws -> SwiftSoup.Elements
+Element	0x770	SwiftSoup.Elements.addClass(Swift.String) throws -> SwiftSoup.Elements
+Element	0x778	SwiftSoup.Elements.removeClass(Swift.String) throws -> SwiftSoup.Elements
+Element	0x780	SwiftSoup.Elements.toggleClass(Swift.String) throws -> SwiftSoup.Elements
+Element	0x788	SwiftSoup.Elements.hasClass(Swift.String) -> Swift.Bool
+Element	0x790	SwiftSoup.Elements.val() throws -> Swift.String
+Element	0x798	SwiftSoup.Elements.val(Swift.String) throws -> SwiftSoup.Elements
+Element	0x7a0	SwiftSoup.Elements.text(trimAndNormaliseWhitespace: Swift.Bool) throws -> Swift.String
+Element	0x7a8	SwiftSoup.Elements.hasText() -> Swift.Bool
+Element	0x7b0	SwiftSoup.Elements.eachText() throws -> [Swift.String]
+Element	0x7b8	SwiftSoup.Elements.html() throws -> Swift.String
+Element	0x7c0	SwiftSoup.Elements.outerHtml() throws -> Swift.String
+Element	0x7c8	SwiftSoup.Elements.toString() throws -> Swift.String
+Element	0x7d0	SwiftSoup.Elements.tagName(Swift.String) throws -> SwiftSoup.Elements
+Element	0x7d8	SwiftSoup.Elements.html(Swift.String) throws -> SwiftSoup.Elements
+Element	0x7e0	SwiftSoup.Elements.prepend(Swift.String) throws -> SwiftSoup.Elements
+Element	0x7e8	SwiftSoup.Elements.append(Swift.String) throws -> SwiftSoup.Elements
+Element	0x7f0	SwiftSoup.Elements.before(Swift.String) throws -> SwiftSoup.Elements
+Element	0x7f8	SwiftSoup.Elements.after(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x58	libswiftCore/_swift_deletedMethodError
+Elements	0x60	libswiftCore/_swift_deletedMethodError
+Elements	0x68	libswiftCore/_swift_deletedMethodError
+Elements	0x70	SwiftSoup.Attributes.__allocating_init() -> SwiftSoup.Attributes
+Elements	0x78	SwiftSoup.Elements.__allocating_init([SwiftSoup.Element]) -> SwiftSoup.Elements
+Elements	0x80	SwiftSoup.Elements.__allocating_init(SwiftSoup.OrderedSet<SwiftSoup.Element>) -> SwiftSoup.Elements
+Elements	0x88	SwiftSoup.Elements.copy(with: ObjectiveC.NSZone?) -> Any
+Elements	0x90	SwiftSoup.Elements.attr(Swift.String) throws -> Swift.String
+Elements	0x98	SwiftSoup.Elements.hasAttr(Swift.String) -> Swift.Bool
+Elements	0xa0	SwiftSoup.Elements.attr(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Elements	0xa8	SwiftSoup.Elements.removeAttr(Swift.String) throws -> SwiftSoup.Elements
+Elements	0xb0	SwiftSoup.Elements.addClass(Swift.String) throws -> SwiftSoup.Elements
+Elements	0xb8	SwiftSoup.Elements.removeClass(Swift.String) throws -> SwiftSoup.Elements
+Elements	0xc0	SwiftSoup.Elements.toggleClass(Swift.String) throws -> SwiftSoup.Elements
+Elements	0xc8	SwiftSoup.Elements.hasClass(Swift.String) -> Swift.Bool
+Elements	0xd0	SwiftSoup.Elements.val() throws -> Swift.String
+Elements	0xd8	SwiftSoup.Elements.val(Swift.String) throws -> SwiftSoup.Elements
+Elements	0xe0	SwiftSoup.Elements.text(trimAndNormaliseWhitespace: Swift.Bool) throws -> Swift.String
+Elements	0xe8	SwiftSoup.Elements.hasText() -> Swift.Bool
+Elements	0xf0	SwiftSoup.Elements.eachText() throws -> [Swift.String]
+Elements	0xf8	SwiftSoup.Elements.html() throws -> Swift.String
+Elements	0x100	SwiftSoup.Elements.outerHtml() throws -> Swift.String
+Elements	0x108	SwiftSoup.Elements.toString() throws -> Swift.String
+Elements	0x110	SwiftSoup.Elements.tagName(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x118	SwiftSoup.Elements.html(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x120	SwiftSoup.Elements.prepend(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x128	SwiftSoup.Elements.append(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x130	SwiftSoup.Elements.before(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x138	SwiftSoup.Elements.after(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x140	SwiftSoup.Elements.wrap(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x148	SwiftSoup.Elements.unwrap() throws -> SwiftSoup.Elements
+Elements	0x150	SwiftSoup.Elements.empty() -> SwiftSoup.Elements
+Elements	0x158	SwiftSoup.Elements.remove() throws -> SwiftSoup.Elements
+Elements	0x160	SwiftSoup.Elements.select(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x168	SwiftSoup.Elements.not(Swift.String) throws -> SwiftSoup.Elements
+Elements	0x170	SwiftSoup.Elements.eq(Swift.Int) -> SwiftSoup.Elements
+Elements	0x178	SwiftSoup.Elements.iS(Swift.String) throws -> Swift.Bool
+Elements	0x180	SwiftSoup.Elements.parents() -> SwiftSoup.Elements
+Elements	0x188	SwiftSoup.Elements.first() -> SwiftSoup.Element?
+Elements	0x190	SwiftSoup.Elements.isEmpty() -> Swift.Bool
+Elements	0x198	SwiftSoup.Elements.size() -> Swift.Int
+Elements	0x1a0	SwiftSoup.Elements.last() -> SwiftSoup.Element?
+Elements	0x1a8	SwiftSoup.Elements.traverse(SwiftSoup.NodeVisitor) throws -> SwiftSoup.Elements
+Elements	0x1b0	SwiftSoup.Elements.forms() -> [SwiftSoup.FormElement]
+Elements	0x1b8	SwiftSoup.Elements.add(SwiftSoup.Element) -> ()
+Elements	0x1c0	SwiftSoup.Elements.add(Swift.Int, SwiftSoup.Element) -> ()
+Elements	0x1c8	SwiftSoup.Elements.get(Swift.Int) -> SwiftSoup.Element
+Elements	0x1d0	SwiftSoup.Attributes.asList() -> [SwiftSoup.Attribute]
+Elements	0x208	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x210	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x218	libobjc/__objc_empty_cache
+Elements	0x228	__METACLASS_DATA_SwiftSoup.Entities
+Elements	0x238	FirebaseSessions.NetworkInfo.__deallocating_deinit
+Elements	0x240	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x248	metaclass for SwiftSoup.Entities
+Elements	0x250	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Elements	0x258	libobjc/__objc_empty_cache
+Elements	0x268	?
+Elements	0x288	nominal type descriptor for SwiftSoup.Entities
+Elements	0x298	libswiftCore/_swift_deletedMethodError
+Elements	0x2a0	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x2a8	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x2b0	libobjc/__objc_empty_cache
+Elements	0x2c0	__METACLASS_DATA_SwiftSoup.Entities.EscapeMode
+Elements	0x2d0	SwiftSoup.Entities.EscapeMode.__deallocating_deinit
+Elements	0x2d8	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x2e0	metaclass for SwiftSoup.Entities.EscapeMode
+Elements	0x2e8	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Elements	0x2f0	libobjc/__objc_empty_cache
+Elements	0x300	?
+Elements	0x320	nominal type descriptor for SwiftSoup.Entities.EscapeMode
+Elements	0x348	libswiftCore/_swift_deletedMethodError
+Elements	0x350	libswiftCore/_swift_deletedMethodError
+Elements	0x358	libswiftCore/_swift_deletedMethodError
+Elements	0x360	SwiftSoup.Entities.EscapeMode.(entitiesByCodepoint in _E9BD2489C242E2841ECC29D4BC5FF5A6).getter : [SwiftSoup.Entities.EscapeMode.NamedCodepoint]
+Elements	0x368	libswiftCore/_swift_deletedMethodError
+Elements	0x370	libswiftCore/_swift_deletedMethodError
+Elements	0x378	libswiftCore/_swift_deletedMethodError
+Elements	0x380	SwiftSoup.Entities.EscapeMode.codepointForName(Swift.String) -> Swift.Unicode.Scalar?
+Elements	0x388	SwiftSoup.Entities.EscapeMode.nameForCodepoint(Swift.Unicode.Scalar) -> Swift.String?
+Elements	0x390	libswiftCore/_swift_deletedMethodError
+Elements	0x398	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x3a0	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x3a8	libobjc/__objc_empty_cache
+Elements	0x3b8	__METACLASS_DATA_SwiftSoup.MutexLock
+Elements	0x3c8	SwiftSoup.MutexLock.__deallocating_deinit
+Elements	0x3d0	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x3d8	metaclass for SwiftSoup.MutexLock
+Elements	0x3e0	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Elements	0x3e8	libobjc/__objc_empty_cache
+Elements	0x3f8	?
+Elements	0x418	nominal type descriptor for SwiftSoup.MutexLock
+Elements	0x430	libswiftCore/_swift_deletedMethodError
+Elements	0x4a8	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x4b0	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x4b8	libobjc/__objc_empty_cache
+Elements	0x4c8	__METACLASS_DATA_SwiftSoup.Evaluator
+Elements	0x4d8	SwiftSoup.Evaluator.IsLastChild.__deallocating_deinit
+Elements	0x4e0	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x4e8	metaclass for SwiftSoup.Evaluator
+Elements	0x4f0	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Elements	0x4f8	libobjc/__objc_empty_cache
+Elements	0x508	?
+Elements	0x528	nominal type descriptor for SwiftSoup.Evaluator
+Elements	0x538	SwiftSoup.Evaluator.IsLastChild.__allocating_init() -> SwiftSoup.Evaluator.IsLastChild
+Elements	0x540	SwiftSoup.Node.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) throws -> ()
+Elements	0x548	SwiftSoup.Node.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) throws -> ()
+Elements	0x550	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x558	metaclass for SwiftSoup.Evaluator
+Elements	0x560	libobjc/__objc_empty_cache
+Elements	0x570	__METACLASS_DATA_SwiftSoup.Evaluator.Tag
+Elements	0x580	SwiftSoup.Evaluator.AttributeWithValueMatching.__deallocating_deinit
+Elements	0x588	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x590	metaclass for SwiftSoup.Evaluator.Tag
+Elements	0x598	type metadata for SwiftSoup.Evaluator
+Elements	0x5a0	libobjc/__objc_empty_cache
+Elements	0x5b0	?
+Elements	0x5d0	nominal type descriptor for SwiftSoup.Evaluator.Tag
+Elements	0x5d8	SwiftSoup.Evaluator.AttributeWithValueMatching.__ivar_destroyer
+Elements	0x5e0	SwiftSoup.Evaluator.Tag.__allocating_init() -> SwiftSoup.Evaluator.Tag
+Elements	0x5e8	SwiftSoup.Evaluator.Tag.matches(SwiftSoup.Element, SwiftSoup.Element) throws -> Swift.Bool
+Elements	0x5f0	SwiftSoup.Evaluator.Tag.toString() -> Swift.String
+Elements	0x608	SwiftSoup.Evaluator.Tag.__allocating_init(Swift.String) -> SwiftSoup.Evaluator.Tag
+Elements	0x610	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x618	metaclass for SwiftSoup.Evaluator
+Elements	0x620	libobjc/__objc_empty_cache
+Elements	0x630	__METACLASS_DATA_SwiftSoup.Evaluator.TagEndsWith
+Elements	0x640	SwiftSoup.AttributeKey.__deallocating_deinit
+Elements	0x648	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x650	metaclass for SwiftSoup.Evaluator.TagEndsWith
+Elements	0x658	type metadata for SwiftSoup.Evaluator
+Elements	0x660	libobjc/__objc_empty_cache
+Elements	0x670	?
+Elements	0x690	nominal type descriptor for SwiftSoup.Evaluator.TagEndsWith
+Elements	0x698	SwiftSoup.Evaluator.TagEndsWith.__ivar_destroyer
+Elements	0x6a0	SwiftSoup.Evaluator.TagEndsWith.__allocating_init() -> SwiftSoup.Evaluator.TagEndsWith
+Elements	0x6a8	SwiftSoup.Evaluator.TagEndsWith.matches(SwiftSoup.Element, SwiftSoup.Element) throws -> Swift.Bool
+Elements	0x6b0	SwiftSoup.Evaluator.TagEndsWith.toString() -> Swift.String
+Elements	0x6c0	Alamofire.Retrier.__allocating_init((Alamofire.Request, Alamofire.Session, Swift.Error, (Alamofire.RetryResult) -> ()) -> ()) -> Alamofire.Retrier
+Elements	0x6c8	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x6d0	metaclass for SwiftSoup.Evaluator
+Elements	0x6d8	libobjc/__objc_empty_cache
+Elements	0x6e8	__METACLASS_DATA_SwiftSoup.Evaluator.Id
+Elements	0x6f8	SwiftSoup.AttributeKey.__deallocating_deinit
+Elements	0x700	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x708	metaclass for SwiftSoup.Evaluator.Id
+Elements	0x710	type metadata for SwiftSoup.Evaluator
+Elements	0x718	libobjc/__objc_empty_cache
+Elements	0x728	?
+Elements	0x748	nominal type descriptor for SwiftSoup.Evaluator.Id
+Elements	0x750	SwiftSoup.Evaluator.TagEndsWith.__ivar_destroyer
+Elements	0x758	SwiftSoup.Evaluator.Id.__allocating_init() -> SwiftSoup.Evaluator.Id
+Elements	0x760	SwiftSoup.Evaluator.Id.matches(SwiftSoup.Element, SwiftSoup.Element) throws -> Swift.Bool
+Elements	0x768	SwiftSoup.Evaluator.Id.toString() -> Swift.String
+Elements	0x778	Alamofire.Retrier.__allocating_init((Alamofire.Request, Alamofire.Session, Swift.Error, (Alamofire.RetryResult) -> ()) -> ()) -> Alamofire.Retrier
+Elements	0x780	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Elements	0x788	metaclass for SwiftSoup.Evaluator
+Elements	0x790	libobjc/__objc_empty_cache
+Elements	0x7a0	__METACLASS_DATA_SwiftSoup.Evaluator.Class
+Elements	0x7b0	SwiftSoup.AttributeKey.__deallocating_deinit
+Elements	0x7b8	libswiftCore/value witness table for Builtin.NativeObject
+Elements	0x7c0	metaclass for SwiftSoup.Evaluator.Class
+Elements	0x7c8	type metadata for SwiftSoup.Evaluator
+Elements	0x7d0	libobjc/__objc_empty_cache
+Elements	0x7e0	?
+Document	0x78	libswiftCore/_swift_deletedMethodError
+Document	0x80	libswiftCore/_swift_deletedMethodError
+Document	0x88	libswiftCore/_swift_deletedMethodError
+Document	0x90	libswiftCore/_swift_deletedMethodError
+Document	0x98	libswiftCore/_swift_deletedMethodError
+Document	0xa0	libswiftCore/_swift_deletedMethodError
+Document	0xa8	libswiftCore/_swift_deletedMethodError
+Document	0xb0	libswiftCore/_swift_deletedMethodError
+Document	0xb8	libswiftCore/_swift_deletedMethodError
+Document	0xc0	libswiftCore/_swift_deletedMethodError
+Document	0xc8	libswiftCore/_swift_deletedMethodError
+Document	0xd0	libswiftCore/_swift_deletedMethodError
+Document	0xd8	SwiftSoup.Node.siblingIndex.getter : Swift.Int
+Document	0xe0	libswiftCore/_swift_deletedMethodError
+Document	0xe8	libswiftCore/_swift_deletedMethodError
+Document	0xf0	SwiftSoup.Element.__allocating_init(Swift.String, SwiftSoup.Attributes) -> SwiftSoup.Element
+Document	0xf8	SwiftSoup.Element.__allocating_init(Swift.String) -> SwiftSoup.Element
+Document	0x100	SwiftSoup.Element.__allocating_init() -> SwiftSoup.Element
+Document	0x108	SwiftSoup.Document.nodeName() -> Swift.String
+Document	0x110	SwiftSoup.Node.attr(Swift.String) throws -> Swift.String
+Document	0x118	SwiftSoup.Node.getAttributes() -> SwiftSoup.Attributes?
+Document	0x120	SwiftSoup.Node.attr(Swift.String, Swift.String) throws -> SwiftSoup.Node
+Document	0x128	SwiftSoup.Node.hasAttr(Swift.String) -> Swift.Bool
+Document	0x130	SwiftSoup.Node.removeAttr(Swift.String) throws -> SwiftSoup.Node
+Document	0x138	SwiftSoup.Node.getBaseUri() -> Swift.String
+Document	0x140	SwiftSoup.Node.setBaseUri(Swift.String) throws -> ()
+Document	0x148	SwiftSoup.Node.absUrl(Swift.String) throws -> Swift.String
+Document	0x150	SwiftSoup.Node.childNode(Swift.Int) -> SwiftSoup.Node
+Document	0x158	SwiftSoup.Node.getChildNodes() -> [SwiftSoup.Node]
+Document	0x160	SwiftSoup.Node.childNodesCopy() -> [SwiftSoup.Node]
+Document	0x168	SwiftSoup.Node.childNodeSize() -> Swift.Int
+Document	0x170	SwiftSoup.Element.parent() -> SwiftSoup.Element?
+Document	0x178	SwiftSoup.Node.ownerDocument() -> SwiftSoup.Document?
+Document	0x180	SwiftSoup.Node.remove() throws -> ()
+Document	0x188	SwiftSoup.Node.before(Swift.String) throws -> SwiftSoup.Node
+Document	0x190	SwiftSoup.Element.before(SwiftSoup.Node) throws -> SwiftSoup.Element
+Document	0x198	merged SwiftSoup.Node.after(Swift.String) throws -> SwiftSoup.Node
+Document	0x1a0	SwiftSoup.Element.after(SwiftSoup.Node) throws -> SwiftSoup.Element
+Document	0x1a8	SwiftSoup.Node.(addSiblingHtml in _88DB12878250A47CDE78A89F4976DAEE)(Swift.Int, Swift.String) throws -> ()
+Document	0x1b0	SwiftSoup.Node.after(html: Swift.String) throws -> SwiftSoup.Node
+Document	0x1b8	SwiftSoup.Node.after(node: SwiftSoup.Node) throws -> SwiftSoup.Node
+Document	0x1c0	SwiftSoup.Node.addSiblingHtml(index: Swift.Int, _: Swift.String) throws -> ()
+Document	0x1c8	SwiftSoup.Element.wrap(Swift.String) throws -> SwiftSoup.Element
+Document	0x1d0	SwiftSoup.Node.unwrap() throws -> SwiftSoup.Node?
+Document	0x1d8	SwiftSoup.Node.(getDeepChild in _88DB12878250A47CDE78A89F4976DAEE)(el: SwiftSoup.Element) -> SwiftSoup.Element
+Document	0x1e0	SwiftSoup.Node.replaceWith(SwiftSoup.Node) throws -> ()
+Document	0x1e8	SwiftSoup.Node.setParentNode(SwiftSoup.Node) throws -> ()
+Document	0x1f0	SwiftSoup.Node.replaceChild(SwiftSoup.Node, SwiftSoup.Node) throws -> ()
+Document	0x1f8	SwiftSoup.Node.removeChild(SwiftSoup.Node) throws -> ()
+Document	0x200	SwiftSoup.Node.addChildren(SwiftSoup.Node...) throws -> ()
+Document	0x208	SwiftSoup.Node.addChildren([SwiftSoup.Node]) throws -> ()
+Document	0x210	SwiftSoup.Node.addChildren(Swift.Int, SwiftSoup.Node...) throws -> ()
+Document	0x218	SwiftSoup.Node.addChildren(Swift.Int, [SwiftSoup.Node]) throws -> ()
+Document	0x220	function signature specialization <Arg[2] = [Constant Propagated Function : closure #2 (Foundation.IndexSet) -> () in closure #1 () -> <<opaque return type of (extension in SwiftUI):SwiftUI.DynamicViewContent.onMove(perform: Swift.Optional<(Foundation.IndexSet, Swift.Int) -> ()>) -> some>>.0 in HDrezka.BookmarksView.body.getter : some]> of reabstraction thunk helper from @escaping @callee_guaranteed (@in_guaranteed Foundation.IndexSet) -> () to @escaping @callee_guaranteed (@in_guaranteed Foundation.IndexSet) -> (@out ())
+Document	0x228	SwiftSoup.Node.reparentChild(SwiftSoup.Node) throws -> ()
+Document	0x230	libswiftCore/_swift_deletedMethodError
+Document	0x238	SwiftSoup.Node.siblingNodes() -> [SwiftSoup.Node]
+Document	0x240	SwiftSoup.Node.nextSibling() -> SwiftSoup.Node?
+Document	0x248	SwiftSoup.Node.previousSibling() -> SwiftSoup.Node?
+Document	0x250	SwiftSoup.Node.setSiblingIndex(Swift.Int) -> ()
+Document	0x258	SwiftSoup.Node.traverse(SwiftSoup.NodeVisitor) throws -> SwiftSoup.Node
+Document	0x260	SwiftSoup.Element.html() throws -> Swift.String
+Document	0x268	SwiftSoup.Node.outerHtml(SwiftSoup.StringBuilder) throws -> ()
+Document	0x270	libswiftCore/_swift_deletedMethodError
+Document	0x278	SwiftSoup.Element.outerHtmlHead(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) throws -> ()
+Document	0x280	SwiftSoup.Element.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Document	0x288	SwiftSoup.Element.html(SwiftSoup.StringBuilder) throws -> SwiftSoup.StringBuilder
+Document	0x290	SwiftSoup.Node.indent(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Document	0x298	SwiftSoup.Node.equals(SwiftSoup.Node) -> Swift.Bool
+Document	0x2a0	SwiftSoup.Node.hasSameValue(SwiftSoup.Node) throws -> Swift.Bool
+Document	0x2a8	SwiftSoup.Document.copy(with: ObjectiveC.NSZone?) -> Any
+Document	0x2b0	SwiftSoup.Document.copy(parent: SwiftSoup.Node?) -> SwiftSoup.Node
+Document	0x2b8	SwiftSoup.Node.copy(clone: SwiftSoup.Node) -> SwiftSoup.Node
+Document	0x2c0	SwiftSoup.Document.copy(clone: SwiftSoup.Node, parent: SwiftSoup.Node?) -> SwiftSoup.Node
+Document	0x2c8	SwiftSoup.Element.hash(into: inout Swift.Hasher) -> ()
+Document	0x2d0	SwiftSoup.Node.hashValue.getter : Swift.Int
+Document	0x2e0	libswiftCore/_swift_deletedMethodError
+Document	0x2e8	libswiftCore/_swift_deletedMethodError
+Document	0x2f0	libswiftCore/_swift_deletedMethodError
+Document	0x2f8	SwiftSoup.Document.__allocating_init(SwiftSoup.Tag, Swift.String, SwiftSoup.Attributes) -> SwiftSoup.Document
+Document	0x300	SwiftSoup.Document.__allocating_init(SwiftSoup.Tag, Swift.String) -> SwiftSoup.Document
+Document	0x308	SwiftSoup.Element.tagName() -> Swift.String
+Document	0x310	SwiftSoup.Element.tagNameNormal() -> Swift.String
+Document	0x318	SwiftSoup.Element.tagName(Swift.String) throws -> SwiftSoup.Element
+Document	0x320	SwiftSoup.Element.tag() -> SwiftSoup.Tag
+Document	0x328	SwiftSoup.Element.isBlock() -> Swift.Bool
+Document	0x330	SwiftSoup.Element.id() -> Swift.String
+Document	0x338	SwiftSoup.Element.attr(Swift.String, Swift.Bool) throws -> SwiftSoup.Element
+Document	0x340	SwiftSoup.Element.dataset() -> [Swift.String : Swift.String]
+Document	0x348	SwiftSoup.Element.parents() -> SwiftSoup.Elements
+Document	0x350	SwiftSoup.Element.child(Swift.Int) -> SwiftSoup.Element
+Document	0x358	SwiftSoup.Element.children() -> SwiftSoup.Elements
+Document	0x360	SwiftSoup.Element.textNodes() -> [SwiftSoup.TextNode]
+Document	0x368	SwiftSoup.Element.dataNodes() -> [SwiftSoup.DataNode]
+Document	0x370	SwiftSoup.Element.select(Swift.String) throws -> SwiftSoup.Elements
+Document	0x378	SwiftSoup.Element.iS(Swift.String) throws -> Swift.Bool
+Document	0x380	SwiftSoup.Element.iS(SwiftSoup.Evaluator) throws -> Swift.Bool
+Document	0x388	SwiftSoup.Element.appendChild(SwiftSoup.Node) throws -> SwiftSoup.Element
+Document	0x390	SwiftSoup.Element.prependChild(SwiftSoup.Node) throws -> SwiftSoup.Element
+Document	0x398	SwiftSoup.Element.insertChildren(Swift.Int, [SwiftSoup.Node]) throws -> SwiftSoup.Element
+Document	0x3a0	SwiftSoup.Element.appendElement(Swift.String) throws -> SwiftSoup.Element
+Document	0x3a8	SwiftSoup.Element.prependElement(Swift.String) throws -> SwiftSoup.Element
+Document	0x3b0	SwiftSoup.Element.appendText(Swift.String) throws -> SwiftSoup.Element
+Document	0x3b8	SwiftSoup.Element.prependText(Swift.String) throws -> SwiftSoup.Element
+Document	0x3c0	SwiftSoup.Element.append(Swift.String) throws -> SwiftSoup.Element
+Document	0x3c8	SwiftSoup.Element.prepend(Swift.String) throws -> SwiftSoup.Element
+Document	0x3d0	SwiftSoup.Element.empty() -> SwiftSoup.Element
+Document	0x3d8	SwiftSoup.Element.cssSelector() throws -> Swift.String
+Document	0x3e0	SwiftSoup.Element.siblingElements() -> SwiftSoup.Elements
+Document	0x3e8	SwiftSoup.Element.nextElementSibling() throws -> SwiftSoup.Element?
+Document	0x3f0	SwiftSoup.Element.previousElementSibling() throws -> SwiftSoup.Element?
+Document	0x3f8	SwiftSoup.Element.firstElementSibling() -> SwiftSoup.Element?
+Document	0x400	SwiftSoup.Element.elementSiblingIndex() throws -> Swift.Int
+Document	0x408	SwiftSoup.Element.lastElementSibling() -> SwiftSoup.Element?
+Document	0x410	SwiftSoup.Element.getElementsByTag(Swift.String) throws -> SwiftSoup.Elements
+Document	0x418	SwiftSoup.Element.getElementById(Swift.String) throws -> SwiftSoup.Element?
+Document	0x420	SwiftSoup.Element.getElementsByClass(Swift.String) throws -> SwiftSoup.Elements
+Document	0x428	SwiftSoup.Element.getElementsByAttribute(Swift.String) throws -> SwiftSoup.Elements
+Document	0x430	SwiftSoup.Element.getElementsByAttributeStarting(Swift.String) throws -> SwiftSoup.Elements
+Document	0x438	SwiftSoup.Element.getElementsByAttributeValue(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Document	0x440	SwiftSoup.Element.getElementsByAttributeValueNot(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Document	0x448	SwiftSoup.Element.getElementsByAttributeValueStarting(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Document	0x450	SwiftSoup.Element.getElementsByAttributeValueEnding(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Document	0x458	SwiftSoup.Element.getElementsByAttributeValueContaining(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Document	0x460	SwiftSoup.Element.getElementsByAttributeValueMatching(Swift.String, SwiftSoup.Pattern) throws -> SwiftSoup.Elements
+Document	0x468	SwiftSoup.Element.getElementsByAttributeValueMatching(Swift.String, Swift.String) throws -> SwiftSoup.Elements
+Document	0x470	SwiftSoup.Element.getElementsByIndexLessThan(Swift.Int) throws -> SwiftSoup.Elements
+Document	0x478	SwiftSoup.Element.getElementsByIndexGreaterThan(Swift.Int) throws -> SwiftSoup.Elements
+Document	0x480	SwiftSoup.Element.getElementsByIndexEquals(Swift.Int) throws -> SwiftSoup.Elements
+Document	0x488	SwiftSoup.Element.getElementsContainingText(Swift.String) throws -> SwiftSoup.Elements
+Document	0x490	SwiftSoup.Element.getElementsContainingOwnText(Swift.String) throws -> SwiftSoup.Elements
+Document	0x498	SwiftSoup.Element.getElementsMatchingText(SwiftSoup.Pattern) throws -> SwiftSoup.Elements
+Document	0x4a0	SwiftSoup.Element.getElementsMatchingText(Swift.String) throws -> SwiftSoup.Elements
+Document	0x4a8	SwiftSoup.Element.getElementsMatchingOwnText(SwiftSoup.Pattern) throws -> SwiftSoup.Elements
+Document	0x4b0	SwiftSoup.Element.getElementsMatchingOwnText(Swift.String) throws -> SwiftSoup.Elements
+Document	0x4b8	SwiftSoup.Element.getAllElements() throws -> SwiftSoup.Elements
+Document	0x4c0	SwiftSoup.Element.text(trimAndNormaliseWhitespace: Swift.Bool) throws -> Swift.String
+Document	0x4c8	SwiftSoup.Element.ownText() -> Swift.String
+Document	0x4d0	SwiftSoup.Element.(ownText in _6F5AC634502CE0BB1DB195E440F1E1BC)(SwiftSoup.StringBuilder) -> ()
+Document	0x4d8	SwiftSoup.Document.text(Swift.String) throws -> SwiftSoup.Element
+Document	0x4e0	SwiftSoup.Element.hasText() -> Swift.Bool
+Document	0x4e8	SwiftSoup.Element.data() -> Swift.String
+Document	0x4f0	SwiftSoup.Element.className() throws -> Swift.String
+Document	0x4f8	SwiftSoup.Element.classNames() throws -> SwiftSoup.OrderedSet<Swift.String>
+Document	0x500	SwiftSoup.Element.classNames(SwiftSoup.OrderedSet<Swift.String>) throws -> SwiftSoup.Element
+Document	0x508	SwiftSoup.Element.hasClass(Swift.String) -> Swift.Bool
+Document	0x510	SwiftSoup.Element.addClass(Swift.String) throws -> SwiftSoup.Element
+Document	0x518	SwiftSoup.Element.removeClass(Swift.String) throws -> SwiftSoup.Element
+Document	0x520	SwiftSoup.Element.toggleClass(Swift.String) throws -> SwiftSoup.Element
+Document	0x528	SwiftSoup.Element.val() throws -> Swift.String
+Document	0x530	SwiftSoup.Element.val(Swift.String) throws -> SwiftSoup.Element
+Document	0x538	SwiftSoup.Element.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Document	0x540	SwiftSoup.Element.html() throws -> Swift.String
+Document	0x548	libswiftCore/_swift_deletedMethodError
+Document	0x550	SwiftSoup.Element.html(Swift.String) throws -> SwiftSoup.Element
+Document	0x578	libswiftCore/_swift_deletedMethodError
+Document	0x580	libswiftCore/_swift_deletedMethodError
+Document	0x588	libswiftCore/_swift_deletedMethodError
+Document	0x590	libswiftCore/_swift_deletedMethodError
+Document	0x598	libswiftCore/_swift_deletedMethodError
+Document	0x5a0	libswiftCore/_swift_deletedMethodError
+Document	0x5a8	libswiftCore/_swift_deletedMethodError
+Document	0x5b0	libswiftCore/_swift_deletedMethodError
+Document	0x5b8	libswiftCore/_swift_deletedMethodError
+Document	0x5c0	SwiftSoup.Document.__allocating_init(Swift.String) -> SwiftSoup.Document
+Document	0x5c8	SwiftSoup.Document.location() -> Swift.String
+Document	0x5d0	SwiftSoup.Document.head() -> SwiftSoup.Element?
+Document	0x5d8	SwiftSoup.Document.body() -> SwiftSoup.Element?
+Document	0x5e0	SwiftSoup.Document.title() throws -> Swift.String
+Document	0x5e8	SwiftSoup.Document.title(Swift.String) throws -> ()
+Document	0x5f0	SwiftSoup.Document.createElement(Swift.String) throws -> SwiftSoup.Element
+Document	0x5f8	SwiftSoup.Document.normalise() throws -> SwiftSoup.Document
+Document	0x600	SwiftSoup.Document.(normaliseTextNodes in _6325FE4B8B02F897E63296C95BCFE5ED)(SwiftSoup.Element) throws -> ()
+Document	0x608	SwiftSoup.Document.(normaliseStructure in _6325FE4B8B02F897E63296C95BCFE5ED)(Swift.String, SwiftSoup.Element) throws -> ()
+Document	0x610	SwiftSoup.Document.(findFirstElementByTagName in _6325FE4B8B02F897E63296C95BCFE5ED)(Swift.String, SwiftSoup.Node) -> SwiftSoup.Element?
+Document	0x618	SwiftSoup.Document.charset((extension in Foundation):Swift.String.Encoding) throws -> ()
+Document	0x620	SwiftSoup.Document.charset() -> (extension in Foundation):Swift.String.Encoding
+Document	0x628	SwiftSoup.HtmlTreeBuilder.transition(SwiftSoup.HtmlTreeBuilderState) -> ()
+Document	0x630	SwiftSoup.HtmlTreeBuilder.state() -> SwiftSoup.HtmlTreeBuilderState
+Document	0x638	SwiftSoup.Document.(ensureMetaCharsetElement in _6325FE4B8B02F897E63296C95BCFE5ED)() throws -> ()
+Document	0x640	SwiftSoup.FormElement.elements() -> SwiftSoup.Elements
+Document	0x648	SwiftSoup.Document.outputSettings(SwiftSoup.OutputSettings) -> SwiftSoup.Document
+Document	0x650	SwiftSoup.Document.quirksMode() -> SwiftSoup.Document.QuirksMode
+Document	0x658	SwiftSoup.Document.quirksMode(SwiftSoup.Document.QuirksMode) -> SwiftSoup.Document
+Document	0x660	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Document	0x668	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Document	0x670	libobjc/__objc_empty_cache
+Document	0x680	__METACLASS_DATA_SwiftSoup.OutputSettings
+Document	0x6a0	SwiftSoup.OutputSettings.__deallocating_deinit
+Document	0x6a8	libswiftCore/value witness table for Builtin.NativeObject
+Document	0x6b0	metaclass for SwiftSoup.OutputSettings
+Document	0x6b8	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Document	0x6c0	libobjc/__objc_empty_cache
+Document	0x6d0	?
+Document	0x6f0	nominal type descriptor for SwiftSoup.OutputSettings
+Document	0x730	libswiftCore/_swift_deletedMethodError
+Document	0x738	libswiftCore/_swift_deletedMethodError
+Document	0x740	libswiftCore/_swift_deletedMethodError
+Document	0x748	libswiftCore/_swift_deletedMethodError
+Document	0x750	libswiftCore/_swift_deletedMethodError
+Document	0x758	libswiftCore/_swift_deletedMethodError
+Document	0x760	libswiftCore/_swift_deletedMethodError
+Document	0x768	libswiftCore/_swift_deletedMethodError
+Document	0x770	libswiftCore/_swift_deletedMethodError
+Document	0x778	libswiftCore/_swift_deletedMethodError
+Document	0x780	libswiftCore/_swift_deletedMethodError
+Document	0x788	libswiftCore/_swift_deletedMethodError
+Document	0x790	libswiftCore/_swift_deletedMethodError
+Document	0x798	libswiftCore/_swift_deletedMethodError
+Document	0x7a0	libswiftCore/_swift_deletedMethodError
+Document	0x7a8	libswiftCore/_swift_deletedMethodError
+Document	0x7b0	libswiftCore/_swift_deletedMethodError
+Document	0x7b8	libswiftCore/_swift_deletedMethodError
+Document	0x7c0	SwiftSoup.OutputSettings.__allocating_init() -> SwiftSoup.OutputSettings
+Document	0x7c8	Alamofire.JSONParameterEncoder.encoder.getter : Foundation.JSONEncoder
+Document	0x7d0	SwiftSoup.OutputSettings.escapeMode(SwiftSoup.Entities.EscapeMode) -> SwiftSoup.OutputSettings
+Document	0x7d8	SwiftSoup.OutputSettings.encoder() -> (extension in Foundation):Swift.String.Encoding
+Document	0x7e0	SwiftSoup.OutputSettings.charset() -> (extension in Foundation):Swift.String.Encoding
+Document	0x7e8	SwiftSoup.OutputSettings.encoder((extension in Foundation):Swift.String.Encoding) -> SwiftSoup.OutputSettings
+Document	0x7f0	SwiftSoup.OutputSettings.charset((extension in Foundation):Swift.String.Encoding) -> SwiftSoup.OutputSettings
+Document	0x7f8	SwiftSoup.OutputSettings.syntax() -> SwiftSoup.OutputSettings.Syntax
+Node	0x78	libswiftCore/_swift_deletedMethodError
+Node	0x80	libswiftCore/_swift_deletedMethodError
+Node	0x88	libswiftCore/_swift_deletedMethodError
+Node	0x90	libswiftCore/_swift_deletedMethodError
+Node	0x98	libswiftCore/_swift_deletedMethodError
+Node	0xa0	libswiftCore/_swift_deletedMethodError
+Node	0xa8	libswiftCore/_swift_deletedMethodError
+Node	0xb0	libswiftCore/_swift_deletedMethodError
+Node	0xb8	libswiftCore/_swift_deletedMethodError
+Node	0xc0	libswiftCore/_swift_deletedMethodError
+Node	0xc8	libswiftCore/_swift_deletedMethodError
+Node	0xd0	libswiftCore/_swift_deletedMethodError
+Node	0xd8	SwiftSoup.Node.siblingIndex.getter : Swift.Int
+Node	0xe0	libswiftCore/_swift_deletedMethodError
+Node	0xe8	libswiftCore/_swift_deletedMethodError
+Node	0xf0	SwiftSoup.Node.__allocating_init(Swift.String, SwiftSoup.Attributes) -> SwiftSoup.Node
+Node	0xf8	SwiftSoup.Node.__allocating_init(Swift.String) -> SwiftSoup.Node
+Node	0x100	SwiftSoup.Node.__allocating_init() -> SwiftSoup.Node
+Node	0x108	SwiftSoup.TreeBuilder.defaultSettings() -> SwiftSoup.ParseSettings
+Node	0x110	SwiftSoup.Node.attr(Swift.String) throws -> Swift.String
+Node	0x118	SwiftSoup.Node.getAttributes() -> SwiftSoup.Attributes?
+Node	0x120	SwiftSoup.Node.attr(Swift.String, Swift.String) throws -> SwiftSoup.Node
+Node	0x128	SwiftSoup.Node.hasAttr(Swift.String) -> Swift.Bool
+Node	0x130	SwiftSoup.Node.removeAttr(Swift.String) throws -> SwiftSoup.Node
+Node	0x138	SwiftSoup.Node.getBaseUri() -> Swift.String
+Node	0x140	SwiftSoup.Node.setBaseUri(Swift.String) throws -> ()
+Node	0x148	SwiftSoup.Node.absUrl(Swift.String) throws -> Swift.String
+Node	0x150	SwiftSoup.Node.childNode(Swift.Int) -> SwiftSoup.Node
+Node	0x158	SwiftSoup.Node.getChildNodes() -> [SwiftSoup.Node]
+Node	0x160	SwiftSoup.Node.childNodesCopy() -> [SwiftSoup.Node]
+Node	0x168	SwiftSoup.Node.childNodeSize() -> Swift.Int
+Node	0x170	SwiftSoup.Node.parent() -> SwiftSoup.Node?
+Node	0x178	SwiftSoup.Node.ownerDocument() -> SwiftSoup.Document?
+Node	0x180	SwiftSoup.Node.remove() throws -> ()
+Node	0x188	SwiftSoup.Node.before(Swift.String) throws -> SwiftSoup.Node
+Node	0x190	SwiftSoup.Node.before(SwiftSoup.Node) throws -> SwiftSoup.Node
+Node	0x198	SwiftSoup.Node.after(Swift.String) throws -> SwiftSoup.Node
+Node	0x1a0	SwiftSoup.Node.after(SwiftSoup.Node) throws -> SwiftSoup.Node
+Node	0x1a8	SwiftSoup.Node.(addSiblingHtml in _88DB12878250A47CDE78A89F4976DAEE)(Swift.Int, Swift.String) throws -> ()
+Node	0x1b0	SwiftSoup.Node.after(html: Swift.String) throws -> SwiftSoup.Node
+Node	0x1b8	SwiftSoup.Node.after(node: SwiftSoup.Node) throws -> SwiftSoup.Node
+Node	0x1c0	SwiftSoup.Node.addSiblingHtml(index: Swift.Int, _: Swift.String) throws -> ()
+Node	0x1c8	SwiftSoup.Node.wrap(Swift.String) throws -> SwiftSoup.Node?
+Node	0x1d0	SwiftSoup.Node.unwrap() throws -> SwiftSoup.Node?
+Node	0x1d8	SwiftSoup.Node.(getDeepChild in _88DB12878250A47CDE78A89F4976DAEE)(el: SwiftSoup.Element) -> SwiftSoup.Element
+Node	0x1e0	SwiftSoup.Node.replaceWith(SwiftSoup.Node) throws -> ()
+Node	0x1e8	SwiftSoup.Node.setParentNode(SwiftSoup.Node) throws -> ()
+Node	0x1f0	SwiftSoup.Node.replaceChild(SwiftSoup.Node, SwiftSoup.Node) throws -> ()
+Node	0x1f8	SwiftSoup.Node.removeChild(SwiftSoup.Node) throws -> ()
+Node	0x200	SwiftSoup.Node.addChildren(SwiftSoup.Node...) throws -> ()
+Node	0x208	SwiftSoup.Node.addChildren([SwiftSoup.Node]) throws -> ()
+Node	0x210	SwiftSoup.Node.addChildren(Swift.Int, SwiftSoup.Node...) throws -> ()
+Node	0x218	SwiftSoup.Node.addChildren(Swift.Int, [SwiftSoup.Node]) throws -> ()
+Node	0x220	function signature specialization <Arg[2] = [Constant Propagated Function : closure #2 (Foundation.IndexSet) -> () in closure #1 () -> <<opaque return type of (extension in SwiftUI):SwiftUI.DynamicViewContent.onMove(perform: Swift.Optional<(Foundation.IndexSet, Swift.Int) -> ()>) -> some>>.0 in HDrezka.BookmarksView.body.getter : some]> of reabstraction thunk helper from @escaping @callee_guaranteed (@in_guaranteed Foundation.IndexSet) -> () to @escaping @callee_guaranteed (@in_guaranteed Foundation.IndexSet) -> (@out ())
+Node	0x228	SwiftSoup.Node.reparentChild(SwiftSoup.Node) throws -> ()
+Node	0x230	libswiftCore/_swift_deletedMethodError
+Node	0x238	SwiftSoup.Node.siblingNodes() -> [SwiftSoup.Node]
+Node	0x240	SwiftSoup.Node.nextSibling() -> SwiftSoup.Node?
+Node	0x248	SwiftSoup.Node.previousSibling() -> SwiftSoup.Node?
+Node	0x250	SwiftSoup.Node.setSiblingIndex(Swift.Int) -> ()
+Node	0x258	SwiftSoup.Node.traverse(SwiftSoup.NodeVisitor) throws -> SwiftSoup.Node
+Node	0x260	SwiftSoup.Node.outerHtml() throws -> Swift.String
+Node	0x268	SwiftSoup.Node.outerHtml(SwiftSoup.StringBuilder) throws -> ()
+Node	0x270	libswiftCore/_swift_deletedMethodError
+Node	0x278	SwiftSoup.TreeBuilder.defaultSettings() -> SwiftSoup.ParseSettings
+Node	0x280	SwiftSoup.Node.outerHtmlTail(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) throws -> ()
+Node	0x288	SwiftSoup.Node.html(SwiftSoup.StringBuilder) throws -> SwiftSoup.StringBuilder
+Node	0x290	SwiftSoup.Node.indent(SwiftSoup.StringBuilder, Swift.Int, SwiftSoup.OutputSettings) -> ()
+Node	0x298	SwiftSoup.Node.equals(SwiftSoup.Node) -> Swift.Bool
+Node	0x2a0	SwiftSoup.Node.hasSameValue(SwiftSoup.Node) throws -> Swift.Bool
+Node	0x2a8	SwiftSoup.Node.copy(with: ObjectiveC.NSZone?) -> Any
+Node	0x2b0	SwiftSoup.Node.copy(parent: SwiftSoup.Node?) -> SwiftSoup.Node
+Node	0x2b8	SwiftSoup.Node.copy(clone: SwiftSoup.Node) -> SwiftSoup.Node
+Node	0x2c0	SwiftSoup.DocumentType.copy(clone: SwiftSoup.Node, parent: SwiftSoup.Node?) -> SwiftSoup.Node
+Node	0x2c8	SwiftSoup.Node.hash(into: inout Swift.Hasher) -> ()
+Node	0x2d0	SwiftSoup.Node.hashValue.getter : Swift.Int
+Node	0x2d8	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x2e0	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x2e8	libobjc/__objc_empty_cache
+Node	0x2f8	__METACLASS_DATA_SwiftSoup.Node.(OuterHtmlVisitor in _88DB12878250A47CDE78A89F4976DAEE)
+Node	0x308	HDrezka.PeopleNetwork.__deallocating_deinit
+Node	0x310	libswiftCore/value witness table for Builtin.NativeObject
+Node	0x318	metaclass for SwiftSoup.Node.(OuterHtmlVisitor in _88DB12878250A47CDE78A89F4976DAEE)
+Node	0x320	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Node	0x328	libobjc/__objc_empty_cache
+Node	0x338	?
+Node	0x358	nominal type descriptor for SwiftSoup.Node.(OuterHtmlVisitor in _88DB12878250A47CDE78A89F4976DAEE)
+Node	0x378	libswiftCore/_swift_deletedMethodError
+Node	0x380	libswiftCore/_swift_deletedMethodError
+Node	0x388	libswiftCore/_swift_deletedMethodError
+Node	0x390	libswiftCore/_swift_deletedMethodError
+Node	0x398	libswiftCore/_swift_deletedMethodError
+Node	0x3a0	libswiftCore/_swift_deletedMethodError
+Node	0x3a8	libswiftCore/_swift_deletedMethodError
+Node	0x3b0	libswiftCore/_swift_deletedMethodError
+Node	0x3b8	SwiftSoup.Node.(OuterHtmlVisitor in _88DB12878250A47CDE78A89F4976DAEE).tail(SwiftSoup.Node, Swift.Int) throws -> ()
+Node	0x3c0	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x3c8	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x3d0	libobjc/__objc_empty_cache
+Node	0x3e0	__METACLASS_DATA_nodeVisitor #1 in SwiftSoup.Node.setBaseUri(Swift.String) throws -> ()
+Node	0x3f0	FirebaseSessions.DevEventConsoleLogger.__deallocating_deinit
+Node	0x3f8	libswiftCore/value witness table for Builtin.NativeObject
+Node	0x400	metaclass for nodeVisitor #1 in SwiftSoup.Node.setBaseUri(Swift.String) throws -> ()
+Node	0x408	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Node	0x410	libobjc/__objc_empty_cache
+Node	0x420	?
+Node	0x440	nominal type descriptor for nodeVisitor #1 in SwiftSoup.Node.setBaseUri(Swift.String) throws -> ()
+Node	0x458	libswiftCore/_swift_deletedMethodError
+Node	0x460	libswiftCore/_swift_deletedMethodError
+Node	0x468	libswiftCore/_swift_deletedMethodError
+Node	0x4b0	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x4b8	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x4c0	libobjc/__objc_empty_cache
+Node	0x4d0	__METACLASS_DATA_SwiftSoup.NodeTraversor
+Node	0x4e0	SwiftSoup.NodeTraversor.__deallocating_deinit
+Node	0x4e8	libswiftCore/value witness table for Builtin.NativeObject
+Node	0x4f0	metaclass for SwiftSoup.NodeTraversor
+Node	0x4f8	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Node	0x500	libobjc/__objc_empty_cache
+Node	0x510	?
+Node	0x530	nominal type descriptor for SwiftSoup.NodeTraversor
+Node	0x548	libswiftCore/_swift_deletedMethodError
+Node	0x550	libswiftCore/_swift_deletedMethodError
+Node	0x658	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x660	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x668	libobjc/__objc_empty_cache
+Node	0x678	__METACLASS_DATA_SwiftSoup.ParseError
+Node	0x688	SwiftSoup.ParseError.__deallocating_deinit
+Node	0x690	libswiftCore/value witness table for Builtin.NativeObject
+Node	0x698	metaclass for SwiftSoup.ParseError
+Node	0x6a0	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Node	0x6a8	libobjc/__objc_empty_cache
+Node	0x6b8	?
+Node	0x6d8	nominal type descriptor for SwiftSoup.ParseError
+Node	0x6f8	libswiftCore/_swift_deletedMethodError
+Node	0x700	SwiftSoup.ParseError.getErrorMessage() -> Swift.String
+Node	0x708	Nuke.ImageTask.taskId.getter : Swift.Int64
+Node	0x710	SwiftSoup.ParseError.toString() -> Swift.String
+Node	0x718	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x720	libswiftCore/_OBJC_METACLASS_$_Swift._SwiftObject
+Node	0x728	libobjc/__objc_empty_cache
+Node	0x738	__METACLASS_DATA_SwiftSoup.ParseErrorList
+Node	0x748	SwiftSoup.ParseError.__deallocating_deinit
+Node	0x750	libswiftCore/value witness table for Builtin.NativeObject
+Node	0x758	metaclass for SwiftSoup.ParseErrorList
+Node	0x760	libswiftCore/_OBJC_CLASS_$_Swift._SwiftObject
+Node	0x768	libobjc/__objc_empty_cache
+Node	0x778	?
+Node	0x798	nominal type descriptor for SwiftSoup.ParseErrorList
+Node	0x7c0	libswiftCore/_swift_deletedMethodError
+Node	0x7c8	libswiftCore/_swift_deletedMethodError
+Node	0x7d0	libswiftCore/_swift_deletedMethodError
+Node	0x7d8	libswiftCore/_swift_deletedMethodError
+Node	0x7e0	libswiftCore/_swift_deletedMethodError
+Node	0x7e8	libswiftCore/_swift_deletedMethodError
+Node	0x7f0	SwiftSoup.ParseErrorList.add(SwiftSoup.ParseError) -> ()
+Node	0x7f8	SwiftSoup.ParseErrorList.add(Swift.Int, SwiftSoup.ParseError) -> ()

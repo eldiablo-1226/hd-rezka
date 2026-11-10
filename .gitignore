@@ -1,0 +1,14 @@
+# Original artifacts (kept locally, not versioned)
+*.ipa
+ipa-extracted/
+
+# Build output and generated project (regenerate with app/regen.sh)
+.build/
+app/HDrezka.xcodeproj/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+.DS_Store
+
+# oh-my-claudecode operational state
+.omc/

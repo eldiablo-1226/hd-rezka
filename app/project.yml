@@ -1,0 +1,125 @@
+name: HDrezka
+options:
+  bundleIdPrefix: me.keet
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    MARKETING_VERSION: "1.6.0"
+    CURRENT_PROJECT_VERSION: "570"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+packages:
+  Alamofire:
+    # The original binary embeds Alamofire 5.8.0 (default User-Agent "... Alamofire/5.8.0", closure at 0x1001428b4).
+    url: https://github.com/Alamofire/Alamofire
+    exactVersion: "5.8.0"
+  SwiftSoup:
+    # The original binary embeds SwiftSoup 2.6.x: String-based Element.hasClass (matches a whole
+    # multi-word class attribute, e.g. getElementsByClass("td title"); changed in 2.8+) and void
+    # tags serialized as "<br>" (outerHtmlHead at 0x1002ac338; 2.7.0+ prints "<br />", which breaks
+    # Element.getMovieLists' split on "<br>").
+    url: https://github.com/scinfu/SwiftSoup
+    minorVersion: "2.6.0"
+  Nuke:
+    # The original binary embeds 12.8.0. 12.9.0 builds in Swift 6 mode, and its LazyImage traps when SwiftUI
+    # renders it off the main thread; that is safe now that Network publishes only on the main actor.
+    url: https://github.com/kean/Nuke
+    from: "12.9.0"
+  YouTubePlayerKit:
+    url: https://github.com/SvenTiigi/YouTubePlayerKit
+    from: "1.9.0"
+  AlertKit:
+    url: https://github.com/sparrowcode/AlertKit
+    from: "5.1.8"
+  Flow:
+    url: https://github.com/tevelee/SwiftUI-Flow
+    from: "1.0.0"
+targets:
+  HDrezka:
+    type: application
+    platform: iOS
+    sources:
+      - path: HDrezka
+        excludes:
+          - "**/.omc"
+          - "**/.omc/**"
+    dependencies:
+      - package: Alamofire
+      - package: SwiftSoup
+      - package: Nuke
+        product: Nuke
+      - package: Nuke
+        product: NukeUI
+      - package: YouTubePlayerKit
+      - package: AlertKit
+      - package: Flow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: me.keet.HDRezka
+        PRODUCT_NAME: HDrezka
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: HDrezka/Info.plist
+    info:
+      path: HDrezka/Info.plist
+      properties:
+        CFBundleDisplayName: HDrezka
+        CFBundleDevelopmentRegion: en
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.video
+        LSRequiresIPhoneOS: true
+        LSSupportsOpeningDocumentsInPlace: true
+        UIFileSharingEnabled: true
+        UIApplicationSupportsIndirectInputEvents: true
+        UIBackgroundModes: [audio]
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: true
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        NSPhotoLibraryUsageDescription: Разрешите доступ к галерее для скачивания видео
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Viewer
+            CFBundleURLName: me.keet.hdrezka
+            CFBundleURLSchemes: [hdr]
+        UISupportedInterfaceOrientations~iphone:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+  HDrezkaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: HDrezkaTests
+        excludes:
+          - "**/.omc"
+          - "**/.omc/**"
+    dependencies:
+      - target: HDrezka
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/HDrezka.app/HDrezka
+schemes:
+  HDrezka:
+    build:
+      targets:
+        HDrezka: all
+        HDrezkaTests: [test]
+    test:
+      targets:
+        - HDrezkaTests

@@ -1,0 +1,106 @@
+import XCTest
+@testable import HDrezka
+
+/// Logic of the profile / account / settings / downloads screens (area d3). Nothing here touches the network:
+/// the sign-up checks are only driven into branches that fail before any request.
+final class ProfileAccountViewTests: XCTestCase {
+
+    // MARK: PremiumStatus
+
+    func testPremiumStatusEmptyOrBlankIsNil() {
+        XCTAssertNil(PremiumStatus(raw: ""))
+        XCTAssertNil(PremiumStatus(raw: "  \n\t "))
+    }
+
+    func testPremiumStatusKeepsTrimmedTextAndJoinsAllDigits() {
+        let status = PremiumStatus(raw: "  23 дня\n")
+        XCTAssertEqual(status?.daysLeft, 23)
+        XCTAssertEqual(status?.rawText, "23 дня")
+
+        let text = PremiumStatus(raw: "Premium")
+        XCTAssertNotNil(text)
+        XCTAssertNil(text?.daysLeft)
+        XCTAssertEqual(text?.rawText, "Premium")
+
+        // Every digit counts, as in the binary: a date becomes one big number.
+        XCTAssertEqual(PremiumStatus(raw: "до 12.05")?.daysLeft, 1205)
+    }
+
+    func testDayWordFollowsRussianPluralRules() {
+        let expected: [Int: String] = [0: "many", 1: "one", 2: "few", 4: "few", 5: "many", 11: "many", 12: "many",
+                                       14: "many", 21: "one", 22: "few", 25: "many", 101: "one", 111: "many",
+                                       112: "many", 122: "few", -1: "many"]
+        for (days, form) in expected {
+            XCTAssertEqual(PremiumStatus.dayWordKey(for: days), "key_days_" + form, "days = \(days)")
+        }
+        XCTAssertEqual(PremiumStatus.dayWord(for: 21), String(localized: "key_days_one"))
+        XCTAssertEqual(PremiumStatus.dayWord(for: 3), String(localized: "key_days_few"))
+    }
+
+    // MARK: RegisterView
+
+    @MainActor
+    func testEmailRegex() {
+        let view = RegisterView()
+        XCTAssertTrue(view.isValidEmail("user.name+tag@example.com"))
+        XCTAssertTrue(view.isValidEmail("a@b.c"))
+        XCTAssertFalse(view.isValidEmail("user@example"))
+        XCTAssertFalse(view.isValidEmail("user name@example.com"))
+        XCTAssertFalse(view.isValidEmail("@example.com"))
+        XCTAssertFalse(view.isValidEmail(""))
+    }
+
+    @MainActor
+    func testCheckoutValidationOrderAndMessages() async throws {
+        let view = RegisterView()
+        func check(_ email: String, _ name: String, _ pass: String, _ confirm: String) async throws -> String? {
+            try await view.checkout(email: email, name: name, pass: pass, conf_pass: confirm)
+        }
+        let mail = String(localized: "key_mail+not+valid")
+        let nameLength = String(localized: "key_wrong+username+lenght")
+        let passLength = String(localized: "key_wrong+password+length")
+        let mismatch = String(localized: "key_passwords+does+not+match")
+
+        // The e-mail is checked first, then the name length (3...30), the password length, the confirmation.
+        let result1 = try await check("bad", "ab", "1", "2")
+        XCTAssertEqual(result1, mail)
+        let result2 = try await check("a@b.cd", "ab", "1", "2")
+        XCTAssertEqual(result2, nameLength)
+        let result3 = try await check("a@b.cd", String(repeating: "x", count: 31), "123456", "123456")
+        XCTAssertEqual(result3, nameLength)
+        let result4 = try await check("a@b.cd", "abc", "12345", "12345")
+        XCTAssertEqual(result4, passLength)
+        let result5 = try await check("a@b.cd", String(repeating: "x", count: 30), "123456", "1234567")
+        XCTAssertEqual(result5, mismatch)
+        // An empty password skips the length check (only 1...5 fails) and still has to match.
+        let result6 = try await check("a@b.cd", "abc", "", "x")
+        XCTAssertEqual(result6, mismatch)
+    }
+
+    // MARK: AboutUsView
+
+    func testXmasWindowIsDecember25ThroughNewYearsEve() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "UTC"))
+        func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 0, _ minute: Int = 0) throws -> Date {
+            try XCTUnwrap(calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute)))
+        }
+        XCTAssertFalse(AboutUsView.isXmas(on: try date(2026, 12, 24, 23, 59), calendar: calendar))
+        XCTAssertTrue(AboutUsView.isXmas(on: try date(2026, 12, 25), calendar: calendar))
+        XCTAssertTrue(AboutUsView.isXmas(on: try date(2026, 12, 31, 23, 59), calendar: calendar))
+        XCTAssertFalse(AboutUsView.isXmas(on: try date(2027, 1, 1), calendar: calendar))
+        XCTAssertFalse(AboutUsView.isXmas(on: try date(2026, 7, 1), calendar: calendar))
+    }
+
+    // MARK: DownloadRow
+
+    func testByteStringUsesFileStyleAndDownloadedForZero() {
+        let download = Download(id: UUID(), title: "t", subtitle: "", poster: "", quality: "720p", sourceURL: "",
+                                fileName: "x.mp4", state: .completed, createdAt: Date(), destination: .app,
+                                receivedBytes: 0, totalBytes: 0)
+        let row = DownloadRow(download: download, onTap: {})
+        XCTAssertEqual(row.byteString(0), String(localized: "key_downloaded_status"))
+        XCTAssertEqual(row.byteString(-1), String(localized: "key_downloaded_status"))
+        XCTAssertEqual(row.byteString(1_500_000), ByteCountFormatter.string(fromByteCount: 1_500_000, countStyle: .file))
+    }
+}
