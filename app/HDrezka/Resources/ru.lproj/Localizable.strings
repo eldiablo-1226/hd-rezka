@@ -225,3 +225,32 @@
 "key_slow_site %@" = "%@ отвечает медленно…";
 "key_continue_hint" = "Открывает страницу на «Смотреть»";
 "key_listing_hint" = "Выбрать, что показывать на главной";
+
+/* Каталог: the site's header menu (SiteMenu); genres and studios come from the site in Russian. */
+"key_catalog" = "Каталог";
+"key_section_films" = "Фильмы";
+"key_section_series" = "Сериалы";
+"key_section_cartoons" = "Мультфильмы";
+"key_section_animation" = "Аниме";
+"key_section_all_films" = "Все фильмы";
+"key_section_all_series" = "Все сериалы";
+"key_section_all_cartoons" = "Все мультфильмы";
+"key_section_all_animation" = "Всё аниме";
+"key_section_best_films" = "Лучшие фильмы";
+"key_section_best_series" = "Лучшие сериалы";
+"key_section_best_cartoons" = "Лучшие мультфильмы";
+"key_section_best_animation" = "Лучшее аниме";
+"key_section_find_best_films" = "Найти лучшие фильмы";
+"key_section_find_best_series" = "Найти лучшие сериалы";
+"key_section_find_best_cartoons" = "Найти лучшие мультфильмы";
+"key_section_find_best_animation" = "Найти лучшее аниме";
+"key_new" = "Новинки";
+"key_announce" = "Анонсы";
+"key_best_new" = "Лучшие новинки";
+"key_any_genre" = "Любой жанр";
+"key_year" = "Год";
+"key_all_time" = "За всё время";
+"key_show" = "Показать";
+"key_studios" = "Студии";
+"key_genres" = "Жанры";
+"key_not_found_text" = "Сайт ничего не нашёл по этому запросу.";

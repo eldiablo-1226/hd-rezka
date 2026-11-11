@@ -225,3 +225,32 @@
 "key_slow_site %@" = "%@ is responding slowly…";
 "key_continue_hint" = "Opens the page on Watch";
 "key_listing_hint" = "Choose what Home shows";
+
+/* Каталог: the site's header menu (SiteMenu); genres and studios come from the site in Russian. */
+"key_catalog" = "Catalog";
+"key_section_films" = "Films";
+"key_section_series" = "Series";
+"key_section_cartoons" = "Cartoons";
+"key_section_animation" = "Anime";
+"key_section_all_films" = "All films";
+"key_section_all_series" = "All series";
+"key_section_all_cartoons" = "All cartoons";
+"key_section_all_animation" = "All anime";
+"key_section_best_films" = "Best films";
+"key_section_best_series" = "Best series";
+"key_section_best_cartoons" = "Best cartoons";
+"key_section_best_animation" = "Best anime";
+"key_section_find_best_films" = "Find the best films";
+"key_section_find_best_series" = "Find the best series";
+"key_section_find_best_cartoons" = "Find the best cartoons";
+"key_section_find_best_animation" = "Find the best anime";
+"key_new" = "New releases";
+"key_announce" = "Upcoming";
+"key_best_new" = "Best new releases";
+"key_any_genre" = "Any genre";
+"key_year" = "Year";
+"key_all_time" = "All time";
+"key_show" = "Show";
+"key_studios" = "Studios";
+"key_genres" = "Genres";
+"key_not_found_text" = "The site found nothing for this request.";

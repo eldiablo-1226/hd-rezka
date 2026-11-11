@@ -13,7 +13,7 @@ struct ContentViewIpad: View {
                     HomeViewIpad(isPresented: $isPresented, id: $id)
                         .environmentObject(Network())
                 }
-                Tab("key_collections", systemImage: "square.grid.2x2.fill") {
+                Tab("key_catalog", systemImage: "square.grid.2x2.fill") {
                     CollectionsViewIpad(isPresented: $isPresented, id: $id)
                 }
                 Tab("key_profile", systemImage: "person.crop.circle") {
@@ -39,7 +39,7 @@ struct ContentViewIpad: View {
                             NavigationLink {
                                 CollectionsViewIpad(isPresented: $isPresented, id: $id)
                             } label: {
-                                Label("key_collections", systemImage: "square.grid.2x2.fill")
+                                Label("key_catalog", systemImage: "square.grid.2x2.fill")
                             }
                             .hoverEffect(.highlight)
                             NavigationLink {

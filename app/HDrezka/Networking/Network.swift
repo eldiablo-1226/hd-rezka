@@ -26,8 +26,13 @@ class Network: ObservableObject {
     /// A refresh failed while the list stayed on screen; Home shows a short notice and clears it.
     @Published var moviesRefreshFailed = false
     private var pageWaiters: [CheckedContinuation<Void, Never>] = []
+    /// improvement: the site page this listing pages through for «Каталог» ("films/drama/"); empty for the start page.
+    let listingPath: String
 
-    nonisolated init() {}  // AccountService creates one off the main actor
+    // AccountService creates one off the main actor.
+    nonisolated init(listingPath: String = "") {
+        self.listingPath = listingPath
+    }
 
     /// Fire-and-forget like the original: returns at once, the page is appended to `movies` when it
     /// arrives. 1.6.0 dropped network and parse errors; they now set `moviesLoadFailed`.
@@ -37,9 +42,18 @@ class Network: ObservableObject {
         siteSession.request(moviesURL(page: page, filter: filter), headers: siteHeaders(version: remoteVersion, contentType: false))
             .responseString { response in
                 self.receivePage(response.value,
-                                 failure: PageLoadFailure(error: response.error, statusCode: response.response?.statusCode),
+                                 failure: Self.listingFailure(html: response.value, error: response.error,
+                                                              statusCode: response.response?.statusCode),
                                  generation: generation, page: page)
             }
+    }
+
+    /// improvement: a 404 answered with the site's own page (its header menu is on it) means the site has nothing there,
+    /// like an empty «Лучшие» year. A 404 without it comes from a host that isn't a mirror and stays a failure.
+    nonisolated static func listingFailure(html: String?, error: Error?, statusCode: Int?) -> PageLoadFailure {
+        statusCode == 404 && html?.contains("id=\"topnav-menu\"") == true
+            ? .notFound
+            : PageLoadFailure(error: error, statusCode: statusCode)
     }
 
     /// Starts over from page 1 without clearing the list: the caller fetches page 1, which then replaces it.
@@ -100,8 +114,12 @@ class Network: ObservableObject {
     }
 
     /// The first page of "last" is the start page itself; every other page is `/page/<n>/?filter=<filter>`.
+    /// A «Каталог» listing is its path, then `page/<n>/` from page 2; it takes no filter.
     func moviesURL(page: Int, filter: String) -> String {
-        page == 1 && filter == "last"
+        if !listingPath.isEmpty {
+            return "https://\(settingStore)/\(listingPath)" + (page == 1 ? "" : "page/\(page)/")
+        }
+        return page == 1 && filter == "last"
             ? "https://\(settingStore)/?filter=last"
             : "https://\(settingStore)/page/\(page)/?filter=\(filter)"
     }

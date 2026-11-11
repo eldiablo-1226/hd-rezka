@@ -40,7 +40,7 @@
 "key_buy" = "Придбати";
 "key_cancel" = "Скасувати";
 "key_career" = "Кар'єра";
-"key_collections" = "Добірка";
+"key_collections" = "Добірки";
 "key_comingsoon" = "Очікується";
 "key_confirm+password" = "Підтвердіть пароль";
 "key_copied" = "Скопійовано";
@@ -225,3 +225,32 @@
 "key_slow_site %@" = "%@ відповідає повільно…";
 "key_continue_hint" = "Відкриває сторінку на «Дивитися»";
 "key_listing_hint" = "Вибрати, що показувати на головній";
+
+/* Каталог: the site's header menu (SiteMenu); genres and studios come from the site in Russian. */
+"key_catalog" = "Каталог";
+"key_section_films" = "Фільми";
+"key_section_series" = "Серіали";
+"key_section_cartoons" = "Мультфільми";
+"key_section_animation" = "Аніме";
+"key_section_all_films" = "Усі фільми";
+"key_section_all_series" = "Усі серіали";
+"key_section_all_cartoons" = "Усі мультфільми";
+"key_section_all_animation" = "Усе аніме";
+"key_section_best_films" = "Найкращі фільми";
+"key_section_best_series" = "Найкращі серіали";
+"key_section_best_cartoons" = "Найкращі мультфільми";
+"key_section_best_animation" = "Найкраще аніме";
+"key_section_find_best_films" = "Знайти найкращі фільми";
+"key_section_find_best_series" = "Знайти найкращі серіали";
+"key_section_find_best_cartoons" = "Знайти найкращі мультфільми";
+"key_section_find_best_animation" = "Знайти найкраще аніме";
+"key_new" = "Новинки";
+"key_announce" = "Анонси";
+"key_best_new" = "Найкращі новинки";
+"key_any_genre" = "Будь-який жанр";
+"key_year" = "Рік";
+"key_all_time" = "За весь час";
+"key_show" = "Показати";
+"key_studios" = "Студії";
+"key_genres" = "Жанри";
+"key_not_found_text" = "Сайт нічого не знайшов за цим запитом.";

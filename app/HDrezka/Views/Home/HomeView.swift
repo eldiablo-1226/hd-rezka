@@ -64,9 +64,15 @@ struct HomeView: View {
     /// fetched here. Resetting `page` matters: the grid's paging cell asks for `page + 1` next.
     @MainActor
     static func refresh(_ network: Network, page: Binding<Int>, variation: StartupPageVariation) {
+        refresh(network, page: page, filter: filter(for: variation))
+    }
+
+    /// The same for a «Каталог» listing, whose pages take no filter.
+    @MainActor
+    static func refresh(_ network: Network, page: Binding<Int>, filter: String) {
         network.beginRefresh()
         if page.wrappedValue == 1 {
-            Task { try await network.fetchMovies(page: 1, filter: filter(for: variation)) }
+            Task { try await network.fetchMovies(page: 1, filter: filter) }
         } else {
             page.wrappedValue = 1
         }

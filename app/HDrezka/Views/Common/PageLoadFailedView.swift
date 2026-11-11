@@ -13,6 +13,9 @@ enum PageLoadFailure: Equatable {
     /// The site answered, but the parser could not read the page. Neither login nor another mirror fixes that, and
     /// after a mirror switch a logged-in user is a guest there (403 on film pages).
     case unparsable
+    /// The site's own 404 page on a «Каталог» listing (an empty «Лучшие» year): there is nothing to show, and every mirror
+    /// serves the same catalogue. Set by `Network.listingFailure`; any other 404 is `.other`, a host that isn't a mirror.
+    case notFound
     /// An answer that is not the expected page (a block page served with 200).
     case other
 
@@ -48,6 +51,7 @@ enum PageLoadFailure: Equatable {
         case .unreachable: "key_unreachable_title"
         case .needsLogin: "key_needs_login_title"
         case .unparsable: "key_unparsable_title"
+        case .notFound: "key_nothing+here"
         case .other: "key_page+not+loaded"
         }
     }
@@ -58,6 +62,7 @@ enum PageLoadFailure: Equatable {
         case .unreachable: "key_unreachable_text"
         case .needsLogin: "key_needs_login_text"
         case .unparsable: "key_unparsable_text"
+        case .notFound: "key_not_found_text"
         case .other: "key_page+not+loaded_text"
         }
     }
@@ -68,6 +73,7 @@ enum PageLoadFailure: Equatable {
         case .unreachable: "network.slash"
         case .needsLogin: "person.crop.circle.badge.exclamationmark"
         case .unparsable: "doc.text.magnifyingglass"
+        case .notFound: "film"
         case .other: "exclamationmark.triangle"
         }
     }
@@ -174,11 +180,14 @@ struct PageLoadFailedView: View {
                 .tint(Color("AccentFill"))
                 .controlSize(.large)
         }
-        // Grey, as secondary buttons are; the accent marks the one fix (login, or the mirror link).
-        Button("key_retry", action: retry)
-            .secondaryButtonStyle()
-            .tint(.primary)
-            .controlSize(.large)
+        // Grey, as secondary buttons are; the accent marks the one fix (login, or the mirror link). An empty answer is
+        // final, so it has no Retry; pull to refresh still asks again.
+        if failure != .notFound {
+            Button("key_retry", action: retry)
+                .secondaryButtonStyle()
+                .tint(.primary)
+                .controlSize(.large)
+        }
         if failure.suggestsMirrorChange {
             Button("key_change_mirror") { isPresentingMirror = true }
                 .controlSize(.large)

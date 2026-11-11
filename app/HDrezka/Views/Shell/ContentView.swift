@@ -12,7 +12,7 @@ struct ContentView: View {
                     Tab("Home", systemImage: "house") {
                         HomeView(isPresented: $isPresented, id: $id)
                     }
-                    Tab("key_collections", systemImage: "square.grid.2x2.fill") {
+                    Tab("key_catalog", systemImage: "square.grid.2x2.fill") {
                         CollectionsView(isPresented: $isPresented, id: $id)
                     }
                     Tab("key_profile", systemImage: "person.circle.fill") {
@@ -28,7 +28,7 @@ struct ContentView: View {
                     HomeView(isPresented: $isPresented, id: $id)
                         .tabItem { Label("Home", systemImage: "house") }
                     CollectionsView(isPresented: $isPresented, id: $id)
-                        .tabItem { Label("key_collections", systemImage: "square.grid.2x2.fill") }
+                        .tabItem { Label("key_catalog", systemImage: "square.grid.2x2.fill") }
                     SearchView(isPresented: $isPresented, id: $id)
                         .tabItem { Label("Search", systemImage: "magnifyingglass") }
                     ProfileView(isPresentedDetail: $isPresented, id: $id)

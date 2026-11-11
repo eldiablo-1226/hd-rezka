@@ -1,7 +1,8 @@
 import SwiftUI
 import AlertKit
 
-/// iPhone list of collections, two per row; the card of the last loaded collection loads the next page.
+/// iPhone «Каталог» tab: the site's header menu, then its collections, two per row; the card of the last loaded
+/// collection loads the next page.
 struct CollectionsListViewComponent: View {
     // Top-aligned: a one-line name keeps its count right under it, and the covers of a row stay level.
     var columns: [GridItem] = [GridItem(.flexible(), spacing: 10, alignment: .top), GridItem(.flexible(), spacing: 10, alignment: .top)]
@@ -16,6 +17,9 @@ struct CollectionsListViewComponent: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
+                // improvement: the site's menu stays usable when the collections fail; it needs no request.
+                CatalogMenu()
+                CollectionsHeader()
                 Group {
                     // improvement: a failed first page offers Retry instead of endless skeletons.
                     if let loadFailure {
@@ -48,7 +52,7 @@ struct CollectionsListViewComponent: View {
                         }
                     }
                 }
-                .navigationTitle("key_collections")
+                .navigationTitle("key_catalog")
             }
             .padding(.horizontal, 16)
             // improvement: pull to refresh reloads the first page (also from the error state).

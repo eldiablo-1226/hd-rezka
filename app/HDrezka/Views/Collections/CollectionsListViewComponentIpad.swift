@@ -1,7 +1,8 @@
 import SwiftUI
 import AlertKit
 
-/// iPad list of collections: only the first page is loaded (no paging in the original).
+/// iPad «Каталог» tab: the site's header menu, then its collections; only the first page of them is loaded (no paging
+/// in the original).
 struct CollectionsListViewComponentIpad: View {
     // Top-aligned: a one-line name keeps its count right under it, and the covers of a row stay level.
     var columns: [GridItem] = [GridItem(.adaptive(minimum: 160), spacing: 16, alignment: .top)]
@@ -13,6 +14,9 @@ struct CollectionsListViewComponentIpad: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
+                // improvement: the site's menu stays usable when the collections fail; it needs no request.
+                CatalogMenu()
+                CollectionsHeader()
                 Group {
                     // improvement: a failed first page offers Retry instead of endless skeletons.
                     if let loadFailure {
@@ -40,7 +44,7 @@ struct CollectionsListViewComponentIpad: View {
                         }
                     }
                 }
-                .navigationTitle("key_collections")
+                .navigationTitle("key_catalog")
             }
             .padding(.horizontal, 16)
             // improvement: pull to refresh reloads the first page (also from the error state).

@@ -73,8 +73,8 @@ final class HardeningTests: XCTestCase {
     }
 
     func testOnlyMirrorProblemsOfferAnotherMirror() {
-        XCTAssertEqual([PageLoadFailure.offline, .unreachable, .needsLogin, .unparsable, .other].map(\.suggestsMirrorChange),
-                       [false, true, false, false, true])
+        XCTAssertEqual([PageLoadFailure.offline, .unreachable, .needsLogin, .unparsable, .notFound, .other].map(\.suggestsMirrorChange),
+                       [false, true, false, false, false, true])
     }
 
     // MARK: mirror typed by the user
