@@ -24,7 +24,10 @@ class CollectionsParser: ObservableObject {
             let name = try item.getName()
             let poster = try item.getElementsByTag("img").first()!.attr("src")
             let count = try item.getCountOfMovies()
-            collections.append(Collection(id: id, name: name, poster: poster, count: count))
+            // improvement: a page loaded again (the tab reappearing, a refresh race) adds nothing twice.
+            if !collections.contains(where: { $0.id == id }) {
+                collections.append(Collection(id: id, name: name, poster: poster, count: count))
+            }
         }
         return collections
     }

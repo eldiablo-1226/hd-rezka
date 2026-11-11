@@ -21,30 +21,26 @@ struct DownloadsView: View {
                     }
                 }
                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                    switch download.state {
-                    case .downloading:
-                        Button {
-                            downloadManager.pause(download)
-                        } label: {
-                            Label("key_pause", systemImage: "pause.fill")
-                        }
-                        .tint(.orange)
-                    case .paused, .failed:
-                        Button {
-                            downloadManager.resume(download)
-                        } label: {
-                            Label("key_resume", systemImage: "play.fill")
-                        }
-                        .tint(.accentColor)
-                    case .completed:
-                        EmptyView()
+                    pauseOrResume(download)
+                }
+                // improvement: the same actions on a long press, for whoever doesn't know the swipes.
+                .contextMenu {
+                    pauseOrResume(download)
+                    Button(role: .destructive) {
+                        downloadManager.delete(download)
+                    } label: {
+                        Label("key_delete", systemImage: "trash")
                     }
                 }
             }
         }
         .overlay(alignment: .center) {
+            // improvement: says where downloads appear and how to start one (1.6.0: «Сейчас ничего не загружается»).
             if downloadManager.downloads.isEmpty {
-                VStack {
+                if #available(iOS 17.0, *) {
+                    ContentUnavailableView("No downloads", systemImage: "arrow.down.circle",
+                                           description: Text("key_downloads_empty_hint"))
+                } else {
                     Text("No downloads").bold()
                 }
             }
@@ -61,22 +57,53 @@ struct DownloadsView: View {
     }
 }
 
+extension DownloadsView {
+    @ViewBuilder
+    fileprivate func pauseOrResume(_ download: Download) -> some View {
+        switch download.state {
+        case .downloading:
+            Button {
+                downloadManager.pause(download)
+            } label: {
+                Label("key_pause", systemImage: "pause.fill")
+            }
+            // improvement: grey, not orange, so the accent stays the one hue (DESIGN.md).
+            .tint(.gray)
+        case .paused, .failed:
+            Button {
+                downloadManager.resume(download)
+            } label: {
+                Label("key_resume", systemImage: "play.fill")
+            }
+            // The fill, not the tint: white on the dark-mode tint is about 3:1.
+            .tint(Color("AccentFill"))
+        case .completed:
+            EmptyView()
+        }
+    }
+}
+
 /// One download: poster, titles, quality and the state line (body 0x100104340, content 0x100102a20).
 /// Private in the binary; internal here (stub contract, tests).
 struct DownloadRow: View {
     var download: Download
     var onTap: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         Button(action: onTap) {
-            HStack(alignment: .center, spacing: 12) {
+            // Beside the poster at accessibility sizes the text column truncated every line: the poster goes above it.
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: 12))
+            layout {
                 AsyncImage(url: URL(string: download.poster)) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Rectangle().foregroundStyle(.quaternary)
                 }
                 .frame(width: 60, height: 90)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
                     Text(download.title)
                         .font(.headline)
@@ -85,22 +112,33 @@ struct DownloadRow: View {
                         Text(download.subtitle)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                            .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                     }
                     Text(download.quality)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     statusLine
                 }
-                Spacer()
-                if download.state == .completed, download.destination == .app {
-                    Image(systemName: "play.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(Color(.accent))
+                if !typeSize.isAccessibilitySize {
+                    Spacer()
+                    playSymbol
                 }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            // Stacked, the symbol would get a row of its own under the text: it sits beside the poster instead.
+            .overlay(alignment: .topTrailing) {
+                if typeSize.isAccessibilitySize { playSymbol }
             }
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder private var playSymbol: some View {
+        if download.state == .completed, download.destination == .app {
+            Image(systemName: "play.circle.fill")
+                .font(.title2)
+                .foregroundStyle(Color(.accent))
+        }
     }
 
     @ViewBuilder var statusLine: some View {
@@ -115,9 +153,10 @@ struct DownloadRow: View {
             .padding(.top, 2)
         case .paused:
             VStack(alignment: .leading, spacing: 2) {
+                // improvement: secondary, not orange: a status, not something to tap.
                 Label("key_paused", systemImage: "pause.circle")
                     .font(.caption)
-                    .foregroundStyle(Color.orange)
+                    .foregroundStyle(.secondary)
                 if download.receivedBytes > 0 {
                     Text(progressText)
                         .font(.caption2)

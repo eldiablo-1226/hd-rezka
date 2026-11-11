@@ -32,11 +32,46 @@ final class CatalogAccountTests: XCTestCase {
             id: "https://ijobs.app/films/drama/93758-otmschenie-moe-1984.html",
             name: "Отмщение моё",
             details: "1984, США, Драмы",
-            poster: "https://static.hdrezka.ac/i/2026/11/9/rc5f861c18d82hd25c99o.jpg"))
+            poster: "https://static.hdrezka.ac/i/2026/11/9/rc5f861c18d82hd25c99o.jpg",
+            entity: "Фильм"))
         XCTAssertEqual(movies.last?.id, "https://ijobs.app/films/documentary/93721-kriki-i-shepot-1988.html")
+        // The cover badge: type for every card, progress only where the site shows one.
+        XCTAssertNil(movies[0].info)
+        XCTAssertEqual(movies[8].entity, "Сериал")
+        XCTAssertEqual(movies[8].info, "Завершен (все серии)")
+        XCTAssertEqual(movies[26].entity, "Мультфильм")
+        XCTAssertEqual(movies[26].info, "2 сезон, 26 серия")
         XCTAssertEqual(network.movies, movies)
-        XCTAssertEqual(try network.parse(html: html).count, 72, "parsing appends, the caller clears")
+        XCTAssertEqual(try network.parse(html: html).count, 36,
+                       "parsing appends, but (improvement) a film already listed is not added twice")
         XCTAssertTrue(network.search.isEmpty)
+    }
+
+    // improvement: a finished listing request reports failure so Home can offer Retry instead of endless skeletons.
+    @MainActor
+    func testMoviesLoadFailedFlag() throws {
+        let network = Network()
+        network.finishMoviesRequest(html: nil)
+        XCTAssertTrue(network.moviesLoadFailed, "no body")
+        network.finishMoviesRequest(html: "<html><body><h1>403 Forbidden</h1></body></html>")
+        XCTAssertTrue(network.moviesLoadFailed, "a page without cards leaves the list empty")
+        network.finishMoviesRequest(html: try fixture("catalog-listing.html"))
+        XCTAssertFalse(network.moviesLoadFailed)
+        XCTAssertEqual(network.movies.count, 36)
+        network.finishMoviesRequest(html: nil)
+        XCTAssertTrue(network.moviesLoadFailed, "a later page fails too; the grid shows the error only while empty")
+        XCTAssertEqual(network.movies.count, 36)
+    }
+
+    /// improvement: receivePage passes the arrived page on, so a failed request reaches Home's Retry.
+    @MainActor
+    func testArrivedPageWithoutBodySetsLoadFailed() {
+        let network = Network()
+        let failed = expectation(description: "the failure flag is published")
+        let subscription = network.$moviesLoadFailed.dropFirst().sink { if $0 { failed.fulfill() } }
+        network.receivePage(nil)
+        wait(for: [failed], timeout: 5)
+        subscription.cancel()
     }
 
     /// fetchMovies hands the arrived page to receivePage. SwiftUI (and Nuke 12.9's LazyImage) must see every change on main.
@@ -294,7 +329,10 @@ final class CatalogAccountTests: XCTestCase {
                      "`as? Int` as in the binary: a string id gives nil")
     }
 
+    /// The movie page's cast row passes the href as parsed: an absolute URL on the mirror the page came from.
     func testPersonSlugDropsPrefixAndEverySlash() {
+        XCTAssertEqual(PeopleRepository.slug("https://ijobs.app/person/4176-vudi-harrelson/"), "4176-vudi-harrelson")
+        XCTAssertEqual(PeopleRepository.slug("https://hdrezka.ag/person/4176-vudi-harrelson/"), "4176-vudi-harrelson")
         XCTAssertEqual(PeopleRepository.slug("person/4176-vudi-harrelson/"), "4176-vudi-harrelson")
         XCTAssertEqual(PeopleRepository.slug("4176-vudi-harrelson"), "4176-vudi-harrelson")
         XCTAssertEqual(PeopleRepository.slug("/person/4176-vudi-harrelson/"), "4176-vudi-harrelson")

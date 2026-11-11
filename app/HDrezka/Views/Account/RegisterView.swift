@@ -14,63 +14,53 @@ struct RegisterView: View {
     @State var error: Bool = false
     @FocusState var focused: Field?
 
+    // improvement: a native form (and password AutoFill); 1.6.0 drew its own grey field and button backgrounds.
     var body: some View {
-        VStack {
-            TextField("key_email", text: $email)
-                .padding(10)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .submitLabel(.next)
-                .focused($focused, equals: .email)
-                .onSubmit { focused = .username }
-                .background(fieldBackground)
-            TextField("Username", text: $username)
-                .padding(10)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .focused($focused, equals: .username)
-                .submitLabel(.next)
-                .onSubmit { focused = .password }
-                .background(fieldBackground)
-            SecureField("Password", text: $password)
-                .padding(10)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .submitLabel(.next)
-                .focused($focused, equals: .password)
-                .onSubmit { focused = .confirmPassword }
-                .background(fieldBackground)
-            SecureField("key_confirm+password", text: $confirm_password)
-                .padding(10)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .submitLabel(.done)
-                .focused($focused, equals: .confirmPassword)
-                .onSubmit { register() }
-                .background(fieldBackground)
-                .padding(.bottom, 12)
-            if error {
-                Text(errorText)
-                    .foregroundStyle(Color.red)
-                    .bold(true)
-                    .padding(.bottom, 8)
-                    .multilineTextAlignment(.center)
+        Form {
+            Section {
+                TextField("key_email", text: $email)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .submitLabel(.next)
+                    .focused($focused, equals: .email)
+                    .onSubmit { focused = .username }
+                TextField("Username", text: $username)
+                    .textContentType(.username)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .focused($focused, equals: .username)
+                    .submitLabel(.next)
+                    .onSubmit { focused = .password }
+                SecureField("Password", text: $password)
+                    .textContentType(.newPassword)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .submitLabel(.next)
+                    .focused($focused, equals: .password)
+                    .onSubmit { focused = .confirmPassword }
+                SecureField("key_confirm+password", text: $confirm_password)
+                    .textContentType(.newPassword)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .submitLabel(.done)
+                    .focused($focused, equals: .confirmPassword)
+                    .onSubmit { register() }
+            } footer: {
+                if error {
+                    Text(errorText)
+                        .foregroundStyle(Color.red)
+                }
             }
-            Button {
-                register()
-            } label: {
-                Text("key_register")
-                    .padding(10)
-                    .foregroundStyle(Color(.accent))
+            Section {
+                Button("key_register", action: register)
                     .frame(maxWidth: .infinity)
-                    .background(RoundedRectangle(cornerRadius: 8, style: .continuous).foregroundStyle(.quinary))
             }
         }
-        .padding(8)
-    }
-
-    private var fieldBackground: some View {
-        RoundedRectangle(cornerRadius: 8, style: .continuous).foregroundStyle(.quaternary)
+        // improvement: a title in the bar (it was empty).
+        .navigationTitle("key_register")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     /// Validates, then signs up; the session is the cookie Alamofire keeps. Network errors are dropped.

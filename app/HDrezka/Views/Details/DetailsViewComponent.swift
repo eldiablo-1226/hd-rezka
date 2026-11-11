@@ -1,54 +1,59 @@
 import SwiftUI
 import Alamofire
-import NukeUI
 
+/// The movie or series page, on the iPhone and the iPad. improvement (Details redesign, contract «Два режима одной
+/// страницы»): a header of facts over two halves, «Смотреть» and «О фильме» (DetailsPanels.swift), one at a time under
+/// a pinned segment in a compact width and side by side in a regular one, with the system navigation bar. 1.6.0 had a
+/// blurred hero with a white Play and glass buttons on the phone, and a separate poster-and-icons page on the iPad.
 struct DetailsViewComponent: View {
     var id: String
+    /// improvement: «Продолжить» (Home's row, «Досмотреть») opens the page on its «Смотреть» half. Playback starts
+    /// only from that half's button: a quality sheet popping up over a page just opened was a surprise.
+    var opensOnWatch = false
     @EnvironmentObject var detailsNetwork: MovieDetailsParser
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
+    @AppStorage("hasPremium") var hasPremium: String = ""
     @AppStorage("preferOriginalTitle") var preferOriginalTitle: Bool = false
     @State var bookmarks: [Bookmark: Bool] = [:]
-    @State var isPresentedScheduleSheet: Bool = false
-    @State var isPresentedPlaySheet: Bool = false
-    @State var isPresentedDownloadSheet: Bool = false
-    @State var isPresentedMoreSheet: Bool = false
-    @State var isPresentedBookmarksSheet: Bool = false
-    @State var isPresentedPersonInfoView: Bool = false
-    @State var isPresentedList: Bool = false
+    @State var isPresentedScheduleSheet = false
+    @State var isPresentedDownloadSheet = false
+    @State var isPresentedBookmarksSheet = false
+    @State var isPresentedPersonInfoView = false
+    @State var isPresentedList = false
     @State var video: String = ""
     @State var coverData: CoverData? = nil
     @State var trailer: String? = nil
     @State var personId: String = ""
-    @State var listData: MovieList = MovieList(id: "", name: "", moviePosition: 0)
-    // 1, not 0, in the binary (0x10007d398): the header gradient divides by outerHeight before the first layout pass.
-    @State var innerHeight: CGFloat = 1
-    @State var outerHeight: CGFloat = 1
-    @State var isAnimated: Bool = false
+    @State var listData = MovieList(id: "", name: "", moviePosition: 0)
+    @State var loadFailure: PageLoadFailure? = nil
+    /// improvement: one-tap playback (QuickPlaySheet).
+    @State var quickPlay: PlaybackChoice? = nil
+    /// The half a compact width shows, picked once per page by DetailsMode.initial.
+    @State var mode: DetailsMode? = nil
+    /// The title moves into the navigation bar once the header has scrolled away.
+    @State var isTitleInBar = false
+    @StateObject var selection = PlaybackSelection()
+    @Environment(\.horizontalSizeClass) var sizeClass
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
-    // 0x1000431c0: a spinner that loads the page, then the first parsed movie in a FancyScrollView.
+    private static let scrollSpace = "detailsPage"
+
+    // 0x1000431c0: a spinner that loads the page, then the first parsed movie.
     var body: some View {
-        if !detailsNetwork.movieDetailed.isEmpty {
-            ForEach(detailsNetwork.movieDetailed.prefix(1)) { detail in
-                FancyScrollView(title: Self.title(detail, preferOriginal: preferOriginalTitle), titleColor: .white,
-                                headerHeight: 650, scrollUpHeaderBehavior: .parallax, scrollDownHeaderBehavior: .offset) {
-                    header(detail)
-                } content: {
-                    content(detail)
-                }
+        if let detail = detailsNetwork.movieDetailed.first {
+            page(detail)
                 .navigationDestination(isPresented: $isPresentedPersonInfoView) {
-                    PersonView(id: personId, isPresentedMoreSheet: $isPresentedMoreSheet)
+                    PersonView(id: personId, isPresentedMoreSheet: .constant(false))
                 }
                 .navigationDestination(isPresented: $isPresentedList) {
-                    MovieListView(id: listData.id, name: listData.name, movieId: id, isPresentedMoreSheet: $isPresentedMoreSheet)
+                    MovieListView(id: listData.id, name: listData.name, movieId: id, isPresentedMoreSheet: .constant(false))
                 }
-                .onAppear {
-                    bookmarks = detail.bookmarks
-                }
-                .task(priority: .userInitiated) {
-                    loadTrailer()
-                }
-            }
+                .onAppear { pageDidLoad(detail) }
+                .task(priority: .userInitiated) { loadTrailer() }
+        } else if let loadFailure {
+            // Back to the spinner, whose onAppear loads the page again; the system bar has the way back.
+            PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
             ProgressView(value: 0.5)
                 .progressViewStyle(.circular)
@@ -66,29 +71,46 @@ struct DetailsViewComponent: View {
         preferOriginal ? detail.nameOriginal ?? detail.nameRussian : detail.nameRussian
     }
 
-    /// "DRAMA • 2012 • USA": the genre line under the title (0x10004767c).
-    static func genreLine(_ genre: MovieGenre, _ detail: MovieDetailed) -> String {
-        "\(genre.name) • \(detail.releaseDate ?? "unknown") • \(detail.country)".uppercased()
+    static func canPlay(_ detail: MovieDetailed) -> Bool {
+        !detail.comingSoon && detail.availability == .AVAILABLE_ON_REZKA
     }
 
-    /// Where the header blur starts fading in: the part of the overlay above the title block (0x10004af10).
-    static func headerFadeLocation(inner: CGFloat, outer: CGFloat) -> CGFloat {
-        (outer - inner) / outer
+    /// improvement: a 2xx answer without the movie block or its title is not a movie page; `parseMovieDetails` would
+    /// throw on it too, this only skips the two attempts.
+    static func isMoviePage(_ html: String) -> Bool {
+        html.contains("b-content__main") && html.contains("b-post__title")
+    }
+
+    /// improvement: `id` is the absolute page URL with the host of the mirror it was listed on (ijobs.app for hdr://
+    /// links); the page is requested from the current mirror, so a retry after a mirror change reaches the new one.
+    static func pageURL(_ id: String, mirror: String) -> String {
+        guard var components = URLComponents(string: id), components.host != nil else { return id }
+        components.host = mirror
+        return components.string ?? id
+    }
+
+    static func isBookmarked(_ bookmarks: [Bookmark: Bool]) -> Bool {
+        bookmarks.values.contains(true)
     }
 
     // MARK: Network
 
     /// closure #2 in body.getter (0x10004f004): the movie page itself (`id` is its full URL), only the app headers.
     private func loadPage() {
-        AF.request(id, method: .get, headers: ["X-Hdrezka-Ios-App": "1", "X-Hdrezka-Ios-App-Version": remoteVersion])
+        AF.request(Self.pageURL(id, mirror: settingStore), method: .get, headers: ["X-Hdrezka-Ios-App": "1", "X-Hdrezka-Ios-App-Version": remoteVersion])
             .responseString { response in
                 Task { @MainActor in
-                    if let html = response.value {
-                        do {
-                            _ = try detailsNetwork.parseMovieDetails(html: html, movieId: id)
-                        } catch {
-                            _ = try detailsNetwork.parseMovieDetails(html: html, movieId: id)
-                        }
+                    // improvement: no body, a non-2xx answer or a page without the movie block end in the retry state
+                    // instead of the endless spinner (a blocked mirror often answers 200 with its own page).
+                    guard let html = response.value, (200..<300).contains(response.response?.statusCode ?? 0),
+                          Self.isMoviePage(html) else {
+                        loadFailure = PageLoadFailure(error: response.error, statusCode: response.response?.statusCode)
+                        return
+                    }
+                    // improvement: a movie page the parser can't read says so, without blaming the mirror.
+                    if (try? detailsNetwork.parseMovieDetails(html: html, movieId: id)) == nil,
+                       (try? detailsNetwork.parseMovieDetails(html: html, movieId: id)) == nil {
+                        loadFailure = .unparsable
                     }
                 }
             }
@@ -108,149 +130,63 @@ struct DetailsViewComponent: View {
             }
     }
 
-    // MARK: Header (closure #1 in closure #1, inlined)
+    // MARK: Page
 
-    private func header(_ detail: MovieDetailed) -> some View {
-        GeometryReader { geometry in
-            LazyImage(url: URL(string: detail.hPoster), transaction: Transaction(animation: .easeInOut)) { state in
-                if let image = state.image {
-                    image
-                        .resizable()
-                        .transition(wipe)
-                } else {
-                    LazyImage(url: URL(string: detail.poster), transaction: Transaction(animation: .easeInOut)) { state in
-                        if let image = state.image {
-                            image
-                                .resizable()
-                                .transition(wipe)
-                        } else {
-                            Rectangle()
-                                .foregroundStyle(.quinary)
-                                .overlay(alignment: .center) {
-                                    shimmer
-                                }
-                                .transition(wipe)
-                        }
-                    }
-                    .transition(wipe)
-                }
-            }
-            .scaledToFill()
-            .frame(width: geometry.size.width, height: geometry.size.height)
-            .clipped()
-            .onAppear {
-                withAnimation(.default) {
-                    isAnimated = true
-                }
-            }
-        }
-        .overlay(alignment: .center) {
-            titleOverlay(detail)
-        }
-    }
-
-    private var wipe: AnyTransition {
-        .asymmetric(insertion: .wipe(angle: .degrees(45), blurRadius: 10), removal: .wipe(angle: .degrees(225), blurRadius: 10))
-    }
-
-    // 0x10004553c: a light band sweeping over the placeholder.
-    private var shimmer: some View {
-        Rectangle()
-            .frame(height: 800)
-            .frame(width: 16)
-            .foregroundStyle(.quaternary)
-            .foregroundStyle(LinearGradient(gradient: Gradient(colors: [.primary, .gray]), startPoint: .top, endPoint: .bottom))
-            .rotationEffect(.degrees(30))
-            .offset(x: isAnimated ? 800 : -800)
-            .blur(radius: 6)
-            .animation(.easeInOut.repeatForever(autoreverses: false).speed(0.3), value: isAnimated)
-    }
-
-    // closure #2 in closure #1 in closure #1 (0x100045c20): title, genre line and the action buttons over a blurred fade.
-    private func titleOverlay(_ detail: MovieDetailed) -> some View {
-        VStack {
-            Spacer()
-            VStack {
-                Text(Self.title(detail, preferOriginal: preferOriginalTitle))
-                    .font(.system(.largeTitle).leading(.tight))
-                    .fontWeight(.bold)
-                    .padding(.bottom, 5)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.white)
-                    .lineLimit(4)
-                ForEach(detail.genres[..<1]) { genre in
-                    Text(Self.genreLine(genre, detail))
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white.opacity(0.5))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .padding(.bottom)
-                }
-                if !detail.comingSoon {
-                    if detail.availability == .AVAILABLE_ON_REZKA {
-                        HStack {
-                            watchButton(detail)
-                            bookmarkButton
-                        }
-                        downloadButton(detail)
+    private func page(_ detail: MovieDetailed) -> some View {
+        let title = Self.title(detail, preferOriginal: preferOriginalTitle)
+        return GeometryReader { proxy in
+            ScrollView(.vertical) {
+                Group {
+                    if sizeClass == .regular {
+                        sideBySide(detail, title: title, width: proxy.size.width)
                     } else {
-                        unavailable(systemImage: "globe", text: "Video is unavailable in this region")
+                        segmented(detail, title: title)
                     }
-                } else {
-                    unavailable(systemImage: "clock", text: "key_comingsoon")
+                }
+                // Nothing inside may widen the page past the screen (a one-line chip at a large text size did).
+                .frame(width: proxy.size.width)
+            }
+            .coordinateSpace(name: Self.scrollSpace)
+        }
+        // A regular width (iPad) keeps the bar's centre for its tab bar: a title there would get a row of its own.
+        .navigationTitle(sizeClass == .regular ? "" : title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if sizeClass != .regular {
+                ToolbarItem(placement: .principal) {
+                    Text(title)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .opacity(isTitleInBar ? 1 : 0)
+                        .accessibilityHidden(!isTitleInBar)
                 }
             }
-            .padding(.horizontal, 20)
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.height
-            } action: { height in
-                innerHeight = height
+            ToolbarItem(placement: trailingPlacement) {
+                ShareButton()
             }
         }
-        .onGeometryChange(for: CGFloat.self) { proxy in
-            proxy.size.height
-        } action: { height in
-            outerHeight = height
-        }
-        .background(alignment: .center) {
-            VStack {}
-                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                .background(VisualEffectView(effect: UIBlurEffect(style: .dark)))
-                .mask(alignment: .center) {
-                    let fade = Self.headerFadeLocation(inner: innerHeight, outer: outerHeight)
-                    LinearGradient(gradient: Gradient(stops: [
-                        .init(color: .clear, location: fade * 0.75),
-                        .init(color: .black.opacity(0.96), location: fade),
-                        .init(color: .black.opacity(0.96), location: 1),
-                    ]), startPoint: .top, endPoint: .bottom)
-                }
-        }
-    }
-
-    private func watchButton(_ detail: MovieDetailed) -> some View {
-        Button {
-            isPresentedPlaySheet.toggle()
-        } label: {
-            Label("Watch", systemImage: "play.fill")
-                .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity, maxHeight: 20)
-        }
-        .padding(.bottom)
-        .buttonStyle(.borderedProminent)
-        .tint(.white)
-        .buttonBorderShape(.roundedRectangle(radius: 12))
-        .controlSize(.large)
-        .sheet(isPresented: $isPresentedPlaySheet) {
-            VideoParamsSheet(id: id, coverData: $coverData, video: $video)
+        .sheet(item: $quickPlay) { choice in
+            QuickPlaySheet(id: id, choice: choice, video: $video, coverData: $coverData)
                 .environmentObject(MovieDetailsService())
+        }
+        .sheet(isPresented: $isPresentedDownloadSheet) {
+            DownloadParamsSheet(id: id, name: title, poster: detail.hPoster, voiceActing: detail.voiceActing, seasons: detail.seasons,
+                                initial: selection.choice)
+                .environmentObject(MovieDetailsService())
+                // improvement: half height first; the sheet's four pickers and its button fit there.
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isPresentedBookmarksSheet) {
+            BookmarksSelectionListViewComponent(bookmarks: $bookmarks)
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $isPresentedScheduleSheet) {
+            scheduleSheet(detail)
+        }
         .fullScreenCover(item: $coverData) { data in
-            PlayerViewComponent(url: data.body, subtitles: data.subtitles,
-                                name: Self.title(detail, preferOriginal: preferOriginalTitle),
+            PlayerViewComponent(url: data.body, subtitles: data.subtitles, name: title,
                                 voiceActing: data.actingName, poster: detail.hPoster,
                                 progressKey: data.progressKey, autoplay: data.autoplay, localFileURL: nil)
                 .ignoresSafeArea(.all, edges: .all)
@@ -258,143 +194,112 @@ struct DetailsViewComponent: View {
         }
     }
 
-    private var bookmarkButton: some View {
-        Button {
-            isPresentedBookmarksSheet.toggle()
-        } label: {
-            Image(systemName: "bookmark.fill")
-                .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.black)
-                .frame(maxHeight: 20)
-        }
-        .padding(.bottom)
-        .buttonStyle(.borderedProminent)
-        .tint(.white)
-        .buttonBorderShape(.roundedRectangle(radius: 12))
-        .controlSize(.large)
-        .sheet(isPresented: $isPresentedBookmarksSheet) {
-            bookmarksSheet
-        }
-    }
-
-    private func downloadButton(_ detail: MovieDetailed) -> some View {
-        Button {
-            isPresentedDownloadSheet.toggle()
-        } label: {
-            Label("Download", systemImage: "icloud.and.arrow.down")
-                .font(.system(size: 17, weight: .medium))
-                .frame(maxWidth: .infinity, maxHeight: 20)
-        }
-        .padding(.bottom)
-        .buttonStyle(.borderedProminent)
-        .tint(Color(uiColor: .opaqueSeparator).opacity(0.4))
-        .buttonBorderShape(.roundedRectangle(radius: 12))
-        .controlSize(.large)
-        .sheet(isPresented: $isPresentedDownloadSheet) {
-            DownloadParamsSheet(id: id, name: Self.title(detail, preferOriginal: preferOriginalTitle), poster: detail.hPoster,
-                                voiceActing: detail.voiceActing, seasons: detail.seasons)
-                .environmentObject(MovieDetailsService())
-        }
-    }
-
-    // closures #6 / #7 (0x100049afc, 0x10004a2fc): no player, but bookmarks still work.
-    private func unavailable(systemImage: String, text: LocalizedStringKey) -> some View {
-        VStack {
-            Image(systemName: systemImage)
-                .font(.title)
-                .foregroundStyle(.white)
-            Text(text)
-                .font(.headline.bold())
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .padding(5)
-            Button("add_to_bookmarks") {
-                isPresentedBookmarksSheet.toggle()
-            }
-            .buttonStyle(.bordered)
-            .padding(.vertical)
-            .sheet(isPresented: $isPresentedBookmarksSheet) {
-                bookmarksSheet
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 15)
-    }
-
-    private var bookmarksSheet: some View {
-        BookmarksSelectionListViewComponent(bookmarks: $bookmarks)
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
-    }
-
-    // MARK: Content (closure #2 in closure #1, 0x10004b120)
-
-    private func content(_ detail: MovieDetailed) -> some View {
-        VStack(alignment: .leading) {
-            InfoTabView(detail: detail)
-                .padding(.top)
-            ZStack {
-                Text(detail.description)
-                    .font(.body)
-                    .lineLimit(3)
-                HStack {
-                    Spacer()
-                    VStack {
-                        Spacer()
-                        ZStack(alignment: .trailing) {
-                            Rectangle()
-                                .foregroundColor(.clear)
-                                .frame(height: 20)
-                                .background(LinearGradient(gradient: Gradient(stops: [
-                                    .init(color: Color(uiColor: .systemBackground), location: 0.2),
-                                    .init(color: .clear, location: 0.3),
-                                ]), startPoint: .trailing, endPoint: .leading))
-                            Spacer()
-                            Button("key_more") {
-                                isPresentedMoreSheet.toggle()
-                            }
-                            .padding(.trailing)
-                        }
-                        .fullScreenCover(isPresented: $isPresentedMoreSheet) {
-                            InfoSheetViewComponent(id: id, detail: detail, trailer: trailer, personId: $personId,
-                                                   listData: $listData, isPresentedPersonInfo: $isPresentedPersonInfoView,
-                                                   isPresentedList: $isPresentedList, isPresentedMoreSheet: $isPresentedMoreSheet)
-                        }
+    /// Compact width: the header, then one half under a segment that stays pinned below the navigation bar.
+    private func segmented(_ detail: MovieDetailed, title: String) -> some View {
+        LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+            header(detail, title: title, posterWidth: 96, titleFont: .title2.bold())
+                .padding(.horizontal)
+                .padding(.top, DesignTokens.space8)
+                .padding(.bottom, DesignTokens.space16)
+            Section {
+                Group {
+                    switch mode ?? .about {
+                    case .watch:
+                        watchPanel(detail)
+                            .padding(.horizontal)
+                    case .about:
+                        aboutPanel(detail)
                     }
                 }
-            }
-            .padding(.horizontal)
-            if let schedule = detail.schedule {
-                ForEach(schedule[..<1]) { group in
-                    Label("key_episodes+schedule", systemImage: "chevron.right")
-                        .labelStyle(TextFirstLabel())
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.vertical, 10)
-                        .onTapGesture {
-                            isPresentedScheduleSheet.toggle()
-                        }
-                    ForEach(group.items.prefix(5)) { item in
-                        SeasonRowView(title: item.title, russianEpisodeName: item.russianEpisodeName, releaseDate: item.releaseDate)
-                    }
-                }
-                .padding(.horizontal)
-            }
-            if let franchise = detail.franchise {
-                Text("key_all+franchise+parts")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal)
-                ForEach(franchise, id: \.self) { part in
-                    FranchiseRowView(item: part)
-                }
-                .padding(.horizontal)
+                .transition(.opacity)
+                .padding(.top, DesignTokens.space16)
+                .padding(.bottom, DesignTokens.space24 * 2)
+            } header: {
+                modePicker(isSeries: PlaybackChoice.isSeries(detail))
             }
         }
-        .sheet(isPresented: $isPresentedScheduleSheet) {
-            scheduleSheet(detail)
+    }
+
+    /// Regular width: the header across, then «Смотреть» beside «О фильме».
+    private func sideBySide(_ detail: MovieDetailed, title: String, width: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.space24 + DesignTokens.space8) {
+            header(detail, title: title, posterWidth: 180, titleFont: .largeTitle.bold())
+                .padding(.horizontal, 28)
+            HStack(alignment: .top, spacing: DesignTokens.space24 + DesignTokens.space8) {
+                watchPanel(detail)
+                    .frame(width: min(420, max(320, width * 0.4)))
+                // Its sections pad themselves, so their rows can scroll to the edge.
+                aboutPanel(detail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.leading, 28)
+            .padding(.trailing, 12)
         }
+        .padding(.vertical, DesignTokens.space24)
+    }
+
+    private func header(_ detail: MovieDetailed, title: String, posterWidth: CGFloat, titleFont: Font) -> some View {
+        DetailsHeaderBlock(detail: detail, title: title, posterWidth: posterWidth, titleFont: titleFont)
+            .onGeometryChange(for: Bool.self) { proxy in
+                proxy.frame(in: .named(Self.scrollSpace)).maxY < 48
+            } action: { scrolledAway in
+                isTitleInBar = scrolledAway
+            }
+    }
+
+    private func modePicker(isSeries: Bool) -> some View {
+        Picker("key_mode_picker", selection: Binding(get: { mode ?? .about }, set: { newMode in
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { mode = newMode }
+        })) {
+            Text(DetailsMode.watch.title(isSeries: isSeries)).tag(DetailsMode.watch)
+            Text(DetailsMode.about.title(isSeries: isSeries)).tag(DetailsMode.about)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal)
+        .padding(.vertical, DesignTokens.space8)
+        // The page's own ground: no band at rest; pinned, it sits under the system bar's scroll edge.
+        .background(Color(uiColor: .systemBackground))
+    }
+
+    private func watchPanel(_ detail: MovieDetailed) -> some View {
+        DetailsWatchPanel(detail: detail, selection: selection, resumeSeconds: resumeSeconds,
+                          isBookmarked: Self.isBookmarked(bookmarks), play: { quickPlay = $0 },
+                          download: { isPresentedDownloadSheet = true }, bookmark: { isPresentedBookmarksSheet = true })
+    }
+
+    private func aboutPanel(_ detail: MovieDetailed) -> some View {
+        DetailsAboutPanel(detail: detail, trailer: trailer, openPerson: openPerson, openList: openList,
+                          openSchedule: { isPresentedScheduleSheet = true })
+    }
+
+    // MARK: Actions
+
+    private func pageDidLoad(_ detail: MovieDetailed) {
+        bookmarks = detail.bookmarks
+        PosterCache.shared.store(detail.poster, for: id)
+        let initial = PlaybackChoice.default(for: detail, hasPremium: !hasPremium.isEmpty)
+        selection.configure(actings: detail.voiceActing, seasons: detail.seasons, initial: initial) { [id] acting in
+            try await MovieDetailsService().getSeriesSeasons(movieId: id, voiceActing: acting)
+        }
+        if mode == nil {
+            mode = DetailsMode.initial(canPlay: Self.canPlay(detail), opensOnWatch: opensOnWatch,
+                                       hasProgress: PlaybackProgressStore.shared.hasProgress(forTitle: id))
+        }
+    }
+
+    private func resumeSeconds(_ choice: PlaybackChoice) -> Double? {
+        PlaybackProgressStore.shared.time(forKey: QualitySelectionSheet.progressKey(
+            id: id, acting: choice.acting, season: choice.season, episode: choice.episode))
+    }
+
+    private func openPerson(_ person: PersonSimple) {
+        personId = person.id
+        isPresentedPersonInfoView = true
+    }
+
+    private func openList(_ list: MovieList) {
+        listData = list
+        isPresentedList = true
     }
 
     // closure #2 in closure #2 in closure #1 (0x10004d2d8): the whole schedule.
@@ -406,8 +311,7 @@ struct DetailsViewComponent: View {
                     VStack(alignment: .leading) {
                         ForEach(schedule) { group in
                             Text(group.name)
-                                .font(.title2)
-                                .fontWeight(.bold)
+                                .font(.title3.bold())
                                 .padding(.vertical, 10)
                             ForEach(group.items) { item in
                                 SeasonRowView(title: item.title, russianEpisodeName: item.russianEpisodeName, releaseDate: item.releaseDate)
@@ -416,27 +320,18 @@ struct DetailsViewComponent: View {
                     }
                     .padding()
                 }
+                .navigationTitle("schedule")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    // shortcut: both taps assumed to toggle the sheet flag (they reach a merged thunk via 0x100055b94), check its body
+                    // improvement: buttons instead of onTapGesture on a bare image (VoiceOver, ≥44pt hit area).
                     ToolbarItem(placement: trailingPlacement) {
-                        if #available(iOS 26.0, *) {
-                            AnyView(
-                                Image(systemName: "xmark")
-                                    .onTapGesture {
-                                        isPresentedScheduleSheet.toggle()
-                                    }
-                            )
-                        } else {
-                            Image(systemName: "xmark")
-                                .onTapGesture {
-                                    isPresentedScheduleSheet.toggle()
-                                }
-                                .padding()
-                                .background(Circle().frame(height: 30).foregroundStyle(.ultraThinMaterial))
+                        Button("done") {
+                            isPresentedScheduleSheet = false
                         }
                     }
                 }
             }
+            .presentationDragIndicator(.visible)
         }
     }
 

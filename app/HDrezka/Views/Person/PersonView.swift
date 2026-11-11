@@ -4,6 +4,8 @@ struct PersonView: View {
     var id: String
     @State var personDetails: PersonDetailed? = nil
     @State var isNavigated: Bool = false
+    /// improvement: the page did not load; 1.6.0 kept spinning (the error was dropped inside the Task).
+    @State var loadFailure: PageLoadFailure? = nil
     @Binding var isPresentedMoreSheet: Bool
 
     var body: some View {
@@ -79,11 +81,18 @@ struct PersonView: View {
                     isPresentedMoreSheet.toggle()
                 }
             }
+        } else if let loadFailure {
+            // Back to the spinner, whose onAppear loads the page again.
+            PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
             ProgressView()
                 .onAppear {
                     Task { @MainActor in
-                        personDetails = try await PeopleRepository().getPersonDetails(id: id)
+                        do {
+                            personDetails = try await PeopleRepository().getPersonDetails(id: id)
+                        } catch {
+                            loadFailure = PageLoadFailure(error: error, statusCode: nil)
+                        }
                     }
                 }
         }

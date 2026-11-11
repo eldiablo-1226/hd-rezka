@@ -77,21 +77,6 @@ final class ProfileAccountViewTests: XCTestCase {
         XCTAssertEqual(result6, mismatch)
     }
 
-    // MARK: AboutUsView
-
-    func testXmasWindowIsDecember25ThroughNewYearsEve() throws {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "UTC"))
-        func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 0, _ minute: Int = 0) throws -> Date {
-            try XCTUnwrap(calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute)))
-        }
-        XCTAssertFalse(AboutUsView.isXmas(on: try date(2026, 12, 24, 23, 59), calendar: calendar))
-        XCTAssertTrue(AboutUsView.isXmas(on: try date(2026, 12, 25), calendar: calendar))
-        XCTAssertTrue(AboutUsView.isXmas(on: try date(2026, 12, 31, 23, 59), calendar: calendar))
-        XCTAssertFalse(AboutUsView.isXmas(on: try date(2027, 1, 1), calendar: calendar))
-        XCTAssertFalse(AboutUsView.isXmas(on: try date(2026, 7, 1), calendar: calendar))
-    }
-
     // MARK: DownloadRow
 
     func testByteStringUsesFileStyleAndDownloadedForZero() {

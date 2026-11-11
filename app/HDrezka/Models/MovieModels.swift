@@ -8,6 +8,9 @@ struct MovieSimple: Equatable, Identifiable {
     let name: String
     let details: String
     let poster: String
+    // improvement: the listing card's type ("Сериал") and series progress ("2 сезон, 8 серия"); 1.6.0 dropped them.
+    var entity: String? = nil
+    var info: String? = nil
 }
 
 struct SearchResult: Identifiable {
@@ -189,6 +192,8 @@ struct Collection: Equatable, Identifiable {
 struct PersonSimple: Identifiable {
     let id: String
     let name: String
+    /// improvement: the `data-photo` of the page's person item, for the cast row; nil when the site has none.
+    var photo: String? = nil
 }
 
 struct PersonDetailed {

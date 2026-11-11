@@ -17,6 +17,6 @@ struct YouTubePlayerViewComponent: View {
             }
         }
         .aspectRatio(16 / 9, contentMode: .fill)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous))
     }
 }

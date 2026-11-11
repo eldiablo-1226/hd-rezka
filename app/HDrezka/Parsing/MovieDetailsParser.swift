@@ -6,6 +6,10 @@ import SwiftUI
 /// but only where the binary passes `.regularExpression` (parseSeriesSeasons); getSeasons() passes no options.
 private let nonDigitRun = "[^\\d!-/:-@\\[-`{-~]+"
 
+/// improvement: what a movie or person page lacks when it cannot be shown at all (1.6.0 trapped there instead of
+/// throwing). The error screen tells it apart from network problems (`PageLoadFailure.unparsable`).
+struct PageParseError: Error { let missing: String }
+
 class MovieDetailsParser: ObservableObject {
     @Published var movieDetailed: [MovieDetailed] = []
     @Published var movieSeason: [MovieSeason] = []
@@ -13,8 +17,10 @@ class MovieDetailsParser: ObservableObject {
     /// Appends the page to `movieDetailed` and returns the whole list (the original never clears it).
     func parseMovieDetails(html: String, movieId: String) throws -> [MovieDetailed] {
         let doc = try SwiftSoup.parse(html)
-        let main = try doc.select("div.b-content__main").first()!
-        let nameRussian = try main.getElementsByClass("b-post__title").first()!.text()
+        // improvement: required, so a page without the movie block or its title throws (details Retry state); 1.6.0 trapped.
+        guard let main = try doc.select("div.b-content__main").first(),
+              let nameRussian = try main.getElementsByClass("b-post__title").first()?.text()
+        else { throw PageParseError(missing: "div.b-content__main .b-post__title") }
         let nameOriginal = try main.getElementsByClass("b-post__origtitle").first()?.text()
         let poster = try main.getDetailsPoster()
         let hPoster = try main.getDetailsHPoster()
@@ -39,7 +45,8 @@ class MovieDetailsParser: ObservableObject {
         var singleVoiceActingName: String?, actors: [PersonSimple]?
         main.getDetailsChunked { chunk in
             do {
-                switch try chunk[0].getElementsByTag("h2").text() {
+                // improvement: a one-cell row (the cast) never matches a label, so a label without its value cell cannot trap on chunk[1].
+                switch try chunk.count > 1 ? chunk[0].getElementsByTag("h2").text() : "" {
                 case "Рейтинги":
                     imdbRating = chunk.getImdbRating()
                     imdbVotes = chunk.getImdbVotes()
@@ -52,7 +59,8 @@ class MovieDetailsParser: ObservableObject {
                 case "Режиссер":
                     producer = try chunk.getProducers()
                 case "Возраст":
-                    ageRestriction = try chunk[1].getElementsByTag("span").first()!.text()
+                    // improvement: no span gives nil, then the "0+" of a page without the row (1.6.0 trapped).
+                    ageRestriction = try chunk[1].getElementsByTag("span").first()?.text()
                 case "Страна":
                     country = try chunk[1].text()
                 case "Жанр":
@@ -89,7 +97,8 @@ class MovieDetailsParser: ObservableObject {
             duration: duration ?? "nil", description: description, releaseDate: releaseDate,
             country: country ?? "nil", ageRestriction: ageRestriction ?? "0+",
             imdbRating: rating(imdbRating, imdbVotes, imdbLink), kpRating: rating(kpRating, kpVotes, kpLink),
-            genres: genres!, lists: lists, collections: collections, schedule: schedule, franchise: franchise,
+            // improvement: no «Жанр» row gives no genres (1.6.0 trapped on genres!); the details views take prefix(1).
+            genres: genres ?? [], lists: lists, collections: collections, schedule: schedule, franchise: franchise,
             producer: producer, actors: actors, ytTrailerLink: nil, ytTrailerPreview: nil,
             availability: isAvailable ? .AVAILABLE_ON_REZKA : .UNAVAILABLE, comingSoon: isComingSoon,
             voiceActing: voiceActing, singleVoiceActingName: singleVoiceActingName, voiceActingRating: voiceActingRating,
@@ -139,7 +148,8 @@ extension SwiftSoup.Document {
     /// Reads the signed-in account's premium badge into the "hasPremium" AppStorage value ("" for guests).
     func checkPremium() throws -> SwiftSoup.Document {
         @AppStorage("hasPremium") var hasPremium: String = ""
-        hasPremium = try body()!.select(".b-tophead-premuser").select("b").text()
+        // improvement: a document without <body> counts as a guest ("") instead of trapping.
+        hasPremium = try body()?.select(".b-tophead-premuser").select("b").text() ?? ""
         return self
     }
 
@@ -168,18 +178,20 @@ extension SwiftSoup.Document {
         if !noSeasons {
             return try getElementsByClass("b-simple_season__item").map { season in
                 let id = try season.attr("data-tab_id")
-                let episodes = try select("ul#simple-episodes-list-" + id).first()!
-                    .getElementsByClass("b-simple_episode__item").map { try $0.episode() }
+                // improvement: a tab without its episode list keeps the season with no episodes (1.6.0 trapped); the sheets cope.
+                let episodes = try select("ul#simple-episodes-list-" + id).first()?
+                    .getElementsByClass("b-simple_episode__item").map { try $0.episode() } ?? []
                 return MovieSeason(id: id, name: try season.text().replacingOccurrences(of: nonDigitRun, with: ""), episodes: episodes,
                                    isSelected: try season.attr("class").contains("active"),
                                    url: season.hasAttr("href") ? try season.attr("href") : nil)
             }
         }
         if !noEpisodes {
-            let id = try select("ul[id*=\"simple-episodes-list\"]").first()!
-                .getElementsByClass("b-simple_episode__item").first()!.attr("data-season_id")
-            let episodes = try select("ul#simple-episodes-list-" + id).first()!
-                .getElementsByClass("b-simple_episode__item").map { try $0.episode() }
+            // improvement: no episode at all reads as no seasons, a season id without its list as no episodes (1.6.0 trapped).
+            guard let id = try select("ul[id*=\"simple-episodes-list\"]").first()?
+                .getElementsByClass("b-simple_episode__item").first()?.attr("data-season_id") else { return nil }
+            let episodes = try select("ul#simple-episodes-list-" + id).first()?
+                .getElementsByClass("b-simple_episode__item").map { try $0.episode() } ?? []
             return [MovieSeason(id: id, name: ("Сезон " + id).replacingOccurrences(of: nonDigitRun, with: ""), episodes: episodes,
                                 isSelected: true, url: nil)]
         }
@@ -191,7 +203,9 @@ extension SwiftSoup.Document {
         func getByOffset() throws -> [MovieVoiceActing] {
             let page = description
             let call = page.contains("initCDNMoviesEvents") ? "initCDNMoviesEvents" : "initCDNSeriesEvents"
-            let arguments = page[page.range(of: call)!.upperBound...].split(separator: ", ")
+            // improvement: required on a playable page (the play and download sheets index into it), so no call throws; 1.6.0 trapped.
+            let arguments = page.range(of: call).map { page[$0.upperBound...].split(separator: ", ") } ?? []
+            guard arguments.count > 1 else { throw PageParseError(missing: call) }
             return [MovieVoiceActing(id: movieId, name: "", translatorId: String(arguments[1]), isCamrip: "", isAds: "",
                                      isDirector: "", isSelected: true, isPremium: false, url: nil)]
         }
@@ -243,16 +257,19 @@ extension SwiftSoup.Document {
         }
     }
 
-    /// The original maps the whole `div.inner` list in one go, so all rows end up in a single entry
-    /// (joined titles, and percent 0 as soon as there is more than one row).
+    /// The popularity tooltip: one entry per voice acting row ("лостфильм (LostFilm)", 98.49).
+    /// improvement: the original mapped the whole `div.inner` list in one go, so all rows ended up in a single entry
+    /// (joined titles, and percent 0 as soon as there was more than one row); the page's voice acting rows show these.
     func getVoiceActingRating() throws -> [MovieVoiceActingRating]? {
         guard let help = try select("span.b-rgstats__help").first() else { return nil }
         let title = try Entities.unescape(try help.attr("title"))
-        guard let rows = try SwiftSoup.parse(title).body()?.select("div.inner") else { return nil }
-        let percent = try rows.select("div.count").text().replacingOccurrences(of: "%", with: "").replacingOccurrences(of: ",", with: ".")
-        let language = try rows.select("img").first()?.attr("title") ?? ""
-        let name = try rows.select("div.title").text() + language.languageFlag
-        return [MovieVoiceActingRating(name: name, percent: Float(percent) ?? 0)]
+        guard let rows = try SwiftSoup.parse(title).body()?.select("div.inner"), !rows.isEmpty() else { return nil }
+        return try rows.map { row in
+            let percent = try row.select("div.count").text().replacingOccurrences(of: "%", with: "").replacingOccurrences(of: ",", with: ".")
+            let language = try row.select("img").first()?.attr("title") ?? ""
+            let name = try row.select("div.title").text() + language.languageFlag
+            return MovieVoiceActingRating(name: name, percent: Float(percent) ?? 0)
+        }
     }
 
     func getCommentsCount() throws -> Int {
@@ -272,33 +289,42 @@ extension SwiftSoup.Document {
 }
 
 extension Element {
+    /// improvement: `data-photo` of the enclosing `span.person-name-item`; the site writes "null" when there is none.
+    func personPhoto() -> String? {
+        guard let photo = try? parent()?.attr("data-photo"), photo.hasPrefix("http") else { return nil }
+        return photo
+    }
+
+    // improvement: no sidecover gives "" (the views and the player read an empty URL as no image); 1.6.0 trapped.
     func getDetailsPoster() throws -> String {
-        try select("div.b-sidecover").first()!.getElementsByTag("a").first()!.getElementsByTag("img").first()!.attr("src")
+        try select("div.b-sidecover").first()?.getElementsByTag("a").first()?.getElementsByTag("img").first()?.attr("src") ?? ""
     }
 
+    // improvement: likewise "" without a sidecover.
     func getDetailsHPoster() throws -> String {
-        try select("div.b-sidecover").first()!.getElementsByTag("a").first()!.attr("href")
+        try select("div.b-sidecover").first()?.getElementsByTag("a").first()?.attr("href") ?? ""
     }
 
+    // improvement: no description gives "" (MovieDetailed.description is not optional); 1.6.0 trapped.
     func getDescription() throws -> String {
-        try getElementsByClass("b-post__description").first()!.getElementsByClass("b-post__description_text").first()!.text()
+        try getElementsByClass("b-post__description").first()?.getElementsByClass("b-post__description_text").first()?.text() ?? ""
     }
 
     /// The "Входит в списки" cell: "<a href=…>Лучшие боевики 2012 года</a> (19 место)<br>…".
     func getMovieLists() throws -> [MovieList] {
-        try outerHtml().split(separator: "<br>").map { part in
-            let body = try SwiftSoup.parse(String(part)).body()!
-            let id = try body.getElementsByTag("a").first()!.attr("href")
-            let name = try body.getElementsByTag("a").first()!.text()
-            let position = try body.text().split(separator: "(")[1].components(separatedBy: " ").dropLast().joined()
-            return MovieList(id: id, name: name, moviePosition: Int(position)!)
+        // improvement: a part without a link is dropped and a missing "(N место)" gives position 0 (1.6.0 trapped on both).
+        try outerHtml().split(separator: "<br>").compactMap { part -> MovieList? in
+            guard let body = try SwiftSoup.parse(String(part)).body(), let link = try body.getElementsByTag("a").first() else { return nil }
+            let position = try body.text().split(separator: "(").dropFirst().last?.components(separatedBy: " ").dropLast().joined()
+            return MovieList(id: try link.attr("href"), name: try link.text(), moviePosition: position.flatMap { Int($0) } ?? 0)
         }
     }
 
     /// Calls `onGot` with the cells of every info-table row, two at a time ([label, value]; the cast row has one cell).
     func getDetailsChunked(onGot: @escaping ([Element]) -> ()) {
         do {
-            for tbody in try select("table.b-post__info").first()!.getElementsByTag("tbody") {
+            // improvement: no info table means no rows, so every info field keeps its default (1.6.0 trapped).
+            for tbody in try select("table.b-post__info").first()?.getElementsByTag("tbody") ?? Elements() {
                 for row in try tbody.getElementsByTag("tr") {
                     let cells = try row.getElementsByTag("td").array()
                     for start in stride(from: 0, to: cells.count, by: 2) {
@@ -371,9 +397,10 @@ extension Array where Element == SwiftSoup.Element {
         return try link.attr("href").decodedHelpLink()
     }
 
-    func getProducers() throws -> [PersonSimple] {
-        try self[1].getElementsByClass("persons-list-holder").first()!.select("a")
-            .map { PersonSimple(id: try $0.attr("href"), name: try $0.text()) }
+    // improvement: a director cell without persons-list-holder gives nil, as if the row were absent (1.6.0 trapped).
+    func getProducers() throws -> [PersonSimple]? {
+        try self[1].getElementsByClass("persons-list-holder").first()?.select("a")
+            .map { PersonSimple(id: try $0.attr("href"), name: try $0.text(), photo: $0.personPhoto()) }
     }
 
     /// Any row that is not one of the known labels: the cast row keeps its people in a div.
@@ -383,7 +410,7 @@ extension Array where Element == SwiftSoup.Element {
             if holders.isEmpty() { return nil }
             var actors: [PersonSimple] = []
             for link in try holders.select("a") {
-                actors.append(PersonSimple(id: try link.attr("href"), name: try link.text()))
+                actors.append(PersonSimple(id: try link.attr("href"), name: try link.text(), photo: link.personPhoto()))
             }
             return actors
         } catch {
@@ -397,15 +424,18 @@ private extension String {
     /// "/help/<base64 of the percent-encoded URL>/" -> the URL ("" when the base64 does not decode).
     func decodedHelpLink() -> String? {
         let path = String(reversed().drop { $0 == "/" }.reversed())
-        let encoded = String(path[path.range(of: "/help/", options: .backwards)!.upperBound...])
+        // improvement: an href without the /help/ wrapper is already the URL, so the rating keeps it (1.6.0 trapped).
+        guard let help = path.range(of: "/help/", options: .backwards) else { return self }
+        let encoded = String(path[help.upperBound...])
         return (Data(base64Encoded: encoded).flatMap { String(data: $0, encoding: .utf8) } ?? "").removingPercentEncoding
     }
 
     /// The flag appended to Ukrainian and Kazakh voice actings, keyed by the flag image's title.
+    /// improvement: a no-break space before it, so at large text sizes the flag never wraps onto a line of its own.
     var languageFlag: String {
         switch self {
-        case "Украинский": " 🇺🇦"
-        case "Казахский": " 🇰🇿"
+        case "Украинский": "\u{00A0}🇺🇦"
+        case "Казахский": "\u{00A0}🇰🇿"
         default: ""
         }
     }

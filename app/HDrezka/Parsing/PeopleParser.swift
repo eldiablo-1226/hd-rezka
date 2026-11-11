@@ -64,7 +64,7 @@ class PeopleParser {
 }
 
 class PeopleRepository {
-    /// `id` may come as "person/4176-vudi-harrelson/": only the slug goes into the URL.
+    /// `id` may come as "person/4176-vudi-harrelson/" or as the cast row's absolute URL: only the slug goes into the URL.
     func getPersonDetails(id: String) async throws -> PersonDetailed {
         let network = PeopleNetwork()  // built before the slug, as at 0x1000f65d4
         let html = try await network.getPersonDetails(id: Self.slug(id))
@@ -72,8 +72,9 @@ class PeopleRepository {
     }
 
     /// Drops "person/" and then every "/": "person/4176-vudi-harrelson/" -> "4176-vudi-harrelson".
+    /// improvement: drops the mirror first; the movie page's cast row passes the absolute href, and every tap failed.
     static func slug(_ id: String) -> String {
-        id.replacingOccurrences(of: "person/", with: "").replacingOccurrences(of: "/", with: "")
+        id.removeMirror().replacingOccurrences(of: "person/", with: "").replacingOccurrences(of: "/", with: "")
     }
 }
 
@@ -86,8 +87,12 @@ private extension Document {
         return try name.text()
     }
 
+    // improvement: a page without the person's cover is not a person page, so it throws (Retry screen); 1.6.0 trapped.
     func getPhoto() throws -> String {
-        try select("div.b-post__infotable_left").select("div.b-sidecover").first!.getElementsByTag("img").attr("src")
+        guard let cover = try select("div.b-post__infotable_left").select("div.b-sidecover").first() else {
+            throw PageParseError(missing: "div.b-post__infotable_left div.b-sidecover")
+        }
+        return try cover.getElementsByTag("img").attr("src")
     }
 }
 

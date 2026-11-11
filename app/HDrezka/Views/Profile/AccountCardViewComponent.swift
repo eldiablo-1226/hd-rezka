@@ -17,8 +17,9 @@ struct AccountCardViewComponent: View {
                                 Text(name)
                                     .bold()
                             } icon: {
+                                // improvement: secondary, not the accent: the icon names the card, the card is the button.
                                 Image(systemName: image)
-                                    .foregroundStyle(Color(.accent))
+                                    .foregroundStyle(.secondary)
                             }
                             .padding(.bottom, 2)
                             Text(desc)
@@ -28,7 +29,7 @@ struct AccountCardViewComponent: View {
                 }
                 .padding(15)
                 .background {
-                    RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous)
                         .foregroundStyle(.quinary)
                 }
             }

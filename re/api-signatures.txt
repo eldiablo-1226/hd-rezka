@@ -1,0 +1,289 @@
+(DownloadRow in _82BB80FECCB29E3318EBD36DB9246D5F).byteString(Int64) -> String
+(DownloadRow in _82BB80FECCB29E3318EBD36DB9246D5F).statusLine.getter : some
+(InfoTabDemoView in _62D1EF6792C0152A08AAC0E91601BCF0).body.getter : some
+(NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).Coordinator.gestureRecognizer(_: __C.UIGestureRecognizer, shouldReceive: __C.UIEvent) -> Bool
+(NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).Coordinator.gestureRecognizer(_: __C.UIGestureRecognizer, shouldReceive: __C.UIPress) -> Bool
+(NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).Coordinator.gestureRecognizer(_: __C.UIGestureRecognizer, shouldReceive: __C.UITouch) -> Bool
+(NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).Coordinator.gestureRecognizerShouldBegin(__C.UIGestureRecognizer) -> Bool
+(NavigationConfigurator in _FF993C097B4D953CB09938FA714CE8F8).updateUIViewController(_: __C.UIViewController, context: UIViewControllerRepresentableContext<(NavigationConfigurator in _FF993C097B4D953CB09938FA714CE8F8)>) -> ()
+(Sparkle in _B418C51FAF84C5F2A16C45974BFF290E).body.getter : some
+(Wipe in _C4AD6164A7F007BC560680DCCB8BB655).mask(size: __C.CGSize) -> some
+(resourceBundle in _BF07C4E531F6C24C90055C3B44DAB34A) : __C.NSBundle
+AccountNetwork.checkRegistration([String : String]) async throws -> String
+AccountNetwork.getBookmarks() async throws -> String
+AccountNetwork.getBookmarksByCategory(id: Int, page: Int) async throws -> String
+AccountNetwork.getLoginResponse([String : String]) async throws -> String
+AccountNetwork.getSeriesUpdates() async throws -> String
+AccountNetwork.getSignUpResponse([String : String]) async throws -> String
+AccountNetwork.getWatchingLaterMovies() async throws -> String
+AccountNetwork.logout() async throws -> String
+AccountNetwork.performBookmarksAction([String : String]) async throws -> String
+AccountNetwork.removeWatchingItem([String : String]) async throws -> String
+AccountNetwork.reorderBookmarks([String : [String]]) async throws -> String
+AccountNetwork.sendWatching([String : String]) async throws -> String
+AccountParser.parseSeriesUpdates(html: String) throws -> [SeriesUpdateGroup]
+AccountParser.parseWatchingLaterMovies() async throws -> [MovieWatchLater]
+AccountParser.seriesUpdates.getter : [SeriesUpdateGroup]
+AccountParser.watchingLaterMovies.getter : [MovieWatchLater]
+AccountService.getBookmarksByCategory(id: Int, page: Int) async throws -> [MovieSimple]
+BackButton.body.getter : some
+BlurView.makeUIView(context: UIViewRepresentableContext<BlurView>) -> __C.UIView
+BlurView.updateUIView(_: __C.UIView, context: UIViewRepresentableContext<BlurView>) -> ()
+BookmarkListGridComponent.body.getter : some
+BookmarkMovieListView.body.getter : some
+BookmarksSelectionListViewComponent.bookmarks.modify : [Bookmark : Bool]
+BookmarksSelectionListViewComponent.bookmarks.modify : [Bookmark : Bool] with unmangled suffix ".resume.0"
+BookmarksView.body.getter : some
+CollectionsMovieListViewComponentIpad.body.getter : some
+CollectionsNetwork.getCollections(page: Int) async throws -> String
+CollectionsNetwork.getMoviesInCollectionFiltered(id: String, page: Int, filter: String) async throws -> String
+CollectionsParser.collections.getter : [Collection]
+CollectionsParser.getWatchingNowMoviesInCollection(collectionId: String, page: Int) async throws -> [MovieSimple]
+CollectionsParser.moviesInCollections.getter : [MovieSimple]
+CollectionsParser.parseCollections(String) throws -> [Collection]
+CollectionsParser.parseMoviesInCollection(String) throws -> [MovieSimple]
+CollectionsView.body.getter : some
+CollectionsViewIpad.body.getter : some
+ContentView.body.getter : some
+ContentViewIpad.body.getter : some
+CustomAVAssetResourceLoaderDelegate.finishRequestWithMainPlaylist(__C.AVAssetResourceLoadingRequest) -> ()
+CustomAVAssetResourceLoaderDelegate.getMainm3u8() -> String
+CustomAVAssetResourceLoaderDelegate.handleMainRequest(__C.AVAssetResourceLoadingRequest) -> Bool
+CustomAVAssetResourceLoaderDelegate.handleSubtitles(__C.AVAssetResourceLoadingRequest) -> Bool
+CustomAVAssetResourceLoaderDelegate.processPlaylistWithData(Data) -> ()
+CustomAVPlayer.init(m3u8: URL, subtitles: [MovieSubtitles]) -> CustomAVPlayer?
+CustomAVPlayer.replaceURLWithScheme(_: String, url: URL) -> URL?
+DetailsViewComponent.body.getter : some
+DetailsViewComponentIpad.body.getter : some
+Download.displayName.getter : String
+Download.encode(to: Encoder) throws -> ()
+Download.fractionCompleted.getter : Double
+Download.hash(into: inout Hasher) -> ()
+Download.init(from: Decoder) throws -> Download
+DownloadDestination.displayName.getter : String
+DownloadManager.() -> DownloadManager(in _F6FDA1C88505717E2E7E9B681440F82F).init() -> DownloadManager
+DownloadManager.(backgroundSession in _F6FDA1C88505717E2E7E9B681440F82F).getter : __C.NSURLSession
+DownloadManager.(defaultSession in _F6FDA1C88505717E2E7E9B681440F82F).getter : __C.NSURLSession
+DownloadManager.(downloadsDirectory in _F6FDA1C88505717E2E7E9B681440F82F)() -> URL
+DownloadManager.(persistDownloadedFile in _F6FDA1C88505717E2E7E9B681440F82F)(at: URL, for: Download) throws -> ()
+DownloadManager.(saveMetadata in _F6FDA1C88505717E2E7E9B681440F82F)() -> ()
+DownloadManager.delete(Download) -> ()
+DownloadManager.downloads.getter : [Download]
+DownloadManager.hasActiveDownloads.getter : Bool
+DownloadManager.localURL(for: Download) -> URL?
+DownloadManager.pause(Download) -> ()
+DownloadManager.resume(Download) -> ()
+DownloadParamsSheet.body.getter : some
+DownloadsView.body.getter : some
+FancyScrollView.body.getter : some
+FancyScrollView.init<A where A: View>(title: String, titleColor: Color, headerHeight: CoreGraphics.CGFloat, scrollUpHeaderBehavior: ScrollUpHeaderBehavior, scrollDownHeaderBehavior: ScrollDownHeaderBehavior, content: () -> A) -> FancyScrollView
+FancyScrollView.init<A, B where A: View, B: View>(title: String, titleColor: Color, headerHeight: CoreGraphics.CGFloat, scrollUpHeaderBehavior: ScrollUpHeaderBehavior, scrollDownHeaderBehavior: ScrollDownHeaderBehavior, header: () -> A?, content: () -> B) -> FancyScrollView
+FranchiseRowView.body.getter : some
+HeaderScrollView.(geometry in _6BEF113B0793A582197953D8D964972C)(from: GeometryProxy, safeArea: EdgeInsets) -> HeaderScrollView.(HeaderScrollViewGeometry in _6BEF113B0793A582197953D8D964972C)
+HeaderScrollView.body.getter : some
+HomeView.body.getter : some
+MovieDetailsParser.movieDetailed.getter : [MovieDetailed]
+MovieDetailsParser.movieSeason.getter : [MovieSeason]
+MovieDetailsParser.parseMovieDetails(html: String, movieId: String) throws -> [MovieDetailed]
+MovieDetailsParser.parseSeriesSeasons(String) -> [MovieSeason]?
+MovieDetailsService.getMovieVideo(params: [String : String]) async throws -> String
+MovieDetailsService.getMovieVideo(url: String) async throws -> String
+MovieDetailsService.getMovieVideo(voiceActing: MovieVoiceActing, season: MovieSeason?, episode: MovieEpisode?, id: String) async throws -> MovieVideo
+MovieDetailsService.getSeriesSeasons(movieId: String, voiceActing: MovieVoiceActing) async throws -> [MovieSeason]?
+MovieFranchisePart.hashValue.getter : Int
+MovieSeason.hashValue.getter : Int
+MovieVideo.getAvailableQualities() -> [Quality]
+MovieVideo.hash(into: inout Hasher) -> ()
+MovieVoiceActing.hash(into: inout Hasher) -> ()
+Network.bookmarks.getter : [MovieSimple]
+Network.fetchMovies(page: Int, filter: String) async throws -> ()
+Network.init() -> Network
+Network.movies.getter : [MovieSimple]
+Network.parse(html: String) throws -> [MovieSimple]
+Network.parseBookmarks(html: String) throws -> [MovieSimple]
+Network.parseQuickSearch(html: String) throws -> [SearchResult]
+Network.parseSearch(html: String) throws -> [MovieSimple]
+Network.quickSearch.getter : [SearchResult]
+Network.search.getter : [MovieSimple]
+PeopleNetwork.getPersonDetails(id: String) async throws -> String
+PersonCardComponent.body.getter : some
+PersonPosterView.body.getter : some
+PersonView.body.getter : some
+PlaybackProgressStore.() -> PlaybackProgressStore(in _9FBAD55F0527F3174410D590071FBB0D).init() -> PlaybackProgressStore
+PlaybackProgressStore.save(time: Double, forKey: String) -> ()
+PlaybackProgressStore.time(forKey: String) -> Double?
+PlayerQualityPreference.displayName.getter : String
+PlayerViewComponent.(setupArtworkMetadata in _87FB00189793CF45EA13D8CB88F6C26A)(__C.AVMutableMetadataItem) -> ()
+PlayerViewComponent.Coordinator.(attachItemObservers in _87FB00189793CF45EA13D8CB88F6C26A)(item: __C.AVPlayerItem?) -> ()
+PlayerViewComponent.Coordinator.(beginManualNowPlaying in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(endManualNowPlaying in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(handlePlaybackEnded in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(installLifecycleObservers in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(installTimeObserver in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(loadArtwork in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(swapToNext in _87FB00189793CF45EA13D8CB88F6C26A)(url: String, subtitles: [MovieSubtitles], episode: MovieEpisode, voiceActing: MovieVoiceActing, progressKey: String, autoplay: AutoplayContext) -> ()
+PlayerViewComponent.Coordinator.(updateNowPlayingElapsedTime in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.(updateNowPlayingInfo in _87FB00189793CF45EA13D8CB88F6C26A)() -> ()
+PlayerViewComponent.Coordinator.attach(player: __C.AVPlayer, controller: __C.AVPlayerViewController) -> ()
+PlayerViewComponent.Coordinator.persistAndDetach() -> ()
+PlayerViewComponent.makeCoordinator() -> PlayerViewComponent.Coordinator
+PlayerViewComponent.makeUIViewController(context: UIViewControllerRepresentableContext<PlayerViewComponent>) -> __C.AVPlayerViewController
+PremiumCard.body.getter : some
+QualitySelectionSheet.body.getter : some
+RegisterView.(checkout in _F3D608742F53215FA252A7FE8427D661)(email: String, name: String, pass: String, conf_pass: String) async throws -> String?
+RegisterView.(isValidEmail in _F3D608742F53215FA252A7FE8427D661)(String) -> Bool
+RegisterView.init() -> RegisterView
+ScrollDownHeaderBehavior.hash(into: inout Hasher) -> ()
+ScrollDownHeaderBehavior.hashValue.getter : Int
+ScrollUpHeaderBehavior.hash(into: inout Hasher) -> ()
+ScrollUpHeaderBehavior.hashValue.getter : Int
+SeriesUpdateCardView.body.getter : some
+SeriesUpdateView.body.getter : some
+ShareButton.body.getter : some
+StarsView.body.getter : some
+TitleGridComponent.body.getter : some
+TitleGridComponentIpad.body.getter : some
+VideoParamsSheet.body.getter : some
+WatchLaterCardComponent.body.getter : some
+WatchLaterView.body.getter : some
+YouTubePlayerViewComponent.body.getter : some
+direct field offset for (NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).Coordinator.navigationController : __C.UINavigationController?
+direct field offset for (NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).Coordinator.originalDelegate : __C.UIGestureRecognizerDelegate?
+direct field offset for (NavigationConfigurator in _FF993C097B4D953CB09938FA714CE8F8).Coordinator.navigationController : __C.UINavigationController?
+direct field offset for AccountNetwork.(_remoteVersion in _035A1D9B3880DA06A5BA8FF1C89386D4) : AppStorage<String>
+direct field offset for AccountNetwork.(_settingStore in _035A1D9B3880DA06A5BA8FF1C89386D4) : AppStorage<String>
+direct field offset for AccountParser.(_seriesUpdates in _0E09E14F1AB11D3B1592C8373AA24713) : Published<[SeriesUpdateGroup]>
+direct field offset for AccountParser.(_watchingLaterMovies in _0E09E14F1AB11D3B1592C8373AA24713) : Published<[MovieWatchLater]>
+direct field offset for AccountService.network : Network
+direct field offset for AppDelegate.backgroundCompletionHandler : (() -> ())?
+direct field offset for CollectionsNetwork.(_remoteVersion in _964A16862399753CA2A53A05378ECAEA) : AppStorage<String>
+direct field offset for CollectionsNetwork.(_settingStore in _964A16862399753CA2A53A05378ECAEA) : AppStorage<String>
+direct field offset for CollectionsParser.(_collections in _BB647783ED02A4B8F0EF0D94A4A13BCE) : Published<[Collection]>
+direct field offset for CollectionsParser.(_moviesInCollections in _BB647783ED02A4B8F0EF0D94A4A13BCE) : Published<[MovieSimple]>
+direct field offset for CustomAVAssetResourceLoaderDelegate.(extInfPrefix in _BC10E7B26DFCEBF53D96DF55EEC14E22) : String
+direct field offset for CustomAVAssetResourceLoaderDelegate.(fragmentsScheme in _BC10E7B26DFCEBF53D96DF55EEC14E22) : String
+direct field offset for CustomAVAssetResourceLoaderDelegate.(m3u8 in _BC10E7B26DFCEBF53D96DF55EEC14E22) : URL
+direct field offset for CustomAVAssetResourceLoaderDelegate.(m3u8String in _BC10E7B26DFCEBF53D96DF55EEC14E22) : String?
+direct field offset for CustomAVAssetResourceLoaderDelegate.(playlistDuration in _BC10E7B26DFCEBF53D96DF55EEC14E22) : Double
+direct field offset for CustomAVAssetResourceLoaderDelegate.(subtitles in _BC10E7B26DFCEBF53D96DF55EEC14E22) : [MovieSubtitles]
+direct field offset for CustomAVAssetResourceLoaderDelegate.(subtitlesScheme in _BC10E7B26DFCEBF53D96DF55EEC14E22) : String
+direct field offset for CustomAVPlayer.(delegate in _F9395BD9E77CE9FAD8EA11548BC75911) : CustomAVAssetResourceLoaderDelegate
+direct field offset for CustomAVPlayer.(loaderQueue in _F9395BD9E77CE9FAD8EA11548BC75911) : __C.OS_dispatch_queue
+direct field offset for DownloadManager.($__lazy_storage_$_backgroundSession in _F6FDA1C88505717E2E7E9B681440F82F) : __C.NSURLSession?
+direct field offset for DownloadManager.($__lazy_storage_$_defaultSession in _F6FDA1C88505717E2E7E9B681440F82F) : __C.NSURLSession?
+direct field offset for DownloadManager.(_downloads in _F6FDA1C88505717E2E7E9B681440F82F) : Published<[Download]>
+direct field offset for DownloadManager.(_useBackgroundSession in _F6FDA1C88505717E2E7E9B681440F82F) : AppStorage<Bool>
+direct field offset for DownloadManager.(fileManager in _F6FDA1C88505717E2E7E9B681440F82F) : __C.NSFileManager
+direct field offset for DownloadManager.(lastProgressPersist in _F6FDA1C88505717E2E7E9B681440F82F) : [UUID : Date]
+direct field offset for DownloadManager.(notification in _F6FDA1C88505717E2E7E9B681440F82F) : __C.UNUserNotificationCenter
+direct field offset for DownloadManager.(storageQueue in _F6FDA1C88505717E2E7E9B681440F82F) : __C.OS_dispatch_queue
+direct field offset for DownloadManager.(tasks in _F6FDA1C88505717E2E7E9B681440F82F) : [UUID : __C.NSURLSessionDownloadTask]
+direct field offset for DownloadManager.(tasksLock in _F6FDA1C88505717E2E7E9B681440F82F) : __C.NSLock
+direct field offset for MovieDetailsParser.(_movieDetailed in _CE0336CDE02AB0361BFE95A2DF28DE47) : Published<[MovieDetailed]>
+direct field offset for MovieDetailsParser.(_movieSeason in _CE0336CDE02AB0361BFE95A2DF28DE47) : Published<[MovieSeason]>
+direct field offset for MovieDetailsService.(_remoteVersion in _213F8EE19DF0941C8D7FFE394F77E72B) : AppStorage<String>
+direct field offset for MovieDetailsService.(_settingStore in _213F8EE19DF0941C8D7FFE394F77E72B) : AppStorage<String>
+direct field offset for Network.(_bookmarks in _AA03199D85BD805DE646A63EF1EFC929) : Published<[MovieSimple]>
+direct field offset for Network.(_movies in _AA03199D85BD805DE646A63EF1EFC929) : Published<[MovieSimple]>
+direct field offset for Network.(_quickSearch in _AA03199D85BD805DE646A63EF1EFC929) : Published<[SearchResult]>
+direct field offset for Network.(_remoteVersion in _AA03199D85BD805DE646A63EF1EFC929) : AppStorage<String>
+direct field offset for Network.(_search in _AA03199D85BD805DE646A63EF1EFC929) : Published<[MovieSimple]>
+direct field offset for Network.(_settingStore in _AA03199D85BD805DE646A63EF1EFC929) : AppStorage<String>
+direct field offset for PeopleNetwork.(_remoteVersion in _FFC87BEBDA4A96524FE4B2FB360F2746) : AppStorage<String>
+direct field offset for PeopleNetwork.(_settingStore in _FFC87BEBDA4A96524FE4B2FB360F2746) : AppStorage<String>
+direct field offset for PlaybackProgressStore.(container in _9FBAD55F0527F3174410D590071FBB0D) : __C.NSPersistentContainer
+direct field offset for PlaybackProgressStore.(entityName in _9FBAD55F0527F3174410D590071FBB0D) : String
+direct field offset for PlayerViewComponent.Coordinator.(artworkImage in _87FB00189793CF45EA13D8CB88F6C26A) : __C.UIImage?
+direct field offset for PlayerViewComponent.Coordinator.(autoplay in _87FB00189793CF45EA13D8CB88F6C26A) : AutoplayContext?
+direct field offset for PlayerViewComponent.Coordinator.(backgroundObserver in _87FB00189793CF45EA13D8CB88F6C26A) : __C.NSObject?
+direct field offset for PlayerViewComponent.Coordinator.(controller in _87FB00189793CF45EA13D8CB88F6C26A) : __C.AVPlayerViewController?
+direct field offset for PlayerViewComponent.Coordinator.(didRestore in _87FB00189793CF45EA13D8CB88F6C26A) : Bool
+direct field offset for PlayerViewComponent.Coordinator.(endObserver in _87FB00189793CF45EA13D8CB88F6C26A) : __C.NSObject?
+direct field offset for PlayerViewComponent.Coordinator.(foregroundObserver in _87FB00189793CF45EA13D8CB88F6C26A) : __C.NSObject?
+direct field offset for PlayerViewComponent.Coordinator.(isAdvancing in _87FB00189793CF45EA13D8CB88F6C26A) : Bool
+direct field offset for PlayerViewComponent.Coordinator.(isPictureInPictureActive in _87FB00189793CF45EA13D8CB88F6C26A) : Bool
+direct field offset for PlayerViewComponent.Coordinator.(manualNowPlayingActive in _87FB00189793CF45EA13D8CB88F6C26A) : Bool
+direct field offset for PlayerViewComponent.Coordinator.(movieName in _87FB00189793CF45EA13D8CB88F6C26A) : String
+direct field offset for PlayerViewComponent.Coordinator.(player in _87FB00189793CF45EA13D8CB88F6C26A) : __C.AVPlayer?
+direct field offset for PlayerViewComponent.Coordinator.(posterUrl in _87FB00189793CF45EA13D8CB88F6C26A) : String
+direct field offset for PlayerViewComponent.Coordinator.(progressKey in _87FB00189793CF45EA13D8CB88F6C26A) : String?
+direct field offset for PlayerViewComponent.Coordinator.(rateObservation in _87FB00189793CF45EA13D8CB88F6C26A) : NSKeyValueObservation?
+direct field offset for PlayerViewComponent.Coordinator.(statusObservation in _87FB00189793CF45EA13D8CB88F6C26A) : NSKeyValueObservation?
+direct field offset for PlayerViewComponent.Coordinator.(subtitle in _87FB00189793CF45EA13D8CB88F6C26A) : String
+direct field offset for PlayerViewComponent.Coordinator.(timeObserver in _87FB00189793CF45EA13D8CB88F6C26A) : Any?
+direct field offset for SystemVersion.os : __C.NSOperatingSystemVersion
+direct field offset for SystemVersion.osString : String
+function signature specialization <Arg[0] = Dead, Arg[1] = Dead> of DownloadManager.urlSessionDidFinishEvents(forBackgroundURLSession: __C.NSURLSession) -> ()
+function signature specialization <Arg[0] = Dead, Arg[2] = Dead> of DownloadManager.urlSession(_: __C.NSURLSession, downloadTask: __C.NSURLSessionDownloadTask, didWriteData: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) -> ()
+function signature specialization <Arg[0] = Dead> of AboutUsView.isXmas() -> Bool
+function signature specialization <Arg[0] = Dead> of AccountService.getBookmarks() async throws -> [Bookmark]
+function signature specialization <Arg[0] = Dead> of AccountService.getSeriesUpdates() async throws -> [SeriesUpdateGroup]
+function signature specialization <Arg[0] = Dead> of BookmarksView.init() -> BookmarksView
+function signature specialization <Arg[0] = Dead> of CustomAVAssetResourceLoaderDelegate.resourceLoader(_: __C.AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource: __C.AVAssetResourceLoadingRequest) -> Bool
+function signature specialization <Arg[0] = Dead> of DownloadManager.urlSession(_: __C.NSURLSession, downloadTask: __C.NSURLSessionDownloadTask, didFinishDownloadingTo: URL) -> ()
+function signature specialization <Arg[0] = Dead> of DownloadManager.urlSession(_: __C.NSURLSession, task: __C.NSURLSessionTask, didCompleteWithError: Error?) -> ()
+function signature specialization <Arg[0] = Dead> of PremiumStarIcon.init() -> PremiumStarIcon
+function signature specialization <Arg[0] = Dead> of static HeaderUpdater.(getHeader in _884EAABF93F48E78510E87BADB4D02A5)() async throws -> String
+function signature specialization <Arg[0] = Dead> of static HeaderUpdater.updateHeader() async throws -> String
+function signature specialization <Arg[1] = Dead> of AboutUsView.init(allowDebug: Binding<Bool>) -> AboutUsView
+function signature specialization <Arg[1] = Dead> of AccountParser.checkRegistration(html: String) throws -> Bool
+function signature specialization <Arg[1] = Dead> of AccountParser.parseBookmarks(html: String) throws -> [Bookmark]
+function signature specialization <Arg[1] = Dead> of AccountService.checkEmail(email: String) async throws -> Bool
+function signature specialization <Arg[1] = Dead> of AccountService.checkUsername(username: String) async throws -> Bool
+function signature specialization <Arg[1] = Dead> of AccountService.createBookmarksCategory(name: String) async throws -> Bookmark?
+function signature specialization <Arg[1] = Dead> of AccountService.deleteBookmarksCategory(id: Int) async throws -> String
+function signature specialization <Arg[1] = Dead> of AccountService.removeWatchingItem(item: MovieWatchLater) async throws -> Bool
+function signature specialization <Arg[1] = Dead> of AccountService.reorderBookmarksCategories([Bookmark]) async throws -> ()
+function signature specialization <Arg[1] = Dead> of BlurView.makeUIView(context: UIViewRepresentableContext<BlurView>) -> __C.UIView
+function signature specialization <Arg[1] = Dead> of DownloadManager.(fetchAlbum in _F6FDA1C88505717E2E7E9B681440F82F)(named: String) -> __C.PHAssetCollection?
+function signature specialization <Arg[1] = Dead> of DownloadManager.(suggestedFileName in _F6FDA1C88505717E2E7E9B681440F82F)(for: Download) -> String
+function signature specialization <Arg[1] = Dead> of DownloadParamsSheet.(downloadByteProgress in _4D9A25384E5FCCD1555D74DEA13D362D)(Download) -> String
+function signature specialization <Arg[1] = Dead> of DownloadState.init(rawValue: String) -> DownloadState?
+function signature specialization <Arg[1] = Dead> of MovieDetailsParser.parseTrailerId(response: String) throws -> String?
+function signature specialization <Arg[1] = Dead> of PeopleParser.parse(html: String) throws -> PersonDetailed
+function signature specialization <Arg[1] = Dead> of PeopleRepository.getPersonDetails(id: String) async throws -> PersonDetailed
+function signature specialization <Arg[1] = Dead> of PlayerQualityPreference.init(rawValue: String) -> PlayerQualityPreference?
+function signature specialization <Arg[1] = Dead> of PremiumStatus.init(raw: String) -> PremiumStatus?
+function signature specialization <Arg[1] = Dead> of StartupPageVariation.init(rawValue: String) -> StartupPageVariation?
+function signature specialization <Arg[1] = Dead> of static PremiumStatus.(dayWord in _B418C51FAF84C5F2A16C45974BFF290E)(for: Int) -> String
+function signature specialization <Arg[1] = Exploded, Arg[2] = Dead> of CustomAVAssetResourceLoaderDelegate.getSubtitlem3u8WithDuration(_: Double, subtitle: MovieSubtitles) -> String
+function signature specialization <Arg[2] = Dead> of (NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03).updateUIViewController(_: __C.UIViewController, context: UIViewControllerRepresentableContext<(NavigationConfigurator in _2138A0569AF9ED26807DC760B2187E03)>) -> ()
+function signature specialization <Arg[2] = Dead> of AccountService.addToBookmarks(movieId: String, bookmarkUserCategory: Int) async throws -> String
+function signature specialization <Arg[2] = Dead> of AccountService.changeBookmarksCategoryName(id: Int, newName: String) async throws -> Bool
+function signature specialization <Arg[2] = Dead> of AccountService.login(username: String, password: String) async throws -> Bool
+function signature specialization <Arg[2] = Dead> of BlurView.updateUIView(_: __C.UIView, context: UIViewRepresentableContext<BlurView>) -> ()
+function signature specialization <Arg[2] = Dead> of DownloadManager.(saveVideo in _F6FDA1C88505717E2E7E9B681440F82F)(videoURL: URL, to: __C.PHAssetCollection) throws -> ()
+function signature specialization <Arg[2] = Dead> of DownloadManager.(saveVideoToAlbum in _F6FDA1C88505717E2E7E9B681440F82F)(videoURL: URL, albumName: String) throws -> ()
+function signature specialization <Arg[2] = Dead> of static Download.__derived_struct_equals(Download, Download) -> Bool
+function signature specialization <Arg[2] = Dead> of static MovieEpisode.__derived_struct_equals(MovieEpisode, MovieEpisode) -> Bool
+function signature specialization <Arg[2] = Dead> of static MovieFranchisePart.__derived_struct_equals(MovieFranchisePart, MovieFranchisePart) -> Bool
+function signature specialization <Arg[2] = Dead> of static MovieSeason.__derived_struct_equals(MovieSeason, MovieSeason) -> Bool
+function signature specialization <Arg[2] = Dead> of static MovieVideo.__derived_struct_equals(MovieVideo, MovieVideo) -> Bool
+function signature specialization <Arg[2] = Dead> of static MovieVoiceActing.__derived_struct_equals(MovieVoiceActing, MovieVoiceActing) -> Bool
+function signature specialization <Arg[2] = Dead> of static MovieWatchLater.__derived_struct_equals(MovieWatchLater, MovieWatchLater) -> Bool
+function signature specialization <Arg[3] = Dead> of AccountService.saveWatchingState(voiceActing: MovieVoiceActing, season: MovieSeason?, episode: MovieEpisode?) async throws -> Bool
+function signature specialization <Arg[3] = Dead> of AccountService.signUp(email: String, username: String, password: String) async throws -> Bool
+function signature specialization <Arg[3] = Dead> of CollectionsListViewComponent.init(isPresented: Binding<Bool>, id: Binding<String>, collectionsParser: EnvironmentObject<CollectionsParser>) -> CollectionsListViewComponent
+metaclass for (ResourceBundleClass in _BF07C4E531F6C24C90055C3B44DAB34A)
+metaclass for AccountNetwork
+metaclass for AccountParser
+metaclass for AccountService
+metaclass for CollectionsNetwork
+metaclass for CollectionsParser
+metaclass for HeaderUpdater
+metaclass for MovieDetailsParser
+metaclass for MovieDetailsService
+metaclass for Network
+metaclass for PeopleNetwork
+metaclass for PeopleParser
+metaclass for PeopleRepository
+metaclass for PlaybackProgressStore
+metaclass for SharedFilmId
+metaclass for SystemVersion
+static ColorResource.accent : ColorResource
+static DefaultSettings.mirror : String
+static DownloadManager.shared : DownloadManager
+static PlaybackProgressStore.shared : PlaybackProgressStore
+static ScrollDownHeaderBehavior.__derived_enum_equals(ScrollDownHeaderBehavior, ScrollDownHeaderBehavior) -> Bool
+static ScrollUpHeaderBehavior.__derived_enum_equals(ScrollUpHeaderBehavior, ScrollUpHeaderBehavior) -> Bool
+static SharedFilmId.id : String

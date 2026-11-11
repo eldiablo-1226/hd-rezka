@@ -11,7 +11,8 @@ struct BehaviorSettingsView: View {
     @EnvironmentObject var downloadManager: DownloadManager
 
     var body: some View {
-        NavigationStack {
+        // improvement: no NavigationStack of its own; the screen is pushed onto Profile's stack.
+        Group {
             VStack {
                 Form {
                     Section(header: Label("key_downloads_settings_footer", systemImage: "square.and.arrow.down"),
@@ -31,7 +32,7 @@ struct BehaviorSettingsView: View {
                     Section(header: Label("key_share_menu_header", systemImage: "square.and.arrow.up"),
                             footer: Text("key_shareMenuVariation+description")) {
                         Picker("key_shareMenuVariation", selection: $shareMenuVariation) {
-                            // AboutUsView explains the missing "Ask" option ("key_ios16+problem+options").
+                            // No "Ask" option on iOS 16.0: the share menu needs 16.1.
                             if #available(iOS 16.1, *) {
                                 Text("key_shareMenuVariation+selectOption")
                                     .tag(ShareMenuVariation.selectOption)

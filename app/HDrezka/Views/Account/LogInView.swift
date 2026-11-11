@@ -8,58 +8,66 @@ struct LogInView: View {
     @State var username: String = ""
     @State var password: String = ""
     @State var isShowingError: Bool = false
+    /// improvement: the site could not be reached (1.6.0 dropped the error, so the button seemed to do nothing).
+    @State var isShowingNetworkError: Bool = false
     @FocusState var focused: Field?
     var accountService: AccountService
     @Environment(\.dismiss) var dismiss
 
+    // improvement: a native form (and password AutoFill); 1.6.0 drew its own grey field and button backgrounds.
     var body: some View {
-        VStack {
-            TextField("Username", text: $username)
-                .padding(10)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .focused($focused, equals: .username)
-                .submitLabel(.next)
-                .onSubmit { focused = .password }
-                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).foregroundStyle(.quaternary))
-            SecureField("Password", text: $password)
-                .padding(10)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .focused($focused, equals: .password)
-                .submitLabel(.done)
-                .onSubmit { login() }
-                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).foregroundStyle(.quaternary))
-                .padding(.bottom, 8)
-            if isShowingError {
-                Text("key_wrong_login_or_password")
-                    .foregroundStyle(Color.red)
-                    .bold(true)
-                    .padding(.bottom, 8)
+        Form {
+            Section {
+                TextField("Username", text: $username)
+                    .textContentType(.username)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .focused($focused, equals: .username)
+                    .submitLabel(.next)
+                    .onSubmit { focused = .password }
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .focused($focused, equals: .password)
+                    .submitLabel(.done)
+                    .onSubmit { login() }
+            } footer: {
+                if isShowingError {
+                    Text("key_wrong_login_or_password")
+                        .foregroundStyle(Color.red)
+                } else if isShowingNetworkError {
+                    Text("key_login_network_error")
+                        .foregroundStyle(Color.red)
+                }
             }
-            Button {
-                login()
-            } label: {
-                Text("login")
-                    .padding(10)
-                    .foregroundStyle(Color(.accent))
+            Section {
+                Button("login", action: login)
                     .frame(maxWidth: .infinity)
-                    .background(RoundedRectangle(cornerRadius: 8, style: .continuous).foregroundStyle(.quinary))
             }
-            .padding(.bottom, 12)
         }
-        .padding(8)
+        // improvement: titled wherever it opens (the Profile push had an empty bar).
+        .navigationTitle("login")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
-    /// The session is the cookie Alamofire keeps; only the flag is stored. Network errors are dropped.
+    /// The session is the cookie Alamofire keeps; only the flag is stored.
     private func login() {
+        isShowingNetworkError = false
         Task {
-            if try await accountService.login(username: username, password: password) {
-                isLoggedIn = true
-                dismiss()
-            } else {
+            do {
+                if try await accountService.login(username: username, password: password) {
+                    isLoggedIn = true
+                    dismiss()
+                } else {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 1, blendDuration: 0)) {
+                        isShowingError = true
+                    }
+                }
+            } catch {
                 withAnimation(.spring(response: 0.5, dampingFraction: 1, blendDuration: 0)) {
-                    isShowingError = true
+                    isShowingError = false
+                    isShowingNetworkError = true
                 }
             }
         }

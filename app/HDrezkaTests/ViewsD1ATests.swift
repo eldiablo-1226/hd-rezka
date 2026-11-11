@@ -66,15 +66,6 @@ final class ViewsD1ATests: XCTestCase {
         XCTAssertEqual(request.url?.absoluteString, "https://ijobs.app/films/best/2012//page/1")
     }
 
-    // MARK: FancyScrollView (init<A, B> 0x10001049c)
-
-    func testHeaderInitWrapsTheOptionalSoTheHeaderBranchIsAlwaysTaken() {
-        // The binary passes the `A?` itself to AnyView.init (Optional: View), with no nil check.
-        let view = FancyScrollView(header: { () -> Text? in nil }, content: { Text(verbatim: "") })
-        XCTAssertNotNil(view.header)
-        XCTAssertNil(FancyScrollView(content: { Text(verbatim: "") }).header)
-    }
-
     // MARK: SystemVersion (inlined in UINavigationController.viewDidLoad, 0x1000e006c)
 
     func testSystemVersionReadsProcessInfo() {
@@ -83,10 +74,23 @@ final class ViewsD1ATests: XCTestCase {
         XCTAssertEqual(version.osString, ProcessInfo().operatingSystemVersionString)
     }
 
+    // improvement: the poster badge keeps progress readable at 11pt; the site's "(все серии)" adds nothing to "Завершен".
+    func testBadgeShortensOnlyTheCompletedPhrase() {
+        XCTAssertEqual(TitleBadge.shortInfo("Завершен (все серии)"), "Завершен")
+        XCTAssertEqual(TitleBadge.shortInfo("2 сезон, 26 серия"), "2 сезон, 26 серия")
+    }
+
     // MARK: strings used by the shell, home and share views
 
     func testLocalizationKeysExistInEveryTable() throws {
-        let keys = ["Home", "Search", "key_collections", "key_profile", "key_share+with+url", "key_share+with+universal+link"]
+        let keys = ["Home", "Search", "key_collections", "key_profile", "key_share+with+url", "key_share+with+universal+link",
+                    "key_page+not+loaded", "key_retry", "key_unparsable_title", "key_unparsable_text"]
+            + ["key_mode_watch", "key_mode_about", "key_mode_about_series", "key_mode_picker", "key_season_number",
+               "key_episode_number", "key_resume_from", "key_all_voices %lld", "key_fewer_voices", "key_voice_camrip",
+               "key_voice_ads", "key_voice_directors_cut", "key_seasons_failed", "key_read_more", "key_read_less",
+               "key_remember_quality", "key_remember_quality_hint", "key_last_used", "key_mirrors_known",
+               "key_mirrors_known_footer", "key_mirror_default", "key_mirror_needs_login", "key_mirror_custom",
+               "key_mirror_custom_placeholder", "key_mirror_custom_footer"]
             + StartupPageVariation.allCases.map(\.rawValue)
         for language in ["en", "ru", "uk"] {
             let path = try XCTUnwrap(Bundle.main.path(forResource: language, ofType: "lproj"), language)

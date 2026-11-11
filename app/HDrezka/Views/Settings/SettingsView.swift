@@ -1,6 +1,8 @@
 import SwiftUI
 
-/// Settings root: links to the sub-pages, the debug page once unlocked, and the Telegram channel (0x100057b94).
+/// Settings root: links to the sub-pages (0x100057b94).
+/// improvement: no «О приложении» (the original developers' credits and the debug unlock), no debug page and no link to
+/// the original app's Telegram channel: this build carries nothing of the decompiled app's authorship.
 struct SettingsView: View {
     @Binding var settingStore: String
     @Binding var remoteVersion: String
@@ -10,16 +12,17 @@ struct SettingsView: View {
     @Binding var shareMenuVariation: ShareMenuVariation
     @Binding var startupPageVariation: StartupPageVariation
     @Binding var backgroundUrlSession: Bool
-    @Binding var allowDebug: Bool
     @Binding var autoplayNextEpisode: Bool
     @Binding var preferredQuality: PlayerQualityPreference
     @Binding var saveHistory: Bool
     @Binding var preferOriginalTitle: Bool
     @Binding var downloadDestination: DownloadDestination
-    @Environment(\.openURL) var openURL
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @State var isConfirmingLogout: Bool = false
 
     var body: some View {
-        NavigationStack {
+        // improvement: no NavigationStack of its own; the screen is pushed onto Profile's stack.
+        Group {
             VStack {
                 Form {
                     Section {
@@ -43,25 +46,38 @@ struct SettingsView: View {
                                 downloadDestination: $downloadDestination)) {
                             Label("key_behavior", systemImage: "slider.horizontal.3")
                         }
-                        NavigationLink(destination: AboutUsView(allowDebug: $allowDebug)) {
-                            Label("about_app_settings", systemImage: "heart")
-                        }
-                        if allowDebug {
-                            NavigationLink(destination: DebugSettingsView(mirror: $settingStore, allowDebug: $allowDebug)) {
-                                // Not localized: the binary uses the StringProtocol initializer.
-                                Label("Debug" as String, systemImage: "gear.badge.xmark")
+                        // improvement: the mirror outside the debug page; the error screens open the same view.
+                        NavigationLink(destination: MirrorSettingsView()) {
+                            LabeledContent {
+                                Text(settingStore)
+                            } label: {
+                                Label("key_mirror", systemImage: "network")
                             }
                         }
-                        Button {
-                            openURL(URL(string: "https://t.me/apphdrios")!)
-                        } label: {
-                            Label("key_telegram+channel", systemImage: "paperplane")
+                    }
+                    // improvement: logout here, at the end, instead of the first icon of the Profile toolbar.
+                    if isLoggedIn {
+                        Section {
+                            Button("key_logout", role: .destructive) {
+                                isConfirmingLogout = true
+                            }
+                            .confirmationDialog("key_logout_description", isPresented: $isConfirmingLogout, titleVisibility: .visible) {
+                                Button("key_logout", role: .destructive) {
+                                    // The session cookie is dropped by the site's answer to GET /logout;
+                                    // the binary does no cookie work of its own (no HTTPCookieStorage use outside Alamofire).
+                                    Task {
+                                        try? await AccountService().logout()
+                                    }
+                                    isLoggedIn = false
+                                }
+                            }
                         }
                     }
                 }
                 Spacer()
             }
             .ignoresSafeArea(.all, edges: .bottom)
+            .navigationTitle("key_settings")
         }
     }
 }

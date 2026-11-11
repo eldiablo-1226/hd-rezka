@@ -23,7 +23,7 @@ struct PremiumUnavailableView: View {
             }
             .buttonStyle(.bordered)
             .padding(.horizontal, 12)
-            .tint(.purple)
+            // improvement: the app accent instead of `.tint(.purple)`.
             .padding(.bottom, 6)
             Text("key_this+premium+acting+caption")
                 .font(.caption)

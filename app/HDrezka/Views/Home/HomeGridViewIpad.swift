@@ -9,14 +9,32 @@ struct HomeGridViewIpad: View {
     @Binding var id: String
     // Default as at the construction site in HomeViewIpad (0x1000579ac).
     @State var page: Int = 0
+    @State var refreshCount = 0
 
     var body: some View {
         NavigationStack {
             ScrollView(.vertical, showsIndicators: true) {
-                TitleGridComponentIpad(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], page: $page)
-                    .onLoad { page = 1 }
+                VStack {
+                    ContinueWatchingRow(refreshToken: refreshCount)
+                    TitleGridComponentIpad(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], page: $page)
+                        .onLoad { page = 1 }
+                }
             }
             .navigationTitle(LocalizedStringKey(startupPageVariation.rawValue))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { HomeView.listingMenu($startupPageVariation) }
+            }
+            .onChange(of: startupPageVariation) { variation in
+                network.movies.removeAll()
+                HomeView.refresh(network, page: $page, variation: variation)
+            }
+            // improvement: pull to refresh, as on the phone (HomeView.refresh).
+            .refreshable {
+                refreshCount += 1
+                HomeView.refresh(network, page: $page, variation: startupPageVariation)
+                await network.nextPageArrival()
+            }
+            .refreshFailureNotice(network)
             .onChange(of: page) { _ in
                 Task {
                     try await network.fetchMovies(page: page, filter: HomeView.filter(for: startupPageVariation))

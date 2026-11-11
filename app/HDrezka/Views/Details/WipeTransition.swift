@@ -5,6 +5,8 @@ extension AnyTransition {
     /// Every LazyImage call site of the original inlines this as
     /// `.asymmetric(insertion: .wipe(angle: .degrees(45), blurRadius: 10), removal: .wipe(angle: .degrees(225), blurRadius: 10))`.
     static func wipe(angle: Angle, blurRadius: CGFloat) -> AnyTransition {
+        // improvement: with Reduce Motion a poster fades in instead of wiping across with a blur.
+        if UIAccessibility.isReduceMotionEnabled { return .opacity }
         var radius = blurRadius > 30 ? 30 : blurRadius
         radius = radius >= 0 ? radius : 0
         return .modifier(active: Wipe(angle: angle, animatableData: AnimatablePair(0, radius)),

@@ -8,7 +8,8 @@ struct PlayerSettingsView: View {
     @Binding var preferredQuality: PlayerQualityPreference
 
     var body: some View {
-        NavigationStack {
+        // improvement: no NavigationStack of its own; the screen is pushed onto Profile's stack.
+        Group {
             VStack {
                 Form {
                     Section(header: Label("key_safe_area_header", systemImage: "iphone"),

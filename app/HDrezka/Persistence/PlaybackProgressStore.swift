@@ -68,6 +68,15 @@ final class PlaybackProgressStore {
         }
     }
 
+    /// improvement: whether any voice acting or episode of the title has a saved position ("<id>|…" keys); the page
+    /// then opens on its «Смотреть» half.
+    func hasProgress(forTitle id: String) -> Bool {
+        let request = NSFetchRequest<NSManagedObject>(entityName: entityName)
+        request.predicate = NSPredicate(format: "key BEGINSWITH %@", id + "|")
+        request.fetchLimit = 1
+        return ((try? container.viewContext.count(for: request)) ?? 0) > 0
+    }
+
     func time(forKey key: String) -> Double? {
         guard let object = (try? container.viewContext.fetch(request(forKey: key)))?.first else { return nil }
         return object.value(forKey: "time") as? Double

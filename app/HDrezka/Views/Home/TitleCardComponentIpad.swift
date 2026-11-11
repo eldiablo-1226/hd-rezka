@@ -5,6 +5,8 @@ import NukeUI
 struct TitleCardComponentIpad: View {
     var model: MovieSimple
     @State var isAnimated: Bool = false
+    // improvement: the text block grows with Dynamic Type (1.6.0: a fixed 65pt).
+    @ScaledMetric(relativeTo: .body) var textHeight: CGFloat = 65
 
     var body: some View {
         VStack {
@@ -25,7 +27,7 @@ struct TitleCardComponentIpad: View {
                                 .rotationEffect(.degrees(30), anchor: .center)
                                 .offset(x: isAnimated ? 120 : -120)
                                 .blur(radius: 15)
-                                .animation(.easeOut.repeatForever(autoreverses: false).speed(0.2), value: isAnimated)
+                                .animation(UIAccessibility.isReduceMotionEnabled ? nil : .easeOut.repeatForever(autoreverses: false).speed(0.2), value: isAnimated)
                         }
                         .onAppear { withAnimation { isAnimated = true } }
                         .transition(.asymmetric(insertion: .wipe(angle: .degrees(45), blurRadius: 10), removal: .wipe(angle: .degrees(225), blurRadius: 10)))
@@ -33,17 +35,22 @@ struct TitleCardComponentIpad: View {
             }
             .scaledToFill()
             .frame(width: 164, height: 247)
-            .clipShape(RoundedRectangle(cornerRadius: 8), style: FillStyle())
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster), style: FillStyle())
+            .overlay(alignment: .bottomLeading) {
+                TitleBadge(entity: model.entity, info: model.info)
+                    .padding(DesignTokens.space4)
+            }
             VStack(alignment: .leading) {
                 Text(model.name)
                     .font(.body)
                     .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                 Text(model.details)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
-            .frame(width: 163, height: 65, alignment: .topLeading)
+            .frame(width: 163, height: textHeight, alignment: .topLeading)
             .frame(maxWidth: .infinity)
         }
     }

@@ -99,7 +99,7 @@ final class MovieDetailsParserTests: XCTestCase {
         XCTAssertEqual(d.seasons?.count, 10)
         XCTAssertEqual(d.voiceActing?.count, 6)
         XCTAssertEqual(d.schedule?.count, 10)
-        XCTAssertEqual(d.voiceActingRating?.count, 1)
+        XCTAssertEqual(d.voiceActingRating?.count, 6, "one popularity row per voice acting (1.6.0 joined them into one)")
         XCTAssertNil(d.franchise)
         XCTAssertEqual(d.commentsCount, 272)
     }
@@ -110,6 +110,102 @@ final class MovieDetailsParserTests: XCTestCase {
         XCTAssertNil(d.seasons)
         XCTAssertNil(d.voiceActing)
         XCTAssertEqual(d.schedule?.count, 10)
+    }
+
+    // MARK: Unusual pages (a fixture with one block removed): a throw ends in the details Retry state, the rest falls back
+
+    private func parsed(_ html: String, movieId: String = "205") throws -> MovieDetailed {
+        try XCTUnwrap(MovieDetailsParser().parseMovieDetails(html: html, movieId: movieId).first)
+    }
+
+    func testPageWithoutMovieBlockOrTitleThrows() throws {
+        let noMain = try film.replacingOccurrences(of: #"class="b-content__main""#, with: #"class="gone""#)
+        let noTitle = try series.replacingOccurrences(of: #"class="b-post__title""#, with: #"class="gone""#)
+        let parser = MovieDetailsParser()
+        XCTAssertThrowsError(try parser.parseMovieDetails(html: noMain, movieId: "205"))
+        XCTAssertThrowsError(try parser.parseMovieDetails(html: noTitle, movieId: "1605"))
+        XCTAssertTrue(parser.movieDetailed.isEmpty, "a failed parse appends nothing")
+    }
+
+    func testPlayablePageWithoutVoiceActingThrows() throws {
+        // No translator list and no initCDN*Events call: nothing to play, and the play/download sheets index into voiceActing.
+        let noActing = try film.replacingOccurrences(of: #"id="translators-list""#, with: #"id="no-list""#)
+            .replacingOccurrences(of: "initCDNMoviesEvents", with: "initCDNOtherEvents")
+        let playable = noActing.replacingOccurrences(of: "b-player__restricted", with: "b-player__open")
+        XCTAssertThrowsError(try MovieDetailsParser().parseMovieDetails(html: playable, movieId: "205"))
+        XCTAssertNil(try parsed(noActing).voiceActing, "a restricted page never reads voice actings")
+    }
+
+    func testPageWithoutGenresHasNone() throws {
+        let d = try parsed(film.replacingOccurrences(of: "<h2>Жанр</h2>", with: "<h2>Жанры</h2>"))
+        XCTAssertTrue(d.genres.isEmpty)
+        XCTAssertEqual(d.country, "США")
+    }
+
+    func testPageWithoutSidecoverOrDescriptionFallsBackToEmpty() throws {
+        let noCover = try parsed(film.replacingOccurrences(of: #"class="b-sidecover""#, with: #"class="gone""#))
+        XCTAssertEqual(noCover.poster, "")
+        XCTAssertEqual(noCover.hPoster, "")
+        XCTAssertEqual(noCover.nameRussian, "Голодные игры")
+        let noText = try parsed(series.replacingOccurrences(of: #"class="b-post__description""#, with: #"class="gone""#), movieId: "1605")
+        XCTAssertEqual(noText.description, "")
+        XCTAssertEqual(noText.duration, "42 мин.")
+    }
+
+    func testRatingLinkWithoutHelpWrapperIsKept() throws {
+        let html = try film.replacingOccurrences(of: "/help/aHR0cHMlM0ElMkYlMkZ3d3cuaW1kYi5jb20lMkZ0aXRsZSUyRnR0MTM5MjE3MCUyRg==/",
+                                                 with: "https://www.imdb.com/title/tt1392170/")
+        let d = try parsed(html)
+        XCTAssertEqual(d.imdbRating?.value, 7.2)
+        XCTAssertEqual(d.imdbRating?.link, "https://www.imdb.com/title/tt1392170/")
+        XCTAssertEqual(d.kpRating?.link, "https://www.kinopoisk.ru/film/468581/")
+    }
+
+    func testMovieListEntryWithoutPositionOrLink() throws {
+        // The position is never shown, so an entry without "(N место)" keeps its link with position 0;
+        // an entry without a link has nothing to open and is dropped.
+        let noPosition = try parsed(film.replacingOccurrences(of: " (19 место)", with: ""))
+        XCTAssertEqual(noPosition.lists?.count, 6)
+        XCTAssertEqual(noPosition.lists?.first?.name, "Лучшие боевики 2012 года")
+        XCTAssertEqual(noPosition.lists?.first?.moviePosition, 0)
+        XCTAssertEqual(try parsed(film.replacingOccurrences(of: "(19 место)", with: "(новинка)")).lists?.first?.moviePosition, 0)
+        let noLink = try parsed(film.replacingOccurrences(of: #"<a href="https://hdrezka.ag/films/best/action/2012/">Лучшие боевики 2012 года</a>"#,
+                                                          with: "Лучшие боевики 2012 года"))
+        XCTAssertEqual(noLink.lists?.count, 5)
+        XCTAssertEqual(noLink.lists?.last?.moviePosition, 140)
+    }
+
+    func testInfoRowsWithoutTheirMarkupFallBack() throws {
+        let noAgeSpan = try parsed(film.replacingOccurrences(of: #"<span class="bold" style="color: #666;">12+</span>"#, with: "12+"))
+        XCTAssertEqual(noAgeSpan.ageRestriction, "0+", "the default of a page without the row")
+        let noHolder = try parsed(film.replacingOccurrences(of: #"<h2>Режиссер</h2>:</td> <td> <div class="persons-list-holder">"#,
+                                                            with: #"<h2>Режиссер</h2>:</td> <td> <div class="gone">"#))
+        XCTAssertNil(noHolder.producer)
+        XCTAssertEqual(noHolder.actors?.first?.name, "Дженнифер Лоуренс")
+        // the "Дата выхода" row without its value cell
+        let oneCell = try parsed(film.replacingOccurrences(of: #"<td>12 марта <a href="https://hdrezka.ag/year/2012/">2012 года</a></td>"#, with: ""))
+        XCTAssertNil(oneCell.releaseDate)
+        XCTAssertEqual(oneCell.country, "США")
+        let noTable = try parsed(film.replacingOccurrences(of: #"class="b-post__info""#, with: #"class="gone""#))
+        XCTAssertEqual(noTable.duration, "nil")
+        XCTAssertEqual(noTable.ageRestriction, "0+")
+        XCTAssertTrue(noTable.genres.isEmpty)
+        XCTAssertNil(noTable.imdbRating)
+        XCTAssertNil(noTable.actors)
+    }
+
+    func testSeasonWithoutEpisodeListFallsBack() throws {
+        // A tab whose episode list is missing keeps its season with no episodes (the sheets handle an empty list).
+        let html = try series.replacingOccurrences(of: "b-player__restricted", with: "b-player__open")
+            .replacingOccurrences(of: #"id="simple-episodes-list-3""#, with: #"id="gone""#)
+        let seasons = try XCTUnwrap(parsed(html, movieId: "1605").seasons)
+        XCTAssertEqual(seasons.map { $0.episodes.count }, [24, 23, 0, 22, 25, 25, 25, 25, 25, 22])
+        // No season tabs and no episodes: no seasons. An episode naming a season without a list: that season is empty.
+        let noEpisodes = try series.replacingOccurrences(of: #"id="simple-seasons-tabs""#, with: #"id="no-tabs""#)
+            .replacingOccurrences(of: "b-simple_episode__item", with: "gone")
+        XCTAssertNil(try SwiftSoup.parse(noEpisodes).getSeasons())
+        let mismatch = #"<div id="simple-episodes-tabs"><ul id="simple-episodes-list-1"><li class="b-simple_episode__item" data-season_id="2" data-episode_id="1">Серия 1</li></ul></div>"#
+        XCTAssertEqual(try SwiftSoup.parse(mismatch).getSeasons()?.map { $0.episodes.count }, [0])
     }
 
     // MARK: Document extensions
@@ -169,7 +265,7 @@ final class MovieDetailsParserTests: XCTestCase {
         XCTAssertEqual(actings.map(\.translatorId), ["1", "232", "359", "389", "392", "420"])
         XCTAssertEqual(actings[0], MovieVoiceActing(id: "1605", name: "лостфильм (LostFilm)", translatorId: "1", isCamrip: "",
                                                     isAds: "", isDirector: "", isSelected: true, isPremium: false, url: nil))
-        XCTAssertEqual(actings[2].name, "Украинский многоголосый 🇺🇦")
+        XCTAssertEqual(actings[2].name, "Украинский многоголосый\u{00A0}🇺🇦")
         XCTAssertFalse(actings[1].isSelected)
     }
 
@@ -178,7 +274,7 @@ final class MovieDetailsParserTests: XCTestCase {
         XCTAssertEqual(actings.map(\.translatorId), ["56", "58", "358", "389", "581", "432", "238"])
         XCTAssertEqual(actings[0], MovieVoiceActing(id: "205", name: "Дубляж", translatorId: "56", isCamrip: "0", isAds: "0",
                                                     isDirector: "0", isSelected: true, isPremium: false, url: nil))
-        XCTAssertEqual(actings[2].name, "Украинский дубляж 🇺🇦")
+        XCTAssertEqual(actings[2].name, "Украинский дубляж\u{00A0}🇺🇦")
     }
 
     func testVoiceActingFromPlayerArgumentsWhenNoList() throws {
@@ -217,13 +313,15 @@ final class MovieDetailsParserTests: XCTestCase {
         XCTAssertNil(try SwiftSoup.parse(series).getFranchise())
     }
 
-    func testVoiceActingRatingIsOneEntryForAllRows() throws {
-        // The original maps the whole div.inner list at once, so every row ends up in a single entry.
+    func testVoiceActingRatingHasOneEntryPerRow() throws {
+        // improvement: one entry per row of the popularity tooltip; the original mapped the whole div.inner list at
+        // once, so every row ended up in a single entry with percent 0. The page's voice acting rows show these shares.
         let ratings = try XCTUnwrap(SwiftSoup.parse(series).getVoiceActingRating())
-        XCTAssertEqual(ratings.count, 1)
-        XCTAssertTrue(ratings[0].name.hasPrefix("лостфильм (LostFilm) Украинский (ТРК Украина)"), ratings[0].name)
-        XCTAssertTrue(ratings[0].name.hasSuffix(" 🇺🇦"), ratings[0].name)
-        XCTAssertEqual(ratings[0].percent, 0)
+        XCTAssertEqual(ratings.map(\.name), ["лостфильм (LostFilm)", "Украинский (ТРК Украина)\u{00A0}🇺🇦", "Украинский многоголосый\u{00A0}🇺🇦",
+                                             "Украинский (1+1)\u{00A0}🇺🇦", "Украинский (НТН)\u{00A0}🇺🇦", "TVShows"])
+        XCTAssertEqual(ratings[0].percent, 98.49, accuracy: 0.001)
+        XCTAssertEqual(ratings[2].percent, 0.4, accuracy: 0.001)
+        XCTAssertEqual(ratings[5].percent, 0.08, accuracy: 0.001)
         XCTAssertNil(try SwiftSoup.parse(film).getVoiceActingRating())
 
         let single = #"<span class="b-rgstats__help" title="&lt;div class=&quot;inner&quot;&gt;&lt;div class=&quot;title&quot;&gt;Дубляж&lt;/div&gt;&lt;div class=&quot;count&quot;&gt;98,49%&lt;/div&gt;&lt;/div&gt;">?</span>"#

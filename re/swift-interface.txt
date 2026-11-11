@@ -1,0 +1,932 @@
+struct HDrezka.(private).DownloadRow : View {
+    let download: Download
+    let onTap: ()
+}
+enum HDrezka.(private).Field : Equatable, Hashable {
+    case username
+    case password
+}
+enum HDrezka.(private).Field : Equatable, Hashable {
+    case email
+    case username
+    case password
+    case confirmPassword
+}
+struct HDrezka.(private).IndexInfo<generic> : Equatable, Hashable {
+    let index: A
+    let id: KeyPath<B, C>
+    let element: B
+}
+struct HDrezka.(private).InfoTabDemoView : View {
+    var _showVotesCount: Binding<Bool>
+}
+struct HDrezka.(private).NavigationConfigurator : UIViewControllerRepresentable, View {
+}
+struct HDrezka.(private).NavigationConfigurator : UIViewControllerRepresentable, View {
+    let hidden: Bool
+}
+class HDrezka.(private).NavigationConfigurator.Coordinator : NSObject {
+    var navigationController: weak UINavigationController?
+    var originalDelegate: weak UIGestureRecognizerDelegate?
+}
+class HDrezka.(private).NavigationConfigurator.Coordinator : NSObject {
+    var navigationController: weak UINavigationController?
+}
+class HDrezka.(private).ResourceBundleClass {
+}
+struct HDrezka.(private).Sparkle : View {
+    let gradient: LinearGradient
+    let size: CGFloat
+    let x: CGFloat
+    let y: CGFloat
+    let duration: Double
+    let delay: Double
+    var _on: State<Bool>
+}
+struct HDrezka.(private).Wipe : Animatable, AnimatableModifier, ViewModifier {
+    var angle: Angle
+    var animatableData: 7SwiftUI14AnimatablePairVy12CoreGraphics7CGFloatVABG
+}
+struct HDrezka.AboutUsView : View {
+    var _allowDebug: Binding<Bool>
+    let appVersion: String?
+    let buildVerison: String?
+}
+struct HDrezka.AccountCardViewComponent : View {
+    var name: LocalizedStringKey
+    var desc: LocalizedStringKey
+    var image: String
+}
+class HDrezka.AccountNetwork {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+}
+class HDrezka.AccountParser : ObservableObject {
+    var _watchingLaterMovies: Published<[MovieWatchLater]>
+    var _seriesUpdates: Published<[SeriesUpdateGroup]>
+}
+class HDrezka.AccountService {
+    var network: Network
+}
+class HDrezka.AppDelegate : NSObject {
+    var backgroundCompletionHandler: (())?
+}
+struct HDrezka.AppearanceSettingsView : View {
+    var _showVotesCount: Binding<Bool>
+    var _preferOriginalTitle: Binding<Bool>
+}
+struct HDrezka.AppleMusicStyleScrollView : View {
+    let content: AnyView
+    var _offset: State<CGFloat>
+}
+struct HDrezka.AutoplayContext {
+    let movieId: String
+    let voiceActing: MovieVoiceActing
+    let season: MovieSeason
+    let currentEpisode: MovieEpisode
+    let qualityName: String
+}
+enum HDrezka.Availability : Equatable, Hashable {
+    case AVAILABLE_ON_REZKA
+    case UNAVAILABLE
+}
+struct HDrezka.BackButton : View {
+    let color: Color
+    var _presentationMode: Environment<Binding<PresentationMode>>
+    var _hasBeenShownAtLeastOnce: State<Bool>
+}
+struct HDrezka.BehaviorSettingsView : View {
+    var _backgroundUrlSession: Binding<Bool>
+    var _saveHistory: Binding<Bool>
+    var _shareMenuVariation: Binding<ShareMenuVariation>
+    var _startupPageVariation: Binding<StartupPageVariation>
+    var _downloadDestination: Binding<DownloadDestination>
+    var _downloadManager: EnvironmentObject<DownloadManager>
+}
+struct HDrezka.BlurView : UIViewRepresentable, View {
+}
+struct HDrezka.Bookmark : Equatable, Hashable {
+    let id: Int
+    var name: String
+}
+struct HDrezka.BookmarkListGridComponent : View {
+    var _network: EnvironmentObject<Network>
+    var _page: Binding<Int>
+}
+struct HDrezka.BookmarkMovieListView : View {
+    var accountService: AccountService
+    var name: String
+    var id: Int
+    var _page: State<Int>
+}
+struct HDrezka.BookmarksSelectionListViewComponent : View {
+    var _isLoggedIn: AppStorage<Bool>
+    var _bookmarks: Binding<[Bookmark : Bool]>
+}
+struct HDrezka.BookmarksView : View {
+    var _bookmarks: State<[Bookmark]>
+    var _selectedBookmark: State<Bookmark>
+    var _isPresentedAdd: State<Bool>
+    var _isPresentedRename: State<Bool>
+    var _newIndex: State<Int>
+    var _name: State<String>
+    var _newName: State<String>
+}
+struct HDrezka.Collection : Equatable, Identifiable {
+    let id: String
+    let name: String
+    let poster: String
+    let count: Int
+}
+struct HDrezka.CollectionsCardViewComponent : View {
+    var collection: Collection
+    var _isAnimated: State<Bool>
+}
+struct HDrezka.CollectionsCardViewComponentIpad : View {
+    var collection: Collection
+    var _isAnimated: State<Bool>
+}
+struct HDrezka.CollectionsListViewComponent : View {
+    let columns: [GridItem]
+    var _page: State<Int>
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+    var _collectionsParser: EnvironmentObject<CollectionsParser>
+}
+struct HDrezka.CollectionsListViewComponentIpad : View {
+    let columns: [GridItem]
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+    var _collectionsParser: EnvironmentObject<CollectionsParser>
+}
+struct HDrezka.CollectionsMovieListViewComponent : View {
+    let columns: [GridItem]
+    var id: String
+    var name: String
+    var _collectionsParser: EnvironmentObject<CollectionsParser>
+}
+struct HDrezka.CollectionsMovieListViewComponentIpad : View {
+    let columns: [GridItem]
+    var _collectionsParser: EnvironmentObject<CollectionsParser>
+    var name: String
+    var id: String
+}
+class HDrezka.CollectionsNetwork {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+}
+class HDrezka.CollectionsParser : ObservableObject {
+    var _collections: Published<[Collection]>
+    var _moviesInCollections: Published<[MovieSimple]>
+}
+struct HDrezka.CollectionsView : View {
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+}
+struct HDrezka.CollectionsViewIpad : View {
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+}
+struct HDrezka.ContentView : View {
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+}
+struct HDrezka.ContentViewIpad : View {
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+}
+struct HDrezka.CoverData : Identifiable {
+    let body: String
+    let actingName: String
+    let subtitles: [MovieSubtitles]
+    let progressKey: String?
+    let autoplay: AutoplayContext?
+}
+class HDrezka.CustomAVAssetResourceLoaderDelegate : NSObject {
+    let fragmentsScheme: String
+    let subtitlesScheme: String
+    let extInfPrefix: String
+    var m3u8: URL
+    var subtitles: [MovieSubtitles]
+    var m3u8String: String?
+    var playlistDuration: Double
+}
+class HDrezka.CustomAVPlayer : AVPlayer {
+    var loaderQueue: OS_dispatch_queue
+    var delegate: CustomAVAssetResourceLoaderDelegate
+}
+struct HDrezka.DebugSettingsView : View {
+    var _mirror: Binding<String>
+    var _allowDebug: Binding<Bool>
+    var _title: State<String>
+    var _text: State<String>
+}
+struct HDrezka.DetailsView : View {
+    var id: String
+}
+struct HDrezka.DetailsViewComponent : View {
+    var id: String
+    var _detailsNetwork: EnvironmentObject<MovieDetailsParser>
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _preferOriginalTitle: AppStorage<Bool>
+    var _bookmarks: State<[Bookmark : Bool]>
+    var _isPresentedScheduleSheet: State<Bool>
+    var _isPresentedPlaySheet: State<Bool>
+    var _isPresentedDownloadSheet: State<Bool>
+    var _isPresentedMoreSheet: State<Bool>
+    var _isPresentedBookmarksSheet: State<Bool>
+    var _isPresentedPersonInfoView: State<Bool>
+    var _isPresentedList: State<Bool>
+    var _video: State<String>
+    var _coverData: State<CoverData?>
+    var _trailer: State<String?>
+    var _personId: State<String>
+    var _listData: State<MovieList>
+    var _innerHeight: State<CGFloat>
+    var _outerHeight: State<CGFloat>
+    var _isAnimated: State<Bool>
+}
+struct HDrezka.DetailsViewComponentIpad : View {
+    var id: String
+    var _detailsNetwork: EnvironmentObject<MovieDetailsParser>
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _preferOriginalTitle: AppStorage<Bool>
+    var _bookmarks: State<[Bookmark : Bool]>
+    var _isPresentedScheduleSheet: State<Bool>
+    var _isPresentedPlaySheet: State<Bool>
+    var _isPresentedDownloadSheet: State<Bool>
+    var _isPresentedMoreSheet: State<Bool>
+    var _isPresentedBookmarksSheet: State<Bool>
+    var _isPresentedPersonInfoView: State<Bool>
+    var _isPresentedList: State<Bool>
+    var _video: State<String>
+    var _coverData: State<CoverData?>
+    var _trailer: State<String?>
+    var _personId: State<String>
+    var _listData: State<MovieList>
+    var _isAnimated: State<Bool>
+    var _dismiss: Environment<DismissAction>
+}
+struct HDrezka.Download : Decodable, Encodable, Equatable, Hashable, Identifiable {
+    let id: UUID
+    var title: String
+    var subtitle: String
+    var poster: String
+    var quality: String
+    var sourceURL: String
+    var fileName: String
+    var state: DownloadState
+    var createdAt: Date
+    var destination: DownloadDestination
+    var receivedBytes: Int64
+    var totalBytes: Int64
+}
+enum HDrezka.Download.(private).CodingKeys : CodingKey, CustomDebugStringConvertible, CustomStringConvertible, Equatable, Hashable {
+    case id
+    case title
+    case subtitle
+    case poster
+    case quality
+    case sourceURL
+    case fileName
+    case state
+    case createdAt
+    case destination
+    case receivedBytes
+    case totalBytes
+}
+enum HDrezka.DownloadDestination : CaseIterable, Decodable, Encodable, Equatable, Hashable, Identifiable, RawRepresentable {
+    case app
+    case gallery
+    case files
+}
+class HDrezka.DownloadManager : NSObject, ObservableObject {
+    var _downloads: Published<[Download]>
+    var _useBackgroundSession: AppStorage<Bool>
+    let notification: UNUserNotificationCenter
+    let fileManager: NSFileManager
+    var $__lazy_storage_$_defaultSession: NSURLSession?
+    var $__lazy_storage_$_backgroundSession: NSURLSession?
+    var tasks: [UUID : NSURLSessionDownloadTask]
+    let tasksLock: NSLock
+    let storageQueue: OS_dispatch_queue
+    var lastProgressPersist: [UUID : Date]
+}
+struct HDrezka.DownloadParamsSheet : View {
+    var id: String
+    var name: String
+    var poster: String
+    var voiceActing: [MovieVoiceActing]?
+    var _movieVideo: State<[Quality]>
+    var _video: State<String>
+    var _seasons: State<[MovieSeason]?>
+    var _selectedActing: State<MovieVoiceActing>
+    var _selectedSeason: State<MovieSeason>
+    var _selectedEpisode: State<MovieEpisode>
+    var _detailService: EnvironmentObject<MovieDetailsService>
+    var _downloadManager: EnvironmentObject<DownloadManager>
+    var _downloadDestination: AppStorage<DownloadDestination>
+}
+enum HDrezka.DownloadState : Decodable, Encodable, Equatable, Hashable, RawRepresentable {
+    case downloading
+    case paused
+    case completed
+    case failed
+}
+struct HDrezka.DownloadsView : View {
+    var _downloadManager: EnvironmentObject<DownloadManager>
+    var _playing: State<Download?>
+}
+struct HDrezka.FancyScrollView : View {
+    let title: String
+    let titleColor: Color
+    let headerHeight: CGFloat
+    let scrollUpHeaderBehavior: ScrollUpHeaderBehavior
+    let scrollDownHeaderBehavior: ScrollDownHeaderBehavior
+    let header: AnyView?
+    let content: AnyView
+}
+struct HDrezka.ForEachWithIndex<generic> : DynamicViewContent, View {
+    var data: A
+    var content: (_:_:)
+    var id: KeyPath<A.Sequence.Element, B>
+}
+struct HDrezka.FranchiseRowView : View {
+    var item: MovieFranchisePart
+}
+struct HDrezka.HDRezkaApp : App {
+    var _delegate: UIApplicationDelegateAdaptor<AppDelegate>
+    var _isPresented: State<Bool>
+    var _id: State<String>
+    var _downloadManager: StateObject<DownloadManager>
+    var network: Network
+}
+struct HDrezka.HeaderScrollView : View {
+    var _colorScheme: Environment<ColorScheme>
+    let title: String
+    let titleColor: Color
+    let headerHeight: CGFloat
+    let scrollUpBehavior: ScrollUpHeaderBehavior
+    let scrollDownBehavior: ScrollDownHeaderBehavior
+    let header: AnyView
+    let content: AnyView
+}
+struct HDrezka.HeaderScrollViewTitle : View {
+    let title: String
+    let titleColor: Color
+    let height: CGFloat
+    let largeTitle: Double
+}
+class HDrezka.HeaderUpdater {
+}
+struct HDrezka.HideNotchAnimatedViewComponent : View {
+    var _isAnimated: Binding<Bool>
+}
+struct HDrezka.HomeGridViewIpad : View {
+    var _settingStore: AppStorage<String>
+    var _startupPageVariation: AppStorage<StartupPageVariation>
+    var _network: EnvironmentObject<Network>
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+    var _page: State<Int>
+}
+struct HDrezka.HomeView : View {
+    var _remoteVersion: AppStorage<String>
+    var _startupPageVariation: AppStorage<StartupPageVariation>
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+    var _network: EnvironmentObject<Network>
+    var _scenePhase: Environment<ScenePhase>
+    var _page: State<Int>
+    var _connectedToVpn: State<Bool>
+    var _vpnPopup: State<Bool>
+}
+struct HDrezka.HomeViewIpad : View {
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+}
+struct HDrezka.InfoSheetViewComponent : View {
+    var id: String
+    var detail: MovieDetailed
+    var trailer: String?
+    var _dismiss: Environment<DismissAction>
+    var _detailsNetwork: EnvironmentObject<MovieDetailsParser>
+    var _personId: Binding<String>
+    var _listData: Binding<MovieList>
+    var _isPresentedPersonInfo: Binding<Bool>
+    var _isPresentedList: Binding<Bool>
+    var _isPresentedMoreSheet: Binding<Bool>
+}
+struct HDrezka.InfoTabView : View {
+    var _showVotesCount: AppStorage<Bool>
+    var _openURL: Environment<OpenURLAction>
+    var detail: MovieDetailed
+}
+struct HDrezka.LogInView : View {
+    var _isLoggedIn: AppStorage<Bool>
+    var _username: State<String>
+    var _password: State<String>
+    var _isShowingError: State<Bool>
+    var _focused: FocusState<Field?>
+    var accountService: AccountService
+    var _dismiss: Environment<DismissAction>
+}
+struct HDrezka.MovieDetailed : Identifiable {
+    let id: String
+    let nameRussian: String
+    let nameOriginal: String?
+    let poster: String
+    let hPoster: String
+    let duration: String
+    let description: String
+    let releaseDate: String?
+    let country: String
+    let ageRestriction: String
+    let imdbRating: MovieRating?
+    let kpRating: MovieRating?
+    let genres: [MovieGenre]
+    let lists: [MovieList]?
+    let collections: [String : String]?
+    let schedule: [SeriesScheduleGroup]?
+    let franchise: [MovieFranchisePart]?
+    let producer: [PersonSimple]?
+    let actors: [PersonSimple]?
+    var ytTrailerLink: String?
+    let ytTrailerPreview: String?
+    let availability: Availability
+    let comingSoon: Bool
+    let voiceActing: [MovieVoiceActing]?
+    let singleVoiceActingName: String?
+    let voiceActingRating: [MovieVoiceActingRating]?
+    let seasons: [MovieSeason]?
+    let video: MovieVideo?
+    let bookmarks: [Bookmark : Bool]
+    let commentsCount: Int
+}
+class HDrezka.MovieDetailsParser : ObservableObject {
+    var _movieDetailed: Published<[MovieDetailed]>
+    var _movieSeason: Published<[MovieSeason]>
+}
+class HDrezka.MovieDetailsService : ObservableObject {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+}
+struct HDrezka.MovieEpisode : Equatable, Hashable {
+    let id: String
+    let name: String
+    let isSelected: Bool
+    let url: String?
+}
+struct HDrezka.MovieFranchisePart : Equatable, Hashable {
+    let id: String
+    let name: String
+    let year: String
+    let rating: Float?
+    let current: Bool
+    let position: Int
+}
+struct HDrezka.MovieGenre : Identifiable {
+    let id: String
+    let name: String
+}
+struct HDrezka.MovieList : Identifiable {
+    let id: String
+    let name: String
+    let moviePosition: Int
+}
+struct HDrezka.MovieListView : View {
+    var id: String
+    var name: String
+    var movieId: String
+    var _remoteVersion: AppStorage<String>
+    var _list: State<[MovieSimple]>
+    var _page: State<Int>
+    var _navId: State<String>
+    var _isPresentedMoreSheet: Binding<Bool>
+    var _network: EnvironmentObject<Network>
+}
+struct HDrezka.MovieRating {
+    let value: Float
+    let votesCount: String
+    let link: String
+}
+struct HDrezka.MovieSeason : Equatable, Hashable {
+    let id: String
+    let name: String
+    let episodes: [MovieEpisode]
+    let isSelected: Bool
+    let url: String?
+}
+struct HDrezka.MovieSimple : Equatable, Identifiable {
+    let id: String
+    let name: String
+    let details: String
+    let poster: String
+}
+struct HDrezka.MovieSubtitles : Equatable, Hashable {
+    let name: String
+    let link: String
+    let lang: String
+}
+struct HDrezka.MovieVideo : Equatable, Hashable {
+    let name: String
+    let _360p: String?
+    let _480p: String?
+    let _720p: String?
+    let _1080p: String?
+    let _1080pUltra: String?
+    let _1440p: String?
+    let _2160p: String?
+    let subtitles: [MovieSubtitles]?
+    let position: Int
+}
+struct HDrezka.MovieVoiceActing : Equatable, Hashable {
+    let id: String
+    let name: String
+    let translatorId: String
+    let isCamrip: String
+    let isAds: String
+    let isDirector: String
+    let isSelected: Bool
+    let isPremium: Bool
+    let url: String?
+}
+struct HDrezka.MovieVoiceActingRating {
+    let name: String
+    let percent: Float
+}
+struct HDrezka.MovieWatchLater : Equatable, Hashable {
+    var id: String
+    var name: String
+    var details: String
+    var watchingInfo: String
+    var date: String
+    var buttonText: String?
+    var dataId: String
+}
+class HDrezka.Network : ObservableObject {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _movies: Published<[MovieSimple]>
+    var _bookmarks: Published<[MovieSimple]>
+    var _search: Published<[MovieSimple]>
+    var _quickSearch: Published<[SearchResult]>
+}
+class HDrezka.PeopleNetwork {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+}
+class HDrezka.PeopleParser {
+}
+class HDrezka.PeopleRepository {
+}
+struct HDrezka.PersonCardComponent : View {
+    var url: String
+    var job: String
+    var name: String
+    var description: LocalizedStringKey
+}
+struct HDrezka.PersonDetailed {
+    let nameRu: String
+    let nameOrig: String?
+    let photo: String
+    let career: String
+    let birthDate: String?
+    let birthPlace: String?
+    let deathDate: String?
+    let deathPlace: String?
+    let height: String?
+    let actorMovies: [MovieSimple]?
+    let directorMovies: [MovieSimple]?
+    let producerMovies: [MovieSimple]?
+    let screenwriterMovies: [MovieSimple]?
+    let operatorMovies: [MovieSimple]?
+    let editorMovies: [MovieSimple]?
+    let artistMovies: [MovieSimple]?
+}
+struct HDrezka.PersonGridComponent : View {
+    var movies: [MovieSimple]
+    var title: LocalizedStringKey
+    let columns: [GridItem]
+}
+struct HDrezka.PersonPosterView : View {
+    var _isAnimated: State<Bool>
+    var url: String
+}
+struct HDrezka.PersonSimple : Identifiable {
+    let id: String
+    let name: String
+}
+struct HDrezka.PersonView : View {
+    var id: String
+    var _personDetails: State<PersonDetailed?>
+    var _isNavigated: State<Bool>
+    var _isPresentedMoreSheet: Binding<Bool>
+}
+struct HDrezka.PesonHorizontalGrid : View {
+    var movies: [MovieSimple]
+    var title: LocalizedStringKey
+    var _isNavigated: Binding<Bool>
+}
+class HDrezka.PlaybackProgressStore {
+    let entityName: String
+    let container: NSPersistentContainer
+}
+enum HDrezka.PlayerQualityPreference : CaseIterable, Equatable, Hashable, Identifiable, RawRepresentable {
+    case ask
+    case p360
+    case p480
+    case p720
+    case p1080
+    case p1080Ultra
+    case k2
+    case k4
+}
+struct HDrezka.PlayerSettingsView : View {
+    var _hideNotch: Binding<Bool>
+    var _useInfuse: Binding<Bool>
+    var _autoplayNextEpisode: Binding<Bool>
+    var _preferredQuality: Binding<PlayerQualityPreference>
+}
+struct HDrezka.PlayerViewComponent : UIViewControllerRepresentable, View {
+    var url: String
+    var subtitles: [MovieSubtitles]
+    var name: String
+    var voiceActing: String
+    var poster: String
+    var progressKey: String?
+    var autoplay: AutoplayContext?
+    var localFileURL: URL?
+}
+class HDrezka.PlayerViewComponent.Coordinator : NSObject {
+    var progressKey: String?
+    let movieName: String
+    var subtitle: String
+    let posterUrl: String
+    var autoplay: AutoplayContext?
+    var player: AVPlayer?
+    var controller: weak AVPlayerViewController?
+    var timeObserver: Any?
+    var statusObservation: NSKeyValueObservation?
+    var rateObservation: NSKeyValueObservation?
+    var endObserver: NSObject?
+    var backgroundObserver: NSObject?
+    var foregroundObserver: NSObject?
+    var didRestore: Bool
+    var isAdvancing: Bool
+    var isPictureInPictureActive: Bool
+    var artworkImage: UIImage?
+    var manualNowPlayingActive: Bool
+}
+struct HDrezka.PremiumCard : View {
+    let status: PremiumStatus
+}
+struct HDrezka.PremiumStarIcon : View {
+    let gradient: LinearGradient
+}
+struct HDrezka.PremiumStatus {
+    let daysLeft: Int?
+    let rawText: String
+}
+struct HDrezka.PremiumUnavailableView : View {
+    var _openURL: Environment<OpenURLAction>
+}
+struct HDrezka.ProfileView : View {
+    var _isLoggedIn: AppStorage<Bool>
+    var _hasPremium: AppStorage<String>
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _isHidingNotch: AppStorage<Bool>
+    var _useInfuse: AppStorage<Bool>
+    var _showVotesCount: AppStorage<Bool>
+    var _shareMenuVariation: AppStorage<ShareMenuVariation>
+    var _startupPageVariation: AppStorage<StartupPageVariation>
+    var _backgroundUrlSession: AppStorage<Bool>
+    var _allowDebug: AppStorage<Bool>
+    var _autoplayNextEpisode: AppStorage<Bool>
+    var _preferredQuality: AppStorage<PlayerQualityPreference>
+    var _saveHistory: AppStorage<Bool>
+    var _preferOriginalTitle: AppStorage<Bool>
+    var _downloadDestination: AppStorage<DownloadDestination>
+    var _isPresentedDetail: Binding<Bool>
+    var _id: Binding<String>
+    var _isPresented: State<Bool>
+    var _downloadManager: EnvironmentObject<DownloadManager>
+}
+struct HDrezka.Quality : Equatable, Hashable {
+    let name: String
+    let url: String
+}
+struct HDrezka.QualitySelectionSheet : View {
+    var _useInfuse: AppStorage<Bool>
+    var _isLoggedIn: AppStorage<Bool>
+    var _autoplayNextEpisode: AppStorage<Bool>
+    var _preferredQuality: AppStorage<PlayerQualityPreference>
+    var _saveHistory: AppStorage<Bool>
+    var _openURL: Environment<OpenURLAction>
+    var _colorScheme: Environment<ColorScheme>
+    var _detailService: EnvironmentObject<MovieDetailsService>
+    var id: String
+    var selectedActing: MovieVoiceActing
+    var selectedSeason: MovieSeason?
+    var selectedEpisode: MovieEpisode?
+    var _video: Binding<String>
+    var dismiss: DismissAction
+    var _coverData: Binding<CoverData?>
+    var _selectedSubtitle: State<MovieSubtitles>
+    var _qualitySelectionPresent: State<Bool>
+    var _proceedSubtitles: State<[MovieSubtitles]>
+    var _movieVideo: State<[Quality]>
+    var _didAutoPlay: State<Bool>
+}
+struct HDrezka.RegisterView : View {
+    var _isLoggedIn: AppStorage<Bool>
+    var _dismiss: Environment<DismissAction>
+    var _email: State<String>
+    var _username: State<String>
+    var _password: State<String>
+    var _confirm_password: State<String>
+    var _errorText: State<String>
+    var _error: State<Bool>
+    var _focused: FocusState<Field?>
+}
+enum HDrezka.ScrollDownHeaderBehavior : Equatable, Hashable {
+    case offset
+    case sticky
+}
+enum HDrezka.ScrollUpHeaderBehavior : Equatable, Hashable {
+    case parallax
+    case sticky
+}
+struct HDrezka.SearchGridComponent : View {
+    let columns: [GridItem]
+    var _network: EnvironmentObject<Network>
+}
+struct HDrezka.SearchGridComponentIpad : View {
+    let columns: [GridItem]
+    var _network: EnvironmentObject<Network>
+}
+struct HDrezka.SearchResult : Identifiable {
+    let id: String
+    let name: String
+    let details: String
+}
+struct HDrezka.SearchResultsView : View {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _network: EnvironmentObject<Network>
+    var _isShowingUnavailableView: State<Bool>
+    var _request: Binding<String>
+}
+struct HDrezka.SearchView : View {
+    var _settingStore: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _network: EnvironmentObject<Network>
+    var _isPresented: Binding<Bool>
+    var _id: Binding<String>
+    var _search: State<String>
+    var _isPresentedResult: State<Bool>
+}
+struct HDrezka.SeasonRowView : View {
+    let title: String
+    let russianEpisodeName: String
+    let releaseDate: String
+}
+struct HDrezka.SeriesScheduleGroup : Identifiable {
+    var id: UUID
+    let name: String
+    let items: [SeriesScheduleItem]
+}
+struct HDrezka.SeriesScheduleItem : Identifiable {
+    var id: UUID
+    let title: String
+    let russianEpisodeName: String
+    let originalEpisodeName: String?
+    let releaseDate: String
+}
+struct HDrezka.SeriesUpdateCardView : View {
+    var episode: SeriesUpdateItem
+}
+struct HDrezka.SeriesUpdateGroup : Identifiable {
+    var id: UUID
+    var date: String
+    var releasedEpisodes: [SeriesUpdateItem]
+}
+struct HDrezka.SeriesUpdateItem : Identifiable {
+    var id: String
+    var seriesName: String
+    var season: String
+    var releasedEpisode: String
+    var chosenVoiceActing: String
+}
+struct HDrezka.SeriesUpdateView : View {
+    var _updatesGroup: State<[SeriesUpdateGroup]?>
+}
+struct HDrezka.SettingsView : View {
+    var _settingStore: Binding<String>
+    var _remoteVersion: Binding<String>
+    var _isHidingNotch: Binding<Bool>
+    var _useInfuse: Binding<Bool>
+    var _showVotesCount: Binding<Bool>
+    var _shareMenuVariation: Binding<ShareMenuVariation>
+    var _startupPageVariation: Binding<StartupPageVariation>
+    var _backgroundUrlSession: Binding<Bool>
+    var _allowDebug: Binding<Bool>
+    var _autoplayNextEpisode: Binding<Bool>
+    var _preferredQuality: Binding<PlayerQualityPreference>
+    var _saveHistory: Binding<Bool>
+    var _preferOriginalTitle: Binding<Bool>
+    var _downloadDestination: Binding<DownloadDestination>
+    var _openURL: Environment<OpenURLAction>
+}
+struct HDrezka.ShareButton : View {
+    let color: Color
+    var _shareMenuVariation: AppStorage<ShareMenuVariation>
+    var _presentationMode: Environment<Binding<PresentationMode>>
+    var _hasBeenShownAtLeastOnce: State<Bool>
+}
+enum HDrezka.ShareMenuVariation : Equatable, Hashable, RawRepresentable {
+    case selectOption
+    case url
+    case universalLink
+}
+class HDrezka.SharedFilmId {
+}
+struct HDrezka.StarsView : View {
+    var rating: CGFloat
+}
+enum HDrezka.StartupPageVariation : CaseIterable, Equatable, Hashable, RawRepresentable {
+    case watching
+    case last
+    case popular
+    case soon
+}
+class HDrezka.SystemVersion {
+    let os: OperatingSystemVersion
+    let osString: String
+}
+struct HDrezka.TextFirstLabel : LabelStyle {
+}
+struct HDrezka.TitleCardComponent : View {
+    var model: MovieSimple
+    var _isAnimated: State<Bool>
+}
+struct HDrezka.TitleCardComponentIpad : View {
+    var model: MovieSimple
+    var _isAnimated: State<Bool>
+}
+struct HDrezka.TitleGridComponent : View {
+    let columns: [GridItem]
+    var _network: EnvironmentObject<Network>
+    var _page: Binding<Int>
+    var _startPaging: State<Bool>
+}
+struct HDrezka.TitleGridComponentIpad : View {
+    let columns: [GridItem]
+    var _network: EnvironmentObject<Network>
+    var _page: Binding<Int>
+    var _startPaging: State<Bool>
+}
+struct HDrezka.VideoParamsSheet : View {
+    var id: String
+    var _useInfuse: AppStorage<Bool>
+    var _isLoggedIn: AppStorage<Bool>
+    var _hasPremium: AppStorage<String>
+    var _remoteVersion: AppStorage<String>
+    var _seasons: State<[MovieSeason]?>
+    var _voiceActing: State<[MovieVoiceActing]?>
+    var _selectedActing: State<MovieVoiceActing>
+    var _premiumActings: State<[MovieVoiceActing]?>
+    var _nonPremiumActings: State<[MovieVoiceActing]?>
+    var _selectedSeason: State<MovieSeason>
+    var _selectedEpisode: State<MovieEpisode>
+    var _canProceed: State<Bool>
+    var _coverData: Binding<CoverData?>
+    var _video: Binding<String>
+    var _dismiss: Environment<DismissAction>
+    var _detailsNetwork: StateObject<MovieDetailsParser>
+    var _detailService: EnvironmentObject<MovieDetailsService>
+}
+struct HDrezka.ViewDidLoadModifier : ViewModifier {
+    var _didLoad: State<Bool>
+    let action: (())?
+}
+struct HDrezka.VisualEffectView : UIViewRepresentable, View {
+    var effect: UIVisualEffect?
+}
+struct HDrezka.WatchLaterCardComponent : View {
+    var movie: MovieWatchLater
+    var moviePosition: Int
+    var _isRemoveMode: State<Bool>
+    var _isPresented: State<Bool>
+    var _movieList: Binding<[MovieWatchLater]>
+}
+struct HDrezka.WatchLaterView : View {
+    var _accountParser: EnvironmentObject<AccountParser>
+    var _watchingLaterMovies: State<[MovieWatchLater]>
+}
+struct HDrezka.YouTubePlayerViewComponent : View {
+    var youTubePlayer: YouTubePlayer
+}

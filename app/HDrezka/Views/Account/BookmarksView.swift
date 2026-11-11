@@ -36,7 +36,8 @@ struct BookmarksView: View {
                     } label: {
                         Image(systemName: "pencil")
                     }
-                    .tint(.blue)
+                    // improvement: grey, not blue, so the accent stays the one hue (DESIGN.md).
+                    .tint(.gray)
                 }
             }
             .onDelete { _ in }  // enables edit-mode deletion UI only; deleting is the swipe action above

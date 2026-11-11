@@ -4,22 +4,55 @@ import SwiftUI
 struct WatchLaterView: View {
     @EnvironmentObject var accountParser: AccountParser
     @State var watchingLaterMovies: [MovieWatchLater] = []
+    /// improvement: loading, failure and an empty list each look different (1.6.0 showed a blank screen for all three).
+    @State var phase: Phase = .loading
+
+    enum Phase: Equatable {
+        case loading, loaded
+        case failed(PageLoadFailure)
+    }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
-            VStack {
+            // improvement: lazy, so only the visible cards fetch a missing poster.
+            LazyVStack {
                 ForEachWithIndex(watchingLaterMovies, id: \.self) { index, movie in
                     WatchLaterCardComponent(movie: movie, moviePosition: index, movieList: $watchingLaterMovies)
                 }
             }
             .padding(.top, 15)
         }
+        .overlay {
+            if watchingLaterMovies.isEmpty {
+                switch phase {
+                case .loading:
+                    ProgressView()
+                case .failed(let failure):
+                    PageLoadFailedView(failure: failure, retry: load)
+                case .loaded:
+                    if #available(iOS 17.0, *) {
+                        ContentUnavailableView("key_nothing+here", systemImage: "clock")
+                    } else {
+                        Text("key_nothing+here")
+                            .font(.title3.bold())
+                    }
+                }
+            }
+        }
         .navigationTitle("key_watch_later")
         .navigationBarTitleDisplayMode(.large)
-        .onAppear {
-            accountParser.watchingLaterMovies.removeAll()
-            Task {
+        .onAppear(perform: load)
+    }
+
+    private func load() {
+        accountParser.watchingLaterMovies.removeAll()
+        phase = .loading
+        Task {
+            do {
                 watchingLaterMovies = try await accountParser.parseWatchingLaterMovies()
+                phase = .loaded
+            } catch {
+                phase = .failed(PageLoadFailure(error: error, statusCode: nil))
             }
         }
     }

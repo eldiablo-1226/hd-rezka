@@ -17,18 +17,28 @@ struct SearchView: View {
                 Color.clear
                     .foregroundStyle(.clear)
                     .frame(width: 0, height: 0)
-                    .searchable(text: $search)
+                    // improvement: always shown, as in a search tab; with the hint below, the automatic placement
+                    // collapsed the field until the user pulled the page down.
+                    .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled(true)
-                    .onChange(of: search) { _ in
+                    .onChange(of: search) { typed in
                         // 0x100070cac: every edit fires its own request 0.2 s later with the text current then.
+                        // improvement: only when the text is still the same (a debounce), and an answer for older text
+                        // is dropped, so a slow reply can't replace the suggestions for what is typed now.
+                        guard !typed.isEmpty else {
+                            network.quickSearch = []
+                            return
+                        }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            AF.request(Request.quick(mirror: settingStore, query: search, version: remoteVersion))
+                            guard typed == search else { return }
+                            AF.request(Request.quick(mirror: settingStore, query: typed, version: remoteVersion))
                                 .responseString { response in
                                     Task { @MainActor in
+                                        guard typed == search else { return }
                                         network.quickSearch = []
                                         if let html = response.value {
-                                            _ = try network.parseQuickSearch(html: html)
+                                            _ = try? network.parseQuickSearch(html: html)
                                         }
                                     }
                                 }
@@ -44,11 +54,28 @@ struct SearchView: View {
                     }
             }
             ScrollView {
+                // improvement: an empty tab says what can be searched (1.6.0: a blank page under the field). Inside the
+                // scroll content: an overlay on this ScrollView never showed, the view gets no height of its own here.
+                if search.isEmpty && network.quickSearch.isEmpty {
+                    VStack(spacing: DesignTokens.space8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                        Text("key_search_hint_title")
+                            .font(.title3.bold())
+                        Text("key_search_hint")
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, DesignTokens.space24)
+                    .padding(.top, 96)
+                }
                 ForEach(network.quickSearch) { result in
                     HStack {
                         NavigationLink(destination: DetailsView(id: result.id)) {
-                            Image(systemName: "arrowshape.turn.up.left.fill")
-                                .foregroundStyle(.primary)
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
                             VStack(alignment: .leading) {
                                 Text(result.name)
                                     .padding(.leading, 5)

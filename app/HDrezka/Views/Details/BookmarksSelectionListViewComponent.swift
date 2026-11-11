@@ -10,8 +10,8 @@ struct BookmarksSelectionListViewComponent: View {
             if isLoggedIn {
                 if !bookmarks.isEmpty {
                     ScrollView(.vertical, showsIndicators: true) {
-                        // shortcut: the specialized Collection.map at 0x100068334 is taken as identity (dictionary to array), check its inlined closure
-                        ForEach(bookmarks.map { $0 }, id: \.key) { bookmark in
+                        // improvement: categories in the site's order (their ids); a Dictionary's order changed between openings.
+                        ForEach(bookmarks.sorted { $0.key.id < $1.key.id }, id: \.key) { bookmark in
                             row(bookmark)
                                 .padding(.bottom, 6)
                         }
@@ -64,7 +64,7 @@ struct BookmarksSelectionListViewComponent: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(10)
-        .background(.quinary, in: RoundedRectangle(cornerRadius: 8))
+        .background(.quinary, in: RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous))
         .contentShape(Rectangle())
 
         if #available(iOS 17.0, *) {

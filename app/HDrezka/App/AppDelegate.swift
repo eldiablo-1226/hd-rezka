@@ -6,6 +6,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         // The original also called FirebaseApp.configure(); Firebase is intentionally removed.
+        DefaultSettings.register()  // improvement: one default per settings key (DefaultSettings.values)
         UNUserNotificationCenter.current().delegate = self
         return true
     }

@@ -58,43 +58,13 @@ struct FranchiseRowView: View {
                 .foregroundStyle(.secondary)
                 .font(.footnote)
             if let rating = item.rating {
-                // From the accent color (rating 0) towards green (rating 10).
-                let color = Color(UIColor(resource: .accent).blended(with: .green, weight: CGFloat(rating / 10)))
-                HStack(spacing: 4) {
-                    Text(String(format: "%.2f", rating))
-                        .foregroundStyle(color)
-                        .font(.caption)
-                        .bold()
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(color)
-                        .font(.caption2)
-                }
+                // improvement: the page's rating numerals (secondary, monospaced); 1.6.0 blended the accent towards
+                // green by the rating, a second colour under 3:1 on white.
+                Text(String(format: "%.2f", rating))
+                    .font(.caption.weight(.semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
             }
-        }
-    }
-}
-
-fileprivate extension UIColor {
-    /// Per-channel RGBA mix `(1 - weight) * self + weight * other`, resolved for the current traits (0x1000dfcc0).
-    func blended(with other: UIColor, weight: CGFloat) -> UIColor {
-        // blend #1 (0x1000dfba8)
-        func blend(_ first: UIColor, with second: UIColor, weight: CGFloat) -> UIColor {
-            var (r1, g1, b1, a1): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
-            var (r2, g2, b2, a2): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
-            first.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-            second.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
-            return UIColor(red: (1 - weight) * r1 + weight * r2,
-                           green: (1 - weight) * g1 + weight * g2,
-                           blue: (1 - weight) * b1 + weight * b2,
-                           alpha: (1 - weight) * a1 + weight * a2)
-        }
-
-        return UIColor { traits in
-            var result = UIColor.white
-            traits.performAsCurrent {
-                result = blend(self, with: other, weight: weight)
-            }
-            return result
         }
     }
 }

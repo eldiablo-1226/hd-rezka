@@ -1,0 +1,260 @@
+don't forget to restart the app afterwards!
+View.task @ HDrezka/SeriesUpdateView.swift:
+key_nothing+here
+div.b-post__title
+div.b-post__infotable_right_inner
+div.b-person__career
+div.b-content__inline_item
+Режиссер
+Продюсер
+Сценарист
+Оператор
+Монтажер
+Художник
+Дата рождения
+Место рождения
+Дата смерти
+Место смерти
+div.b-content__inline_item-cover
+div.b-content__inline_item-link
+div.b-post__infotable_left
+key_select_quality
+key_subtitle_language
+key_no_subtitles
+infuse://x-callback-url/play?x-success=some-app://x-callback-url/playbackDidFinish&x-error=some-app://x-callback-url/playbackDidFail&url=
+reorderBookmarks(_:)
+/ajax/favorites/
+application/x-www-form-urlencoded; charset=UTF-8
+X-Hdrezka-Ios-App
+X-Hdrezka-Ios-App-Version
+performBookmarksAction(_:)
+getBookmarksByCategory(id:page:)
+sendWatching(_:)
+/ajax/send_save/?t=
+checkRegistration(_:)
+/engine/ajax/registration.php
+getSignUpResponse(_:)
+/engine/ajax/quick_register.php
+getLoginResponse(_:)
+getSeriesUpdates()
+removeWatchingItem(_:)
+/engine/ajax/cdn_saves_remove.php
+getWatchingLaterMovies()
+getMovieVideo(url:)
+getMovieVideo(params:)
+/ajax/get_cdn_series/?t=
+shareMenuVariation
+key_downloaded_status
+checkmark.circle
+square.and.arrow.down
+Download started
+key_last_releases
+prevent_autofill_name
+prevent_autofill_password1
+b-content__inline_item-cover
+b-content__inline_item-link
+b-search__live_section
+b-search__section_list
+View.task @ HDrezka/DetailsViewComponent.swift:
+/engine/ajax/gettrailervideo.php
+downloadDestination
+icloud.and.arrow.down
+add_to_bookmarks
+Video is unavailable in this region
+key_all+franchise+parts
+key_episodes+schedule
+startupPageVariation
+selectOption
+url
+universalLink
+ask
+360p
+480p
+720p
+1080p
+1080p Ultra
+2K
+4K
+app
+gallery
+files
+Now watching
+key_popular
+key_comingsoon
+gear.badge.xmark
+key_telegram+channel
+https://t.me/apphdrios
+about_app_settings
+slider.horizontal.3
+rectangle.inset.filled.and.person.filled
+paintbrush.pointed
+key_download_destination_files
+key_download_destination_gallery
+key_download_destination_app
+div.b-content__collections_item
+getMoviesInCollectionFiltered(id:page:filter:)
+getCollections(page:)
+/collections/page/
+key_wrong_login_or_password
+person.crop.circle
+key_login+to+add+bookmarks
+arrowshape.turn.up.left.fill
+/engine/ajax/search.php/
+/search/?do=search&subaction=search
+key_nothing+found
+preferOriginalTitle
+:hls:manifest.m3u8
+Error initializing audio: 
+AVPlayerItemDidPlayToEndTimeNotification
+Autoplay next episode failed: 
+Error downloading image: 
+HDrezka.Coordinator
+getPersonDetails(id:)
+square.grid.2x2.fill
+person.circle.fill
+background_url_session
+autoplayNextEpisode
+preferredQuality
+key_screenwriter
+key_date+of+birth
+key_place+of+birth
+key_date+of+death
+key_place+of+death
+key_infuse_reminder
+Contradictory frame constraints specified.
+key_this+premium+acting
+key_this+premium+acting+description
+key_this+premium+acting+caption
+https://hdrezka.ag/payments
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="
+",DEFAULT=NO,AUTOSELECT=NO,FORCED=NO,URI="subtitlesm3u8://
+#EXT-X-STREAM-INF:BANDWIDTH=1280000,SUBTITLES="subs",CLOSED-CAPTIONS=NONE
+fragmentsm3u8://foo
+#EXT-X-STREAM-INF:BANDWIDTH=1280000,CLOSED-CAPTIONS=NONE
+fragmentsm3u8://foo
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:1
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-ALLOW-CACHE:NO
+#EXT-X-TARGETDURATION:
+HDrezka.CustomAVAssetResourceLoaderDelegate
+HDrezka.CustomAVPlayer
+init(playerItem:)
+init(url:)
+YouTube player couldn't be loaded
+failed to download
+Download successfully
+me.keet.HDRezka.downloads.storage
+https://api.hdrezka.tech/get.hdrezka_android_app_updates
+error in parseSeriesSeasons
+[^\d!-/:-@\[-`{-~]+
+.b-simple_episode__item[data-season_id=
+.b-simple_season__item
+ul#simple-seasons-tabs
+div#simple-episodes-tabs
+b-simple_season__item
+ul[id*="simple-episodes-list"]
+b-simple_episode__item
+ul#simple-episodes-list-
+div.b-content__main
+b-post__origtitle
+ul#translators-list
+b-translator__item
+initCDNMoviesEvents
+initCDNSeriesEvents
+data-translator_id
+b-prem_translator
+Украинский
+Казахский
+div#user-favorites-list
+div.hd-label-row
+table.b-post__info
+error getting chunked details
+error in parseMovieDetails
+Рейтинги
+Дата выхода
+Входит в списки
+В переводе
+b-post__info_rates kp
+error getting kp votes
+b-post__info_rates imdb
+error getting Imdb votes
+error getting Imdb rating
+persons-list-holder
+error getting actors
+button#comments-list-button
+span.b-rgstats__help
+div.b-post__partcontent_item
+div.b-post__schedule_block
+div.b-post__schedule_block_title
+div.b-post__status_logo
+error in isComingSoon
+div.b-player__restricted
+error in isAvailable
+b-post__description
+b-post__description_text
+error in getMovieVideo
+https://www.youtube.com/embed/
+View.task @ HDrezka/DetailsViewComponentIpad.swift:
+arrow.down.circle
+gauge.with.needle
+div.b-seriesupdate__block
+div.b-seriesupdate__block_date
+развернуть
+li.b-seriesupdate__block_list_item.tracked
+a.b-seriesupdate__block_list_link
+https://ijobs.app
+span.cell.cell-2
+div.b-videosaves__list_item
+div.b-favorites_content__cats_list_item
+.b-tophead-premuser
+key_downloads_settings_footer
+key_background_url_session+description
+key_share_menu_header
+square.and.arrow.up
+key_shareMenuVariation+description
+key_startup_page
+key_startup_page_footer
+key_section.history
+key_section.history.footer
+key_save_history
+key_shareMenuVariation
+key_share+with+url
+key_share+with+universal+link
+key_shareMenuVariation+selectOption
+key_download_destination
+key_background_url_session
+key_safe_area_header
+key_safe_area_footer
+key_autoplay_next+description
+key_preferred_quality+description
+key_unfise_description
+key_preferred_quality
+key_autoplay_next
+key_toggle+safe+areas
+CFBundleShortVersionString
+key_ios16+problem+options
+key_ios17+problem+swipe
+exclamationmark.triangle
+key_disclaimer_description
+https://i.imgur.com/kJChmNQ.jpeg
+Ведущий разработчик
+https://i.imgur.com/YyKUZSZ.jpeg
+Помощь в разработке
+https://i.imgur.com/XrNIAEe.jpeg
+thanks_special_info
+key_confirm+password
+key_something+went+wrong
+key_mail+not+valid
+key_wrong+username+lenght
+key_passwords+does+not+match
+key_email+already+taken
+key_username+already+taken
+key_wrong+password+length
+[a-zA-Z0-9\+\.\_\%\-\+]{1,256}\@[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}(\.[a-zA-Z0-9][a-zA-Z0-9\-]{0,25})+
+PlaybackProgressStore save error: 
+Down-casted Array element failed to match the target type
+Expected 
+NSArray element failed to match the Swift Array Element type
+Expected 

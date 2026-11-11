@@ -25,7 +25,7 @@ struct SeriesUpdateCardView: View {
             NavigationLink {
                 DetailsView(id: episode.id)
             } label: {
-                RoundedRectangle(cornerRadius: 15, style: .continuous).foregroundStyle(.quinary)
+                RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous).foregroundStyle(.quinary)
             }
             .buttonStyle(.plain)
         }

@@ -23,17 +23,14 @@ final class ViewsD2ATests: XCTestCase {
         XCTAssertEqual(DetailsViewComponent.title(detail(nameOriginal: nil, releaseDate: nil), preferOriginal: true), "Голодные игры")
     }
 
-    // 0x10004767c: "<genre> • <release date or unknown> • <country>", uppercased.
-    func testGenreLine() {
-        let genre = MovieGenre(id: "g", name: "Фантастика")
-        XCTAssertEqual(DetailsViewComponent.genreLine(genre, detail(nameOriginal: nil, releaseDate: "2012")), "ФАНТАСТИКА • 2012 • США")
-        XCTAssertEqual(DetailsViewComponent.genreLine(genre, detail(nameOriginal: nil, releaseDate: nil)), "ФАНТАСТИКА • UNKNOWN • США")
-    }
-
-    // 0x10004af10: the blur starts where the title block begins; the initial heights (1, 1) must not give NaN.
-    func testHeaderFadeLocation() {
-        XCTAssertEqual(DetailsViewComponent.headerFadeLocation(inner: 300, outer: 400), 0.25)
-        XCTAssertEqual(DetailsViewComponent.headerFadeLocation(inner: 1, outer: 1), 0)
+    // improvement (Details redesign): the header's facts line replaces 0x10004767c's uppercased genre line: the year out
+    // of the release date, no "unknown" when there is no date.
+    func testFactsLine() {
+        XCTAssertEqual(detail(nameOriginal: nil, releaseDate: "21 марта 2012 года").factsLine, "Фантастика · 2012 · США")
+        XCTAssertEqual(detail(nameOriginal: nil, releaseDate: nil).factsLine, "Фантастика · США")
+        XCTAssertEqual(detail(nameOriginal: nil, releaseDate: "скоро").factsLine, "Фантастика · скоро · США")
+        XCTAssertEqual(MovieDetailed.year(in: "19 сентября 2026 года"), "2026")
+        XCTAssertNil(MovieDetailed.year(in: "скоро"))
     }
 
     // 0x1000698dc: SharedFilmId holds the page URL; post_id is its last path component up to the first ".".
@@ -51,5 +48,27 @@ final class ViewsD2ATests: XCTestCase {
         let diagonal = CGSize(width: 100, height: 50).boundingSize(at: .degrees(45))
         XCTAssertEqual(diagonal.width, 150 / 2.0.squareRoot(), accuracy: 1e-9)
         XCTAssertEqual(diagonal.height, 150 / 2.0.squareRoot(), accuracy: 1e-9)
+    }
+
+    // improvement: the "Minutes" caption already names the unit, so only an exact "<digits> мин." loses it;
+    // anything else (nil here) is shown raw and the caption is hidden.
+    func testDurationDropsOnlyAnExactMinutesUnit() {
+        XCTAssertEqual(InfoTabView.durationNumber("172 мин."), "172")
+        XCTAssertEqual(InfoTabView.durationNumber("172 мин"), "172")
+        XCTAssertNil(InfoTabView.durationNumber("1 ч. 30 мин."))
+        XCTAssertNil(InfoTabView.durationNumber("40-50 мин."))
+        XCTAssertNil(InfoTabView.durationNumber("~45 мин."))
+        XCTAssertNil(InfoTabView.durationNumber("45"), "a bare number has no unit to replace")
+        XCTAssertNil(InfoTabView.durationNumber("nil"), "the parser's placeholder for a missing duration")
+        XCTAssertNil(InfoTabView.durationNumber(""))
+    }
+
+    // improvement: the parser force-unwraps the page's main block and title, so other pages (403, errors) are rejected first.
+    func testMoviePageCheck() throws {
+        let film = try String(contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/details-film-hunger-games.html"), encoding: .utf8)
+        XCTAssertTrue(DetailsViewComponent.isMoviePage(film))
+        XCTAssertFalse(DetailsViewComponent.isMoviePage("<html><body><h1>403 Forbidden</h1></body></html>"))
+        XCTAssertFalse(DetailsViewComponent.isMoviePage(""))
     }
 }

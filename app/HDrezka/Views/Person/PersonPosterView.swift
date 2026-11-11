@@ -26,7 +26,7 @@ struct PersonPosterView: View {
                             .blur(radius: 15)
                     }
                     .onAppear {
-                        withAnimation(.easeOut.repeatForever(autoreverses: false).speed(0.3)) {
+                        withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeOut.repeatForever(autoreverses: false).speed(0.3)) {
                             isAnimated = true
                         }
                     }
@@ -35,6 +35,6 @@ struct PersonPosterView: View {
         }
         .aspectRatio(contentMode: .fill)
         .frame(width: 140, height: 213)
-        .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster, style: .continuous))
     }
 }

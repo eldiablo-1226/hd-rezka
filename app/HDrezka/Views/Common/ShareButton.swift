@@ -2,7 +2,6 @@ import SwiftUI
 
 /// Shares the film open in DetailsView (`SharedFilmId.id`) as a site link, an hdr:// link or both (0x10010f254…0x11168c).
 struct ShareButton: View {
-    var color: Color
     @AppStorage("shareMenuVariation") var shareMenuVariation: ShareMenuVariation = .url
     @Environment(\.presentationMode) var presentationMode
     @State var hasBeenShownAtLeastOnce: Bool = false
@@ -32,8 +31,11 @@ struct ShareButton: View {
         }
     }
 
+    // improvement: the bare symbol; the toolbar draws the button. 1.6.0 put it in its own grey circle, which on
+    // iOS 26 sat inside the system's glass capsule.
     private var label: some View {
-        Image(systemName: "square.and.arrow.up").circleButtonLabel(color: color)
+        Image(systemName: "square.and.arrow.up")
+            .accessibilityLabel(Text("key_share"))
     }
 
     /// The page on the public domain: "https://ijobs.app/films/x/1-y.html" -> "https://rezka.ag/films/x/1-y.html".

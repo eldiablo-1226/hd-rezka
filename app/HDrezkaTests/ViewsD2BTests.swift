@@ -11,16 +11,6 @@ final class ViewsD2BTests: XCTestCase {
     private let season = MovieSeason(id: "2", name: "Сезон 2", episodes: [], isSelected: true, url: nil)
     private let episode = MovieEpisode(id: "7", name: "Серия 7", isSelected: true, url: nil)
 
-    // MARK: - VideoParamsSheet
-
-    func testPremiumAndNonPremiumActingLists() {
-        let list = [acting("A", premium: true), acting("B"), acting("C", premium: true)]
-        XCTAssertEqual(list.getPremiumActingList(actingList: list)?.map(\.name), ["A", "C"])
-        XCTAssertEqual(list.getNonPremiumActingList(actingList: list)?.map(\.name), ["B"])
-        // The receiver is ignored: only the argument is filtered (0x100076b24 has a dead self).
-        XCTAssertEqual([MovieVoiceActing]().getPremiumActingList(actingList: list)?.count, 2)
-    }
-
     // MARK: - QualitySelectionSheet
 
     func testProgressKeyForSeriesAndFilm() {

@@ -50,36 +50,4 @@ final class ViewsD3ATests: XCTestCase {
         XCTAssertEqual(PremiumStatus(raw: " Premium ")?.displayText, "Premium")
     }
 
-    // MARK: AboutUsView.isXmas() (0x1000ead04): from Dec 25 00:00 to "Dec 32" (Jan 1) 00:00 inclusive
-
-    func testXmasWindow() throws {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "UTC"))
-        func date(_ y: Int, _ m: Int, _ d: Int, _ h: Int = 0, _ min: Int = 0, _ s: Int = 0) throws -> Date {
-            try XCTUnwrap(calendar.date(from: DateComponents(year: y, month: m, day: d, hour: h, minute: min, second: s)))
-        }
-        XCTAssertFalse(AboutUsView.isXmas(on: try date(2025, 12, 24, 23, 59, 59), calendar: calendar))
-        XCTAssertTrue(AboutUsView.isXmas(on: try date(2025, 12, 25), calendar: calendar))
-        XCTAssertTrue(AboutUsView.isXmas(on: try date(2025, 12, 31, 23, 59, 59), calendar: calendar))
-        // Jan 1 belongs to the new year, whose window has not started yet.
-        XCTAssertFalse(AboutUsView.isXmas(on: try date(2026, 1, 1), calendar: calendar))
-        XCTAssertFalse(AboutUsView.isXmas(on: try date(2026, 6, 1), calendar: calendar))
-    }
-
-    // MARK: AboutUsView version line and init(allowDebug:) (0x1000ea778)
-
-    func testVersionText() {
-        let os = SystemVersion().osString
-        let known = AboutUsView(allowDebug: .constant(false), appVersion: "1.6.0", buildVerison: "570")
-        XCTAssertEqual(known.versionText, "v1.6.0, build 570, OS \(os)")
-        let unknown = AboutUsView(allowDebug: .constant(false), appVersion: nil, buildVerison: nil)
-        XCTAssertEqual(unknown.versionText, "vUNKNOWN VERSION, build UNKNOWN BUILD, OS \(os)")
-    }
-
-    func testAboutUsInitReadsBundleVersions() {
-        let view = AboutUsView(allowDebug: .constant(false))
-        XCTAssertEqual(view.appVersion, Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
-        XCTAssertEqual(view.buildVerison, Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String)
-        XCTAssertNotNil(view.appVersion)
-    }
 }

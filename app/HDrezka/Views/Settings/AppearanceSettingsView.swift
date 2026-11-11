@@ -6,7 +6,8 @@ struct AppearanceSettingsView: View {
     @Binding var preferOriginalTitle: Bool
 
     var body: some View {
-        NavigationStack {
+        // improvement: no NavigationStack of its own; the screen is pushed onto Profile's stack.
+        Group {
             VStack {
                 Form {
                     Section {
@@ -40,7 +41,6 @@ private struct InfoTabDemoView: View {
                         .font(.caption2)
                         .foregroundColor(.primary)
                     rating(9.1, format: "%.1f", votes: "(214K)")
-                    StarsView(rating: 9.1)
                 }
             }
             Spacer()
@@ -50,7 +50,6 @@ private struct InfoTabDemoView: View {
                         .font(.caption2)
                         .foregroundColor(.primary)
                     rating(2.8, format: "%.2f", votes: "(840K)")
-                    StarsView(rating: 2.8)
                 }
             }
             Spacer()
