@@ -21,14 +21,12 @@ struct HomeView: View {
             ScrollView(.vertical, showsIndicators: true) {
                 VStack {
                     ContinueWatchingRow(refreshToken: refreshCount)
+                    Self.listingMenu($startupPageVariation)
+                        .padding(.horizontal)
+                        .padding(.top, DesignTokens.space8)
                     TitleGridComponent(page: $page)
                 }
-                .navigationTitle(LocalizedStringKey(startupPageVariation.rawValue))
-                // improvement: the listing is switched right here (1.6.0: only in Settings → Behaviour). A toolbar menu,
-                // not toolbarTitleMenu: with a large title that menu has no visible affordance.
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) { Self.listingMenu($startupPageVariation) }
-                }
+                .navigationTitle("Home")
             }
             // improvement: pull to refresh; the spinner stays until page 1 arrives and replaces the list.
             .refreshable {
@@ -74,7 +72,9 @@ struct HomeView: View {
         }
     }
 
-    /// The start page listings, as a toolbar menu on phone and iPad.
+    /// improvement: the listing's name heads the grid and is the menu that switches it; the screen is «Главная», with
+    /// «Продолжить просмотр» above the listing. 1.6.0 titled the screen after the listing (switched only in Settings), and
+    /// «Последние поступления» didn't fit a large title. The chevron is the ember: the name is a control.
     static func listingMenu(_ selection: Binding<StartupPageVariation>) -> some View {
         Menu {
             Picker("key_startup_page", selection: selection) {
@@ -83,8 +83,21 @@ struct HomeView: View {
                 }
             }
         } label: {
-            Label("key_startup_page", systemImage: "line.3.horizontal.decrease")
+            HStack(alignment: .firstTextBaseline, spacing: DesignTokens.space4) {
+                Text(LocalizedStringKey(selection.wrappedValue.rawValue))
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.primary)
+                    .multilineTextAlignment(.leading)
+                Image(systemName: "chevron.down")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
+                    // The menu says it's a menu; VoiceOver read the symbol's name too.
+                    .accessibilityHidden(true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle())
         }
+        .accessibilityHint(Text("key_listing_hint"))
     }
 
     /// Listing filter of the start page: `String(describing:)` gives the case name ("watching", "last", "popular", "soon").

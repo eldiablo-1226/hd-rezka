@@ -1,5 +1,21 @@
 import SwiftUI
 import UIKit
+import AlertKit
+
+/// improvement: VoiceOver reads a change that appears away from its focus, such as a footer or a slow-site line.
+/// Only while VoiceOver runs: nobody else hears it, and under XCTest the post stalled the main thread for minutes.
+@MainActor
+func announce(_ text: String.LocalizationValue) {
+    guard UIAccessibility.isVoiceOverRunning else { return }
+    UIAccessibility.post(notification: .announcement, argument: String(localized: text))
+}
+
+/// improvement: a failure toast that VoiceOver reads too; AlertKit's HUD isn't announced.
+@MainActor
+func presentFailure(_ text: String.LocalizationValue) {
+    AlertKitAPI.present(title: String(localized: text), icon: .error, style: .iOS17AppleMusic, haptic: .error)
+    announce(text)
+}
 
 /// Runs `action` on the first `onAppear` only (0x1000dfa10).
 struct ViewDidLoadModifier: ViewModifier {
@@ -34,6 +50,17 @@ extension View {
     /// Secondary actions and chips: clear Liquid Glass on iOS 26 and later, `.bordered` before it.
     func secondaryButtonStyle() -> some View {
         modifier(ActionButtonStyle(isProminent: false))
+    }
+
+    /// improvement: an opaque grouped ground under a list sheet. On iOS 26 a medium-detent sheet is glass, and the page's
+    /// ember «Смотреть» button showed through it as an orange band behind the title.
+    @ViewBuilder
+    func opaqueSheetBackground() -> some View {
+        if #available(iOS 16.4, *) {
+            presentationBackground(Color(uiColor: .systemGroupedBackground))
+        } else {
+            self
+        }
     }
 }
 

@@ -186,10 +186,17 @@ Native and quiet, with one loud exception.
 Season and episode on the page are system `Menu { Picker }` with the current value as the label, followed by an SF Symbol `chevron.up.chevron.down`, in the accent; side by side, stacking when they don't fit.
 
 ### Selection lists
-`VoiceActingRow`: a full-width plain button with the name (lock symbol when premium can't play), flags under it in caption secondary («Премиум · Экранка · С рекламой»), the popularity percent in subheadline monospaced secondary, and a trailing accent `checkmark` whose space is always reserved. Rows separate with the system divider. Up to four rows, the chosen one in its own place, then «Все озвучки · N». Quality selection in its sheet follows the same trailing-checkmark pattern, and so does the bookmark sheet (a system `List`, one row per category, a failed request takes the mark back and says so in the footer).
+`VoiceActingRow`: a full-width plain button with the name (lock symbol when premium can't play), flags under it in caption secondary («Премиум · Экранка · С рекламой»), the popularity percent in subheadline monospaced secondary, and a trailing accent `checkmark` whose space is always reserved. Rows separate with the system divider. Up to four rows, the chosen one in its own place, then «Все озвучки · N». Quality selection in its sheet follows the same trailing-checkmark pattern, and so does the bookmark sheet: a system `List` headed by the film's title, one row per category and a «Новая категория» row, «Готово» in the bar. A mark changes once the site confirms; until then a spinner holds its place, and a failure says why in the footer (a refused save offers «Войти»).
 
 ### Navigation
-System `NavigationStack` with the inline title appearing in the bar once the header scrolls away; the system back button and edge swipe; bare SF Symbols in toolbar items (share). Tab bar for the top-level sections, which iPadOS draws as the top tab bar. The logged-in Profile is an inset-grouped system `List` (Premium row, then «Досмотреть», «Закладки», «Обновления сериалов»), not cards.
+System `NavigationStack` with the inline title appearing in the bar once the header scrolls away; the system back button and edge swipe; bare SF Symbols in toolbar items (share). Tab bar for the top-level sections, which iPadOS draws as the top tab bar. The logged-in Profile is an inset-grouped system `List` (Premium row, then «Досмотреть», «Закладки», «Обновления сериалов»), not cards. Home is «Главная»: «Продолжить просмотр» first (kept on the device and shown from the first frame, placeholder cards before the first answer), then the listing's name in title3 bold with an ember chevron, the menu that switches it, over the grid.
+
+### Loading and failure
+- **Grids** (Home, a collection, a bookmark category) show skeleton cards: the real card, redacted, so posters drop into the same cells. A poster that can't load ends as a film symbol on the loading fill.
+- **The movie page** keeps the tapped card in view while it loads, its poster and title where the header will be, over a spinner; a deep link or the continue row gets the spinner alone. **Lists** show a plain spinner.
+- **Slow sites:** after 8 s a footnote names the mirror («ijobs.app отвечает медленно…»). Every site request gives up after 15 s without data (`siteTimeout` through `siteSession`), and `PageLoadFailedView` takes over with the cause and the fix.
+- **Empty** is its own state with the next step (`ContentUnavailableView`, e.g. «Категорий пока нет» with «Новая категория»), never a blank screen, and a failure never looks empty.
+- **Writes to the site** (bookmark marks, category changes) change the screen only after `success: true`; meanwhile the row shows a spinner and can't be tapped. A failure says so where it happened or in a toast, and VoiceOver announces it.
 
 ### Trailer
 `TrailerTile`: the YouTube thumbnail at 16:9 (radiusButton) with a system glass play disc. A tap plays the trailer in the system full-screen player (AVKit: close, AirPlay, ±10 s, speed); closing it brings the tile back and the next tap resumes. While it starts, a spinner takes the play symbol's place on the same disc. The YouTube web view only feeds that player: on iPhone it sits behind the thumbnail, so YouTube's web chrome never shows; iPad's WebKit plays in place, so there the player takes over the tile. A trailer that YouTube won't embed opens in YouTube after the tap; any other failure stays on the page and the next tap loads the player again. Leaving the page pauses it.
@@ -209,6 +216,7 @@ System `NavigationStack` with the inline title appearing in the bar once the hea
 - **Do** use Dynamic Type text styles and restack layouts at accessibility sizes; keep every control at least 44 pt.
 - **Do** use monospaced digits for ratings, percentages and progress.
 - **Do** honour Reduce Motion: 0.2 s ease animations become none, the poster wipe becomes a crossfade, shimmers stop looping.
+- **Do** give every screen that loads its loading, empty and failure states, and change the screen only after the site confirms a write.
 
 ### Don't:
 - **Don't** draw circles, capsules, gauges or badges as control chrome; system border shapes and content clipping (avatars) are fine.
@@ -218,3 +226,5 @@ System `NavigationStack` with the inline title appearing in the bar once the hea
 - **Don't** hard-code point sizes for text.
 - **Don't** build the details page as a cinematic Apple TV header with blurred art and a white Play.
 - **Don't** play trailers in a sheet or show YouTube's web player: the tile plays in the system full-screen player.
+- **Don't** keep a global "open film": a page passes its own id to its sheets and its share link.
+- **Don't** delete on a full swipe or without asking: a category takes its bookmarks with it.

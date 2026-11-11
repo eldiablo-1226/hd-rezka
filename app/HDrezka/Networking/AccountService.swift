@@ -39,8 +39,11 @@ class AccountService {
         return try await parser.checkAvailability(html: html)
     }
 
+    /// improvement: throws `SiteRefusal` when the site says `success: false` (a session that isn't valid on this mirror),
+    /// so the caller can offer «Войти» instead of a bare failure.
     func createBookmarksCategory(name: String) async throws -> Bookmark? {
         let response = try await AccountNetwork().performBookmarksAction(["name": name, "action": "add_cat"])
+        if Self.isRefusal(response) { throw SiteRefusal() }
         return try Self.createdCategory(response, name: name)
     }
 
@@ -52,8 +55,10 @@ class AccountService {
         try await AccountNetwork().removeWatchingItem(["id": item.dataId]).isSuccess()
     }
 
-    func reorderBookmarksCategories(_ bookmarks: [Bookmark]) async throws {
-        _ = try await AccountNetwork().reorderBookmarks(Self.reorderParams(bookmarks))
+    /// improvement: false when the site refuses the order (1.6.0 ignored the answer, so a refused order stayed on
+    /// screen). script.673.js alerts only on `success: false`, so an answer without the flag counts as saved.
+    func reorderBookmarksCategories(_ bookmarks: [Bookmark]) async throws -> Bool {
+        !Self.isRefusal(try await AccountNetwork().reorderBookmarks(Self.reorderParams(bookmarks)))
     }
 
     func addToBookmarks(movieId: String, bookmarkUserCategory: Int) async throws -> String {
@@ -81,7 +86,10 @@ class AccountService {
     /// Ends the session (the site drops the cookie in its answer to GET /logout) and forgets the premium badge,
     /// which the original kept until the next listing page.
     func logout(network: AccountNetwork = AccountNetwork()) async throws {
-        await MainActor.run { UserDefaults.standard.set("", forKey: "hasPremium") }
+        await MainActor.run {
+            UserDefaults.standard.set("", forKey: "hasPremium")
+            ContinueWatchingCache.clear()  // improvement: the row's list belongs to the account
+        }
         _ = try await network.logout()
     }
 
@@ -125,6 +133,12 @@ class AccountService {
 
     // MARK: - Answers
 
+    /// The site said no: JSON with `success: false`, the answer script.673.js shows its message for.
+    static func isRefusal(_ response: String) -> Bool {
+        guard let json = (try? JSONSerialization.jsonObject(with: Data(response.utf8))) as? [String: Any] else { return false }
+        return (json["success"] as? Bool) == false
+    }
+
     /// The `success` flag of the login JSON (0x10003a3b4). Traps on any other answer shape, as the original.
     static func loginSucceeded(_ response: String) throws -> Bool {
         let json = try JSONSerialization.jsonObject(with: Data(response.utf8)) as! [String: Any]
@@ -132,10 +146,14 @@ class AccountService {
     }
 
     /// The new category, or nil when the answer has no numeric "id": `as? Int`, so a string id gives nil too
-    /// (0x10003c200). Traps on a non-object answer, as the original.
+    /// (0x10003c200). improvement: an answer that isn't a JSON object (a block page served with 200) gives nil too;
+    /// 1.6.0 trapped on it.
     static func createdCategory(_ response: String, name: String) throws -> Bookmark? {
-        let json = try JSONSerialization.jsonObject(with: Data(response.utf8)) as! [String: Any]
-        guard let id = json["id"] as? Int else { return nil }
+        guard let json = (try? JSONSerialization.jsonObject(with: Data(response.utf8))) as? [String: Any],
+              let id = json["id"] as? Int else { return nil }
         return Bookmark(id: id, name: name)
     }
 }
+
+/// The site answered `success: false` to an account action.
+struct SiteRefusal: Error {}

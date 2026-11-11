@@ -1,5 +1,6 @@
 import SwiftUI
 import Alamofire
+import NukeUI
 
 /// The movie or series page, on the iPhone and the iPad. improvement (Details redesign, contract «Два режима одной
 /// страницы»): a header of facts over two halves, «Смотреть» and «О фильме» (DetailsPanels.swift), one at a time under
@@ -10,12 +11,17 @@ struct DetailsViewComponent: View {
     /// improvement: «Продолжить» (Home's row, «Досмотреть») opens the page on its «Смотреть» half. Playback starts
     /// only from that half's button: a quality sheet popping up over a page just opened was a surprise.
     var opensOnWatch = false
+    /// The card that opened the page, shown while it loads (nil for deep links and the continue row).
+    var preview: MovieSimple? = nil
     @EnvironmentObject var detailsNetwork: MovieDetailsParser
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
     @AppStorage("hasPremium") var hasPremium: String = ""
     @AppStorage("preferOriginalTitle") var preferOriginalTitle: Bool = false
     @State var bookmarks: [Bookmark: Bool] = [:]
+    /// improvement: the page's marks are taken once; 1.6.0 reset them to the loaded page on every appearance, so after
+    /// a visit to a cast member the button said «В закладки» again and the next tap removed the film on the site.
+    @State var bookmarksLoaded = false
     @State var isPresentedScheduleSheet = false
     @State var isPresentedDownloadSheet = false
     @State var isPresentedBookmarksSheet = false
@@ -55,13 +61,9 @@ struct DetailsViewComponent: View {
             // Back to the spinner, whose onAppear loads the page again; the system bar has the way back.
             PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
-            ProgressView(value: 0.5)
-                .progressViewStyle(.circular)
+            DetailsLoadingView(preview: preview)
                 .onAppear {
                     loadPage()
-                }
-                .onAppear {
-                    SharedFilmId.id = id
                 }
         }
     }
@@ -97,7 +99,7 @@ struct DetailsViewComponent: View {
 
     /// closure #2 in body.getter (0x10004f004): the movie page itself (`id` is its full URL), only the app headers.
     private func loadPage() {
-        AF.request(Self.pageURL(id, mirror: settingStore), method: .get, headers: ["X-Hdrezka-Ios-App": "1", "X-Hdrezka-Ios-App-Version": remoteVersion])
+        siteSession.request(Self.pageURL(id, mirror: settingStore), method: .get, headers: ["X-Hdrezka-Ios-App": "1", "X-Hdrezka-Ios-App-Version": remoteVersion])
             .responseString { response in
                 Task { @MainActor in
                     // improvement: no body, a non-2xx answer or a page without the movie block end in the retry state
@@ -118,7 +120,7 @@ struct DetailsViewComponent: View {
 
     /// closure #6 in closure #1 (0x10004e7e0): the YouTube id of the trailer, if the site has one.
     private func loadTrailer() {
-        AF.request("https://\(settingStore)/engine/ajax/gettrailervideo.php", method: .post,
+        siteSession.request("https://\(settingStore)/engine/ajax/gettrailervideo.php", method: .post,
                    parameters: ["id": id.getMovieId()], encoder: URLEncodedFormParameterEncoder.default,
                    headers: ["X-Hdrezka-Ios-App": "1", "X-Hdrezka-Ios-App-Version": remoteVersion])
             .responseString { response in
@@ -162,7 +164,7 @@ struct DetailsViewComponent: View {
                 }
             }
             ToolbarItem(placement: trailingPlacement) {
-                ShareButton()
+                ShareButton(filmId: id)
             }
         }
         .sheet(item: $quickPlay) { choice in
@@ -178,9 +180,10 @@ struct DetailsViewComponent: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $isPresentedBookmarksSheet) {
-            BookmarksSelectionListViewComponent(bookmarks: $bookmarks)
+            BookmarksSelectionListViewComponent(bookmarks: $bookmarks, filmId: id, title: title, onSignedIn: reloadAfterSignIn)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+                .opaqueSheetBackground()
         }
         .sheet(isPresented: $isPresentedScheduleSheet) {
             scheduleSheet(detail)
@@ -275,7 +278,10 @@ struct DetailsViewComponent: View {
     // MARK: Actions
 
     private func pageDidLoad(_ detail: MovieDetailed) {
-        bookmarks = detail.bookmarks
+        if !bookmarksLoaded {
+            bookmarks = detail.bookmarks
+            bookmarksLoaded = true
+        }
         PosterCache.shared.store(detail.poster, for: id)
         let initial = PlaybackChoice.default(for: detail, hasPremium: !hasPremium.isEmpty)
         selection.configure(actings: detail.voiceActing, seasons: detail.seasons, initial: initial) { [id] acting in
@@ -285,6 +291,13 @@ struct DetailsViewComponent: View {
             mode = DetailsMode.initial(canPlay: Self.canPlay(detail), opensOnWatch: opensOnWatch,
                                        hasProgress: PlaybackProgressStore.shared.hasProgress(forTitle: id))
         }
+    }
+
+    /// After a sign-in from the bookmark sheet: the page again, now with the account's categories.
+    private func reloadAfterSignIn() {
+        isPresentedBookmarksSheet = false
+        bookmarksLoaded = false
+        detailsNetwork.movieDetailed.removeAll()
     }
 
     private func resumeSeconds(_ choice: PlaybackChoice) -> Double? {
@@ -340,6 +353,63 @@ struct DetailsViewComponent: View {
             return .topBarTrailing
         } else {
             return .navigationBarTrailing
+        }
+    }
+}
+
+/// improvement: while the page loads, the card that was tapped stays in view: its poster and title sit where the page's
+/// header will be, over a spinner. 1.6.0 showed a spinner at a fixed 0.5 on a blank page. Without a card (a deep link,
+/// the continue row) only the spinner shows.
+private struct DetailsLoadingView: View {
+    var preview: MovieSimple?
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        let isRegular = sizeClass == .regular
+        VStack(alignment: .leading, spacing: DesignTokens.space24) {
+            if let preview {
+                header(preview, isRegular: isRegular)
+                    .padding(.horizontal, isRegular ? 28 : DesignTokens.space16)
+            }
+            VStack(spacing: DesignTokens.space8) {
+                ProgressView()
+                SlowLoadNotice()
+            }
+            .padding(.horizontal, DesignTokens.space16)
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.top, isRegular ? DesignTokens.space24 : DesignTokens.space8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: preview == nil ? .center : .top)
+    }
+
+    /// The loaded page's header (DetailsHeaderBlock) with what the card knows: poster, title and «год, страна, жанр».
+    private func header(_ preview: MovieSimple, isRegular: Bool) -> some View {
+        let posterWidth: CGFloat = isRegular ? 180 : 96
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignTokens.space16))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: DesignTokens.space16))
+        return layout {
+            LazyImage(url: URL(string: preview.poster)) { state in
+                if let image = state.image {
+                    image.resizable().scaledToFill()
+                } else {
+                    Rectangle().foregroundStyle(.quinary)
+                }
+            }
+            .frame(width: posterWidth, height: posterWidth * 1.5)
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster, style: .continuous))
+            .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: DesignTokens.space4) {
+                Text(preview.name)
+                    .font(isRegular ? .largeTitle.bold() : .title2.bold())
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                Text(preview.details)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

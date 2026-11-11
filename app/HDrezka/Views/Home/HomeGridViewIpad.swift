@@ -16,14 +16,14 @@ struct HomeGridViewIpad: View {
             ScrollView(.vertical, showsIndicators: true) {
                 VStack {
                     ContinueWatchingRow(refreshToken: refreshCount)
+                    HomeView.listingMenu($startupPageVariation)
+                        .padding(.horizontal)
+                        .padding(.top, DesignTokens.space8)
                     TitleGridComponentIpad(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], page: $page)
                         .onLoad { page = 1 }
                 }
             }
-            .navigationTitle(LocalizedStringKey(startupPageVariation.rawValue))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { HomeView.listingMenu($startupPageVariation) }
-            }
+            .navigationTitle("Home")
             .onChange(of: startupPageVariation) { variation in
                 network.movies.removeAll()
                 HomeView.refresh(network, page: $page, variation: variation)

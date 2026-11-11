@@ -143,11 +143,15 @@ struct WatchLaterCardComponent: View {
 struct WatchLaterPoster: View {
     var url: String?
     var width: CGFloat = 60
+    /// improvement: no poster to load; a film symbol says so instead of a fill that looks like loading.
+    var isMissing = false
 
     var body: some View {
         LazyImage(url: url.flatMap(URL.init(string:))) { state in
             if let image = state.image {
                 image.resizable().scaledToFill()
+            } else if isMissing || (url != nil && state.error != nil) {
+                MissingPoster()
             } else {
                 Rectangle().foregroundStyle(.quinary)
             }

@@ -12,6 +12,8 @@ struct LogInView: View {
     @State var isShowingNetworkError: Bool = false
     @FocusState var focused: Field?
     var accountService: AccountService
+    /// improvement: told about a successful sign-in, so a caller can reload what depended on the session.
+    var onLoggedIn: () -> Void = {}
     @Environment(\.dismiss) var dismiss
 
     // improvement: a native form (and password AutoFill); 1.6.0 drew its own grey field and button backgrounds.
@@ -58,6 +60,7 @@ struct LogInView: View {
             do {
                 if try await accountService.login(username: username, password: password) {
                     isLoggedIn = true
+                    onLoggedIn()
                     dismiss()
                 } else {
                     withAnimation(.spring(response: 0.5, dampingFraction: 1, blendDuration: 0)) {

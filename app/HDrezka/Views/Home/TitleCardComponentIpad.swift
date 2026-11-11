@@ -15,6 +15,9 @@ struct TitleCardComponentIpad: View {
                     image
                         .resizable()
                         .transition(.asymmetric(insertion: .wipe(angle: .degrees(45), blurRadius: 10), removal: .wipe(angle: .degrees(225), blurRadius: 10)))
+                } else if state.error != nil && !model.poster.isEmpty {
+                    // A skeleton card has no poster URL, so its "error" is no request at all; it keeps the shimmer.
+                    MissingPoster()
                 } else {
                     Rectangle()
                         .foregroundStyle(.quinary)

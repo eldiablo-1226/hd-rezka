@@ -9,7 +9,7 @@ class MovieDetailsService: ObservableObject {
     /// POST /ajax/get_cdn_series/ with the given form fields; returns the raw JSON text.
     func getMovieVideo(params: [String: String]) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
-            AF.request(Self.cdnSeriesURL(mirror: settingStore), method: .post, parameters: params,
+            siteSession.request(Self.cdnSeriesURL(mirror: settingStore), method: .post, parameters: params,
                        encoder: URLEncodedFormParameterEncoder.default, headers: headers)
                 .responseString { response in
                     switch response.result {
@@ -23,7 +23,7 @@ class MovieDetailsService: ObservableObject {
     /// GET of a full page URL (a translator or episode link), with the same headers as the POST.
     func getMovieVideo(url: String) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
-            AF.request(url, method: .get, headers: headers)
+            siteSession.request(url, method: .get, headers: headers)
                 .responseString { response in
                     switch response.result {
                     case .success(let value): continuation.resume(returning: value)

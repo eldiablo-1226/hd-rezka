@@ -139,7 +139,8 @@ struct Quality: Equatable, Hashable {
     let url: String
 }
 
-struct MovieWatchLater: Equatable, Hashable {
+/// Codable for ContinueWatchingCache.
+struct MovieWatchLater: Equatable, Hashable, Codable {
     var id: String
     var name: String
     var details: String

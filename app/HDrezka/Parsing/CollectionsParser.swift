@@ -39,6 +39,8 @@ class CollectionsParser: ObservableObject {
             let name = try item.getMovieTitle()
             let details = try item.getMovieDetails().replacingOccurrences(of: name + " ", with: "")
             let poster = try item.getMoviePoster()
+            // improvement: a page loaded again (a retry, a reappearance) adds nothing twice.
+            guard !moviesInCollections.contains(where: { $0.id == id }) else { continue }
             moviesInCollections.append(MovieSimple(id: id, name: name, details: details, poster: poster))
         }
         return moviesInCollections

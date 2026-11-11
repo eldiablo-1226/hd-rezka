@@ -73,6 +73,32 @@ enum PageLoadFailure: Equatable {
     }
 }
 
+/// improvement: after 8 s of loading it names the mirror that is slow, so a stall doesn't look like a frozen app. The
+/// request gives up at `siteTimeout` and PageLoadFailedView takes over.
+struct SlowLoadNotice: View {
+    @AppStorage("mirror") private var mirror: String = DefaultSettings.mirror
+    @State private var isSlow = false
+
+    var body: some View {
+        // A VStack, not a Group: an empty Group has no view for `.task` to run on.
+        VStack {
+            if isSlow {
+                Text("key_slow_site \(mirror)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .transition(.opacity)
+            }
+        }
+        .task {
+            try? await Task.sleep(nanoseconds: 8_000_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.2)) { isSlow = true }
+            announce("key_slow_site \(mirror)")
+        }
+    }
+}
+
 /// improvement: shown instead of 1.6.0's endless spinner or skeletons when a page fails to load
 /// (movie pages on phone and iPad, the watch sheet, Home, Collections, search and the account lists).
 struct PageLoadFailedView: View {

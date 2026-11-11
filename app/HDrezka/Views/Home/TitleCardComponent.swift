@@ -15,6 +15,9 @@ struct TitleCardComponent: View {
                     image
                         .resizable()
                         .transition(.asymmetric(insertion: .wipe(angle: .degrees(45), blurRadius: 10), removal: .wipe(angle: .degrees(225), blurRadius: 10)))
+                } else if state.error != nil && !model.poster.isEmpty {
+                    // A skeleton card has no poster URL, so its "error" is no request at all; it keeps the shimmer.
+                    MissingPoster()
                 } else {
                     Rectangle()
                         .foregroundStyle(.quinary)
@@ -99,4 +102,18 @@ struct TitleBadge: View {
 extension MovieSimple {
     /// Skeleton card while a listing loads: no poster URL, so the card shows its shimmer; the text is redacted.
     static let placeholder = MovieSimple(id: "", name: "Название фильма", details: "2026, Страна, Жанр", poster: "")
+}
+
+/// improvement: a poster that can't load ends here, a film symbol on the loading fill, instead of a shimmer or grey
+/// fill that looks like it is still coming.
+struct MissingPoster: View {
+    var body: some View {
+        Rectangle()
+            .foregroundStyle(.quinary)
+            .overlay {
+                Image(systemName: "film")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
+    }
 }

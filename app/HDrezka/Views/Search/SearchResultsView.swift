@@ -55,7 +55,7 @@ struct SearchResultsView: View {
 
     private func search() {
         phase = .loading
-        AF.request(SearchView.Request.full(mirror: settingStore, query: request, version: remoteVersion))
+        siteSession.request(SearchView.Request.full(mirror: settingStore, query: request, version: remoteVersion))
             .responseString { response in
                 print(response)
                 Task { @MainActor in

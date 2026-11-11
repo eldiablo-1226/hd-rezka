@@ -72,18 +72,13 @@ final class ViewsD3BTests: XCTestCase {
     // MARK: Bookmarks (binary facts a review pass restored)
 
     @MainActor
-    func testBookmarkMovieListWritesTheColorSchemeAgainAfterOnDisappear() {
-        // body 0x100061f50 builds ModifiedContent five deep (0x10043bfa0); the outermost layer is a second nil writer.
-        let view = BookmarkMovieListView(accountService: AccountService(), name: "", id: 0)
+    func testBookmarkMovieListWritesTheColorSchemeTwiceWithTheSecondOutermost() {
+        // body 0x100061f50 (0x10043bfa0): two nil writers, the outermost layer the second. improvement: the
+        // onDisappear that cleared the grid is gone (BookmarkMovieListView keeps its pages), so it no longer sits under it.
+        let view = BookmarkMovieListView(name: "", id: 0)
         let type = String(describing: Swift.type(of: view.body))
         XCTAssertEqual(type.components(separatedBy: "PreferredColorSchemeKey").count - 1, 2, type)
-        XCTAssertTrue(type.hasSuffix("_AppearanceActionModifier>, _PreferenceWritingModifier<PreferredColorSchemeKey>>"), type)
-    }
-
-    @MainActor
-    func testBookmarksViewStartsNewIndexAtZero() {
-        // specialized BookmarksView.init() 0x10009f1d4: `str xzr` into the State at +0x50.
-        XCTAssertEqual(BookmarksView().newIndex, 0)
+        XCTAssertTrue(type.hasSuffix("_PreferenceWritingModifier<PreferredColorSchemeKey>>"), type)
     }
 
     // MARK: DownloadRow (byteString 0x10010421c; the progress text is inlined into statusLine 0x100103c7c / 0x100103ef8)

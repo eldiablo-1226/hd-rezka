@@ -63,7 +63,6 @@
 "key_editor" = "Монтажер";
 "key_email" = "Почта";
 "key_email+already+taken" = "Эта почта не может быть использована для регистрации";
-"key_enter_name" = "Введите имя";
 "key_episodes+schedule" = "Расписание серий";
 "key_error" = "Ошибка";
 "key_failed" = "Ошибка";
@@ -78,7 +77,7 @@
 "key_mail+not+valid" = "Некорректный почтовый адрес";
 "key_more" = "больше";
 "key_no" = "Нет";
-"key_no+cat" = "Категорий пока нет. Создайте их в разделе «Закладки» профиля.";
+"key_no+cat" = "Категорий пока нет. Создайте первую — фильм сразу попадёт в неё.";
 "key_no_subtitles" = "Без субтитров";
 "key_not_logged_in" = "Вы не вошли";
 "key_nothing+found" = "Ничего не найдено";
@@ -209,3 +208,20 @@
 "key_mirror_custom_footer" = "Адрес без https://, например rezka.ag. Личное зеркало можно получить, написав на [mirror@hdrezka.org](mailto:mirror@hdrezka.org).";
 "key_add_to_bookmarks" = "В закладки";
 "key_bookmark_failed" = "Не удалось сохранить. Проверьте подключение и попробуйте ещё раз.";
+"key_new_category" = "Новая категория";
+"key_category_name" = "Название";
+"key_bookmark_rejected" = "Сайт не принял изменение: похоже, вход на этом зеркале истёк. Войдите снова.";
+"key_category_create_failed" = "Не удалось создать категорию.";
+"key_category_delete_title %@" = "Удалить категорию «%@» вместе с закладками?";
+"key_category_delete_message" = "Это нельзя отменить.";
+"key_category_delete_failed" = "Не удалось удалить категорию.";
+"key_category_rename_title" = "Переименовать категорию";
+"key_category_rename_failed" = "Не удалось переименовать категорию.";
+"key_category_reorder_failed" = "Не удалось сохранить порядок категорий.";
+"key_no_categories_title" = "Категорий пока нет";
+"key_no_categories_text" = "Создайте категорию, чтобы раскладывать по ней фильмы и сериалы.";
+"key_category_empty_title" = "В этой категории пока пусто";
+"key_category_empty_text" = "Фильм попадает сюда кнопкой «В закладки» на его странице.";
+"key_slow_site %@" = "%@ отвечает медленно…";
+"key_continue_hint" = "Открывает страницу на «Смотреть»";
+"key_listing_hint" = "Выбрать, что показывать на главной";

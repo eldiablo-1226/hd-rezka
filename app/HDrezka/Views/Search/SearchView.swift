@@ -32,7 +32,7 @@ struct SearchView: View {
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             guard typed == search else { return }
-                            AF.request(Request.quick(mirror: settingStore, query: typed, version: remoteVersion))
+                            siteSession.request(Request.quick(mirror: settingStore, query: typed, version: remoteVersion))
                                 .responseString { response in
                                     Task { @MainActor in
                                         guard typed == search else { return }

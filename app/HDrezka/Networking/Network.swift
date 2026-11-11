@@ -34,7 +34,7 @@ class Network: ObservableObject {
     func fetchMovies(page: Int, filter: String) async throws {
         lastMoviesRequest = (page, filter)
         let generation = moviesGeneration
-        AF.request(moviesURL(page: page, filter: filter), headers: siteHeaders(version: remoteVersion, contentType: false))
+        siteSession.request(moviesURL(page: page, filter: filter), headers: siteHeaders(version: remoteVersion, contentType: false))
             .responseString { response in
                 self.receivePage(response.value,
                                  failure: PageLoadFailure(error: response.error, statusCode: response.response?.statusCode),
@@ -248,6 +248,21 @@ private extension Element {
 // The original repeated `AF.request(url, method:, parameters:, encoder:, headers:).responseString`
 // inside a checked continuation in every method; these build the same request and await its body.
 
+/// improvement: how long a site request may go without data before it fails. 1.6.0 used Alamofire's 60 s, so a mirror
+/// that silently dropped traffic kept the shimmer or the spinner for a minute; its error screen now comes after 15 s.
+let siteTimeout: TimeInterval = 15
+
+/// The request with the site timeout; `siteSession` applies it to every request it sends.
+func withSiteTimeout(_ request: URLRequest) -> URLRequest {
+    var request = request
+    request.timeoutInterval = siteTimeout
+    return request
+}
+
+/// Every site request goes through this session: Alamofire's defaults (the shared cookie store, so the login carries
+/// over, and the User-Agent the mirrors expect) plus the site timeout.
+let siteSession = Session(interceptor: Adapter { request, _, completion in completion(.success(withSiteTimeout(request))) })
+
 /// Headers of every site request; most calls also send the form Content-Type, even GETs.
 func siteHeaders(version: String, contentType: Bool) -> HTTPHeaders {
     contentType
@@ -268,7 +283,7 @@ func siteRequest(_ url: String, _ method: HTTPMethod = .get, _ parameters: [Stri
 func siteString(_ request: URLRequest) async throws -> String {
     try await withCheckedThrowingContinuation { continuation in
         // improvement: a non-2xx answer fails with its status code, so error screens can tell 403 and 5xx apart.
-        AF.request(request).validate(statusCode: 200..<300).responseString { response in
+        siteSession.request(request).validate(statusCode: 200..<300).responseString { response in
             switch response.result {
             case .success(let body): continuation.resume(returning: body)
             case .failure(let error): continuation.resume(throwing: error)

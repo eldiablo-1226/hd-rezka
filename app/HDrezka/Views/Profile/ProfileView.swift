@@ -83,7 +83,8 @@ struct ProfileView: View {
                     Label("key_bookmarks", systemImage: "bookmark")
                 }
                 NavigationLink(destination: SeriesUpdateView()) {
-                    Label("key_series_updates", systemImage: "bell.badge")
+                    // improvement: a plain bell; bell.badge drew a "new" dot whether or not a series had new episodes.
+                    Label("key_series_updates", systemImage: "bell")
                 }
             }
         }

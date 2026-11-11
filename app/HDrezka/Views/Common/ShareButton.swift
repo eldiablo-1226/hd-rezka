@@ -1,7 +1,10 @@
 import SwiftUI
 
-/// Shares the film open in DetailsView (`SharedFilmId.id`) as a site link, an hdr:// link or both (0x10010f254…0x11168c).
+/// Shares the page's film as a site link, an hdr:// link or both (0x10010f254…0x11168c).
+/// improvement: the page passes its own URL; 1.6.0 read a global "open film", which after going back from another film
+/// still held that other one.
 struct ShareButton: View {
+    var filmId: String
     @AppStorage("shareMenuVariation") var shareMenuVariation: ShareMenuVariation = .url
     @Environment(\.presentationMode) var presentationMode
     @State var hasBeenShownAtLeastOnce: Bool = false
@@ -11,10 +14,10 @@ struct ShareButton: View {
             switch shareMenuVariation {
             case .selectOption:
                 Menu {
-                    ShareLink(item: URL(string: Self.siteLink(SharedFilmId.id))!) {
+                    ShareLink(item: URL(string: Self.siteLink(filmId))!) {
                         Text("key_share+with+url")
                     }
-                    ShareLink(item: URL(string: Self.universalLink(SharedFilmId.id))!) {
+                    ShareLink(item: URL(string: Self.universalLink(filmId))!) {
                         Text("key_share+with+universal+link")
                     }
                 } label: {
@@ -22,10 +25,10 @@ struct ShareButton: View {
                 }
                 .onAppear { hasBeenShownAtLeastOnce = true }
             case .url:
-                ShareLink(item: URL(string: Self.siteLink(SharedFilmId.id))!) { label }
+                ShareLink(item: URL(string: Self.siteLink(filmId))!) { label }
                     .onAppear { hasBeenShownAtLeastOnce = true }
             case .universalLink:
-                ShareLink(item: URL(string: Self.universalLink(SharedFilmId.id))!) { label }
+                ShareLink(item: URL(string: Self.universalLink(filmId))!) { label }
                     .onAppear { hasBeenShownAtLeastOnce = true }
             }
         }

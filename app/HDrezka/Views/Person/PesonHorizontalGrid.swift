@@ -27,7 +27,7 @@ struct PesonHorizontalGrid: View {
                 LazyHStack {
                     ForEach(movies.prefix(15)) { movie in
                         NavigationLink {
-                            DetailsView(id: movie.id)
+                            DetailsView(id: movie.id, preview: movie)
                                 .onAppear { isNavigated = true }
                                 .onDisappear { isNavigated = false }
                         } label: {

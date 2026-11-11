@@ -8,7 +8,7 @@ struct SearchGridComponent: View {
     var body: some View {
         LazyVGrid(columns: columns) {
             ForEach(network.search) { movie in
-                NavigationLink(destination: DetailsView(id: movie.id)) {
+                NavigationLink(destination: DetailsView(id: movie.id, preview: movie)) {
                     TitleCardComponent(model: movie)
                 }
                 .buttonStyle(.plain)

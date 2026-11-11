@@ -11,7 +11,7 @@ struct PersonGridComponent: View {
             LazyVGrid(columns: columns) {
                 ForEach(movies) { movie in
                     NavigationLink {
-                        DetailsView(id: movie.id)
+                        DetailsView(id: movie.id, preview: movie)
                     } label: {
                         TitleCardComponent(model: movie)
                     }

@@ -1,10 +1,5 @@
 import Foundation
 
-/// URL of the film currently open in DetailsView; ShareButton reads it.
-class SharedFilmId {
-    static var id: String = ""
-}
-
 class SystemVersion {
     let os: OperatingSystemVersion
     let osString: String

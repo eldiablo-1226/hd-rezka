@@ -13,9 +13,13 @@ struct TitleGridComponent: View {
             PageLoadFailedView(failure: network.moviesLoadFailure) { network.retryMovies() }
                 .padding()
         } else {
+            if network.movies.isEmpty {
+                SlowLoadNotice()
+                    .padding(.horizontal)
+            }
             LazyVGrid(columns: columns) {
                 ForEach(network.movies) { movie in
-                    NavigationLink(destination: DetailsView(id: movie.id)) {
+                    NavigationLink(destination: DetailsView(id: movie.id, preview: movie)) {
                         TitleCardComponent(model: movie)
                     }
                     .buttonStyle(.plain)
