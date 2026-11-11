@@ -236,7 +236,7 @@ struct DetailsWatchPanel: View {
             HStack(spacing: DesignTokens.space8) { secondaryButtons }
             VStack(spacing: DesignTokens.space8) { secondaryButtons }
         }
-        .buttonStyle(.bordered)
+        .secondaryButtonStyle()
         .buttonBorderShape(.roundedRectangle(radius: DesignTokens.radiusButton))
         .tint(.primary)
     }
@@ -249,7 +249,7 @@ struct DetailsWatchPanel: View {
             }
         }
         Button(action: bookmark) {
-            secondaryLabel(isBookmarked ? "key_in_bookmarks" : "key_bookmarks",
+            secondaryLabel(isBookmarked ? "key_in_bookmarks" : "key_add_to_bookmarks",
                            systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
         }
     }
@@ -374,7 +374,7 @@ struct PrimaryActionButton: View {
             .padding(.vertical, DesignTokens.space4)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         }
-        .buttonStyle(.borderedProminent)
+        .primaryButtonStyle()
         .buttonBorderShape(.roundedRectangle(radius: DesignTokens.radiusButton))
         .controlSize(.large)
         // The light accent in both appearances: white on the dark accent (#FF5A26) is about 3:1, on #D92D00 about 4.9:1.

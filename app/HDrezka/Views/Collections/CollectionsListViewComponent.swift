@@ -3,7 +3,8 @@ import AlertKit
 
 /// iPhone list of collections, two per row; the card of the last loaded collection loads the next page.
 struct CollectionsListViewComponent: View {
-    var columns: [GridItem] = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+    // Top-aligned: a one-line name keeps its count right under it, and the covers of a row stay level.
+    var columns: [GridItem] = [GridItem(.flexible(), spacing: 10, alignment: .top), GridItem(.flexible(), spacing: 10, alignment: .top)]
     @State var page: Int = 1
     @Binding var isPresented: Bool
     @Binding var id: String

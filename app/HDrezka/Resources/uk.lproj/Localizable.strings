@@ -37,7 +37,6 @@
 "key_background_url_session+unstable" = "Завантаження файлів у фоновому режимі (нестабільно)";
 "key_behavior" = "Поведінка";
 "key_bookmarks" = "Закладки";
-"key_bookmarks_description" = "Дивіться обрані та фільми, збережені раніше";
 "key_buy" = "Придбати";
 "key_cancel" = "Скасувати";
 "key_career" = "Кар'єра";
@@ -79,7 +78,7 @@
 "key_mail+not+valid" = "Некоректна поштова адреса";
 "key_more" = "більше";
 "key_no" = "Ні";
-"key_no+cat" = "Ви не маєте категорій! спробуйте створити її у розділі \"закладки\"";
+"key_no+cat" = "Категорій поки немає. Створіть їх у розділі «Закладки» профілю.";
 "key_no_subtitles" = "Без субтитрів";
 "key_not_logged_in" = "Ви не увійшли";
 "key_nothing+found" = "Нічого не знайдено";
@@ -116,7 +115,6 @@
 "key_section.history.footer" = "Якщо цю опцію вимкнено, переглянутий контент не зберігатиметься у «додивитися»";
 "key_select_quality" = "Виберіть якість";
 "key_series_updates" = "Оновлення серіалів";
-"key_series_updates_description" = "Відстежуйте вихід нових епізодів у серіалів, які Ви дивіться";
 "key_share+with+universal+link" = "Універсальне посилання";
 "key_share+with+url" = "Сайт";
 "key_shareMenuVariation" = "Вид меню «Поділитися»";
@@ -137,7 +135,6 @@
 "key_username+already+taken" = "Ім'я користувача вже зайняте";
 "key_watch" = "Дивитися";
 "key_watch_later" = "Дивитися пізніше";
-"key_watch_later_description" = "Продовжуйте дивитися фільми та серіали з місця, на якому зупинилися";
 "key_wrong+password+length" = "Пароль повинен бути не менше 6 символів";
 "key_wrong+username+lenght" = "Ім'я користувача повинне бути від 3 до 30 символів";
 "key_wrong_login_or_password" = "Невірний логін або пароль";
@@ -166,7 +163,6 @@
 "key_unreachable_title" = "Сайт не відповідає";
 "key_refresh_failed" = "Не вдалося оновити";
 "key_login_network_error" = "Не вдалося зв’язатися з сайтом. Перевірте інтернет або змініть дзеркало в налаштуваннях.";
-"key_voice_and_quality" = "Озвучення";
 "key_episode_and_voice" = "Серії";
 "key_in_bookmarks" = "У закладках";
 "key_cast" = "У ролях";
@@ -211,3 +207,5 @@
 "key_mirror_custom" = "Своя адреса";
 "key_mirror_custom_placeholder" = "Адреса дзеркала";
 "key_mirror_custom_footer" = "Адреса без https://, наприклад rezka.ag. Особисте дзеркало можна отримати, написавши на [mirror@hdrezka.org](mailto:mirror@hdrezka.org).";
+"key_add_to_bookmarks" = "До закладок";
+"key_bookmark_failed" = "Не вдалося зберегти. Перевірте з’єднання і спробуйте ще раз.";

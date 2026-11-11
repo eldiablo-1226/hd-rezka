@@ -25,73 +25,14 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            // improvement: scrolls instead of truncating every card at accessibility sizes; the minimum height
-            // keeps the login prompt centred and the cards at the top, as before.
-            GeometryReader { proxy in
-                ScrollView {
-                    VStack {
-                        if !isLoggedIn {
-                            VStack {
-                                Text("key_not_logged_in")
-                                    .font(.title)
-                                    .bold()
-                                    .padding(5)
-                                Text("key_login_description")
-                                    .multilineTextAlignment(.center)
-                                    .padding(.bottom)
-                                // improvement: system buttons; 1.6.0 drew its own rounded rectangle behind accent text.
-                                NavigationLink(destination: LogInView(accountService: AccountService())) {
-                                    Text("login")
-                                        .frame(maxWidth: 280)
-                                }
-                                .buttonStyle(.borderedProminent)
-                                // The fill, not the tint: white on the dark-mode tint is about 3:1.
-                                .tint(Color("AccentFill"))
-                                .controlSize(.large)
-                                Text("Or")
-                                    .foregroundStyle(.secondary)
-                                    .padding(.vertical, 8)
-                                NavigationLink(destination: RegisterView()) {
-                                    Text("key_register")
-                                        .frame(maxWidth: 280)
-                                }
-                                .buttonStyle(.bordered)
-                                .tint(.primary)
-                                .controlSize(.large)
-                            }
-                            // iOS 26 draws large bordered buttons as capsules; DESIGN.md keeps capsules for list chips.
-                            .buttonBorderShape(.roundedRectangle(radius: DesignTokens.radiusButton))
-                        } else {
-                            if let status = PremiumStatus(raw: hasPremium) {
-                                PremiumCard(status: status)
-                                    .padding(.bottom, 10)
-                            }
-                            NavigationLink(destination:
-                                WatchLaterView()
-                                    .environmentObject(AccountParser())) {
-                                AccountCardViewComponent(name: "key_watch_later", desc: "key_watch_later_description", image: "clock")
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.bottom, 10)
-                            NavigationLink(destination:
-                                BookmarksView()
-                                    .environmentObject(AccountParser())) {
-                                AccountCardViewComponent(name: "key_bookmarks", desc: "key_bookmarks_description", image: "bookmark")
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.bottom, 10)
-                            NavigationLink(destination: SeriesUpdateView()) {
-                                AccountCardViewComponent(name: "key_series_updates", desc: "key_series_updates_description", image: "bell.badge")
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.bottom, 10)
-                            Spacer()
-                        }
-                    }
-                    .padding()
-                    .frame(minHeight: proxy.size.height, alignment: isLoggedIn ? .top : .center)
+            Group {
+                if isLoggedIn {
+                    accountList
+                } else {
+                    loginPrompt
                 }
             }
+            .navigationTitle("key_profile")
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     // improvement: named icons (VoiceOver read the symbol names).
@@ -121,6 +62,69 @@ struct ProfileView: View {
             }
             .navigationDestination(isPresented: $isPresentedDetail) {
                 DetailsView(id: id)
+            }
+        }
+    }
+
+    /// improvement: a system list. 1.6.0 drew a grey card per section, each with a line of description the people
+    /// who use this app don't need.
+    private var accountList: some View {
+        List {
+            if let status = PremiumStatus(raw: hasPremium) {
+                Section {
+                    PremiumCard(status: status)
+                }
+            }
+            Section {
+                NavigationLink(destination: WatchLaterView().environmentObject(AccountParser())) {
+                    Label("key_watch_later", systemImage: "clock")
+                }
+                NavigationLink(destination: BookmarksView().environmentObject(AccountParser())) {
+                    Label("key_bookmarks", systemImage: "bookmark")
+                }
+                NavigationLink(destination: SeriesUpdateView()) {
+                    Label("key_series_updates", systemImage: "bell.badge")
+                }
+            }
+        }
+    }
+
+    // improvement: scrolls instead of truncating at accessibility sizes; the minimum height keeps it centred.
+    private var loginPrompt: some View {
+        GeometryReader { proxy in
+            ScrollView {
+                VStack {
+                    Text("key_not_logged_in")
+                        .font(.title)
+                        .bold()
+                        .padding(5)
+                    Text("key_login_description")
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom)
+                    // improvement: system buttons; 1.6.0 drew its own rounded rectangle behind accent text.
+                    NavigationLink(destination: LogInView(accountService: AccountService())) {
+                        Text("login")
+                            .frame(maxWidth: 280)
+                    }
+                    .primaryButtonStyle()
+                    // The fill, not the tint: white on the dark-mode tint is about 3:1.
+                    .tint(Color("AccentFill"))
+                    .controlSize(.large)
+                    Text("Or")
+                        .foregroundStyle(.secondary)
+                        .padding(.vertical, 8)
+                    NavigationLink(destination: RegisterView()) {
+                        Text("key_register")
+                            .frame(maxWidth: 280)
+                    }
+                    .secondaryButtonStyle()
+                    .tint(.primary)
+                    .controlSize(.large)
+                }
+                // The bordered styles before iOS 26; glass is a capsule there.
+                .buttonBorderShape(.roundedRectangle(radius: DesignTokens.radiusButton))
+                .padding()
+                .frame(minHeight: proxy.size.height)
             }
         }
     }

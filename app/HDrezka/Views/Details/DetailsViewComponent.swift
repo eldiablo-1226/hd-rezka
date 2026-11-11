@@ -179,7 +179,7 @@ struct DetailsViewComponent: View {
         }
         .sheet(isPresented: $isPresentedBookmarksSheet) {
             BookmarksSelectionListViewComponent(bookmarks: $bookmarks)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $isPresentedScheduleSheet) {

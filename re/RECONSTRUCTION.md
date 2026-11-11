@@ -57,6 +57,10 @@ Reading pseudocode:
   fine; never call `open_binary` or `close_binary`. The decompiled files are canonical.
 - Build: `cd app && ./build.sh <tag>` (own DerivedData `../.build/dd-<tag>`, shared SPM checkout).
 - Tests: `cd app && SIM_ID=<your simulator UDID> ONLY=<YourTestClass> ./build.sh <tag> test`.
+- IPA: `cd app && ./build-ipa.sh` writes an unsigned Release IPA to `../.build/ipa/HDrezka.ipa`. CI runs the
+  same script on every push to main that touches `app/` and publishes the IPA as a GitHub release
+  (`.github/workflows/release-ipa.yml`). Package versions come from the tracked `app/Package.resolved`, which
+  `regen.sh` copies into the project.
 - TDD for logic: write a failing XCTest first (parsers, decoders, playlist builders, URL/param
   builders, file naming), then the code. Pure SwiftUI layout is verified by building.
 - Parser fixtures: put HTML in `app/HDrezkaTests/Fixtures/` and load it via

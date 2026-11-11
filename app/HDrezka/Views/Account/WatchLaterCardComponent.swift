@@ -66,7 +66,7 @@ struct WatchLaterCardComponent: View {
                                 .frame(maxWidth: .infinity)
                         }
                         // Tinted, not filled: a filled accent button on every card made the list shout.
-                        .buttonStyle(.bordered)
+                        .secondaryButtonStyle()
                         .tint(.accentColor)
                         .buttonBorderShape(.roundedRectangle(radius: DesignTokens.radiusButton))
                     }
@@ -80,7 +80,7 @@ struct WatchLaterCardComponent: View {
                         } label: {
                             Text("key_delete").bold().frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
+                        .primaryButtonStyle()
                         .accessibilityFocused($isDeleteFocused)
                         .onAppear { isDeleteFocused = true }
                         Spacer()
@@ -92,7 +92,7 @@ struct WatchLaterCardComponent: View {
                                 .foregroundStyle(.primary)
                         }
                         .foregroundStyle(.secondary)
-                        .buttonStyle(.bordered)
+                        .secondaryButtonStyle()
                     }
                     .frame(maxWidth: .infinity)
                 }

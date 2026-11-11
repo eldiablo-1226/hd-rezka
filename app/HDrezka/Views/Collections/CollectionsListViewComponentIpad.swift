@@ -3,7 +3,8 @@ import AlertKit
 
 /// iPad list of collections: only the first page is loaded (no paging in the original).
 struct CollectionsListViewComponentIpad: View {
-    var columns: [GridItem] = [GridItem(.adaptive(minimum: 160), spacing: 16)]
+    // Top-aligned: a one-line name keeps its count right under it, and the covers of a row stay level.
+    var columns: [GridItem] = [GridItem(.adaptive(minimum: 160), spacing: 16, alignment: .top)]
     @Binding var isPresented: Bool
     @Binding var id: String
     @EnvironmentObject var collectionsParser: CollectionsParser

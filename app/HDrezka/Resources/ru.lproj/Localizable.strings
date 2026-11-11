@@ -37,7 +37,6 @@
 "key_background_url_session+unstable" = "Загрузка файлов в фоновом режиме (нестабильно)";
 "key_behavior" = "Поведение";
 "key_bookmarks" = "Закладки";
-"key_bookmarks_description" = "Смотрите избранные или отложенные фильмы, сохранённые ранее";
 "key_buy" = "Приобрести";
 "key_cancel" = "Отмена";
 "key_career" = "Карьера";
@@ -79,7 +78,7 @@
 "key_mail+not+valid" = "Некорректный почтовый адрес";
 "key_more" = "больше";
 "key_no" = "Нет";
-"key_no+cat" = "У вас нет категорий! попробуйте создать её в разделе \"закладки\"";
+"key_no+cat" = "Категорий пока нет. Создайте их в разделе «Закладки» профиля.";
 "key_no_subtitles" = "Без субтитров";
 "key_not_logged_in" = "Вы не вошли";
 "key_nothing+found" = "Ничего не найдено";
@@ -116,7 +115,6 @@
 "key_section.history.footer" = "Если эта опция выключена, просмотренный контент не будет сохраняться в «досмотреть»";
 "key_select_quality" = "Выберите качество";
 "key_series_updates" = "Обновления сериалов";
-"key_series_updates_description" = "Отслеживайте выход новых эпизодов у сериалов, которые вы смотрите";
 "key_share+with+universal+link" = "Универсальная ссылка";
 "key_share+with+url" = "Сайт";
 "key_shareMenuVariation" = "Вид меню «Поделиться»";
@@ -137,7 +135,6 @@
 "key_username+already+taken" = "Имя пользователя уже занято";
 "key_watch" = "Смотреть";
 "key_watch_later" = "Досмотреть";
-"key_watch_later_description" = "Продолжайте смотреть фильмы и сериалы с места, на котором остановились";
 "key_wrong+password+length" = "Пароль должен быть как минимум 6 символов в длину";
 "key_wrong+username+lenght" = "Имя пользователя должно быть от 3 до 30 символов в длину";
 "key_wrong_login_or_password" = "Неверный логин или пароль";
@@ -166,7 +163,6 @@
 "key_unreachable_title" = "Сайт не отвечает";
 "key_refresh_failed" = "Не удалось обновить";
 "key_login_network_error" = "Не удалось связаться с сайтом. Проверьте интернет или смените зеркало в настройках.";
-"key_voice_and_quality" = "Озвучка";
 "key_episode_and_voice" = "Серии";
 "key_in_bookmarks" = "В закладках";
 "key_cast" = "В ролях";
@@ -211,3 +207,5 @@
 "key_mirror_custom" = "Свой адрес";
 "key_mirror_custom_placeholder" = "Адрес зеркала";
 "key_mirror_custom_footer" = "Адрес без https://, например rezka.ag. Личное зеркало можно получить, написав на [mirror@hdrezka.org](mailto:mirror@hdrezka.org).";
+"key_add_to_bookmarks" = "В закладки";
+"key_bookmark_failed" = "Не удалось сохранить. Проверьте подключение и попробуйте ещё раз.";

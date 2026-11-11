@@ -13,7 +13,8 @@ struct DownloadsView: View {
                         playing = download
                     }
                 }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                // improvement: no full swipe, so a file that took time and traffic goes only with a tap on «Удалить».
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
                         downloadManager.delete(download)
                     } label: {

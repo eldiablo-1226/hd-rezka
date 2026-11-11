@@ -3,75 +3,85 @@ import SwiftUI
 struct BookmarksSelectionListViewComponent: View {
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
     @Binding var bookmarks: [Bookmark: Bool]
+    @State private var saveFailed = false
 
     // Bookmark categories of the open movie; a tap sends add_post for SharedFilmId.id and flips the mark (0x1000686e8).
+    // improvement: a system list with a trailing checkmark (1.6.0 drew its own grey rounded rows), and a failed request
+    // takes the mark back and says so instead of showing a change the site never made.
     var body: some View {
         NavigationStack {
-            if isLoggedIn {
-                if !bookmarks.isEmpty {
-                    ScrollView(.vertical, showsIndicators: true) {
-                        // improvement: categories in the site's order (their ids); a Dictionary's order changed between openings.
-                        ForEach(bookmarks.sorted { $0.key.id < $1.key.id }, id: \.key) { bookmark in
-                            row(bookmark)
-                                .padding(.bottom, 6)
-                        }
-                        .navigationTitle("key_bookmarks")
-                        // shortcut: display mode argument not decoded (call at 0x1000692ec), read the value passed in x0 there
-                        .navigationBarTitleDisplayMode(.inline)
-                        .frame(maxHeight: .infinity, alignment: .top)
-                        .padding()
-                    }
+            Group {
+                if !isLoggedIn {
+                    notice("key_login+to+add+bookmarks", systemImage: "person.crop.circle")
+                } else if bookmarks.isEmpty {
+                    notice("key_no+cat", systemImage: "bookmark")
                 } else {
-                    VStack {
-                        Image(systemName: "bookmark")
-                            .font(.largeTitle)
-                        HStack {
-                            Text("key_no+cat")
-                                .bold()
-                                .multilineTextAlignment(.center)
+                    List {
+                        Section {
+                            // improvement: categories in the site's order (their ids); a Dictionary's order changed between openings.
+                            ForEach(bookmarks.sorted { $0.key.id < $1.key.id }, id: \.key) { bookmark in
+                                row(bookmark.key, isOn: bookmark.value)
+                            }
+                        } footer: {
+                            if saveFailed {
+                                Text("key_bookmark_failed")
+                            }
                         }
                     }
-                    .padding()
                 }
-            } else {
-                VStack {
-                    Image(systemName: "person.crop.circle")
-                        .font(.largeTitle)
-                    HStack {
-                        Text("key_login+to+add+bookmarks")
-                            .bold()
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .padding()
+            }
+            .navigationTitle("key_bookmarks")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func row(_ category: Bookmark, isOn: Bool) -> some View {
+        Button {
+            toggle(category)
+        } label: {
+            HStack {
+                Text(category.name)
+                    .foregroundStyle(Color.primary)
+                Spacer(minLength: DesignTokens.space8)
+                Image(systemName: "checkmark")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .opacity(isOn ? 1 : 0)
+                    // `.isSelected` says it; VoiceOver read the hidden mark too.
+                    .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+        }
+        .accessibilityAddTraits(isOn ? [.isSelected] : [])
+    }
+
+    /// The mark flips at once; the site's add_post toggles the film in that category, so a failure flips it back.
+    /// A failure is an error or an answer without `success: true`, which is what the site's own script waits for
+    /// (script.673.js, action add_post); a session that isn't valid on this mirror gets a 200 with `success: false`.
+    private func toggle(_ category: Bookmark) {
+        saveFailed = false
+        withAnimation(.default) { bookmarks[category]?.toggle() }
+        Task { @MainActor in
+            let answer = try? await AccountService().addToBookmarks(movieId: Self.postId(filmId: SharedFilmId.id),
+                                                                    bookmarkUserCategory: category.id)
+            if answer?.isSuccess() != true {
+                withAnimation(.default) { bookmarks[category]?.toggle() }
+                saveFailed = true
             }
         }
     }
 
-    // closure #2 in closure #1 in closure #1 (0x100069404); the symbol swap is animated from iOS 17 (closure #3, 0x100069d1c)
-    @ViewBuilder
-    private func row(_ bookmark: (key: Bookmark, value: Bool)) -> some View {
-        let button = Button {
-            Task { @MainActor in
-                try await AccountService().addToBookmarks(movieId: Self.postId(filmId: SharedFilmId.id),
-                                                          bookmarkUserCategory: bookmark.key.id)
-            }
-            withAnimation(.default) {
-                bookmarks[bookmark.key]?.toggle()
-            }
-        } label: {
-            Label(bookmark.key.name, systemImage: bookmark.value ? "bookmark.fill" : "bookmark")
-                .frame(maxWidth: .infinity, alignment: .leading)
+    private func notice(_ text: LocalizedStringKey, systemImage: String) -> some View {
+        VStack(spacing: DesignTokens.space8) {
+            Image(systemName: systemImage)
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+            Text(text)
+                .font(.headline)
+                .multilineTextAlignment(.center)
         }
-        .padding(10)
-        .background(.quinary, in: RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous))
-        .contentShape(Rectangle())
-
-        if #available(iOS 17.0, *) {
-            AnyView(button.contentTransition(.symbolEffect(.replace)))
-        } else {
-            button
-        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// post_id sent to /ajax/favorites/: the last path component of the movie URL up to the first "." (0x1000698dc).

@@ -38,7 +38,7 @@ struct CollectionsCardViewComponent: View {
             }
             .scaledToFill()
             .frame(width: 170, height: 98)
-            .scaleEffect(1.1)
+            // improvement: no 1.1 zoom; the site's 208×120 covers have no border to hide, so it only cropped them.
             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster, style: .continuous))
 
             // improvement: Dynamic Type (1.6.0: a fixed 12 pt in a fixed-height frame), and the number of films the
@@ -46,7 +46,7 @@ struct CollectionsCardViewComponent: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(collection.name)
                     .font(.caption.weight(.medium))
-                    .lineLimit(2, reservesSpace: true)
+                    .lineLimit(2)
                 if collection.count > 0 {
                     Label("\(collection.count)", systemImage: "film.stack")
                         .font(.caption2)

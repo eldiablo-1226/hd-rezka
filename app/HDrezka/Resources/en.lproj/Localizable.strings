@@ -37,7 +37,6 @@
 "key_background_url_session+unstable" = "Downloading files in the background (unstable)";
 "key_behavior" = "Behavior";
 "key_bookmarks" = "Bookmarks";
-"key_bookmarks_description" = "Watch favorites or pending movies saved previously";
 "key_buy" = "Acquire";
 "key_cancel" = "Cancel";
 "key_career" = "Career";
@@ -73,13 +72,13 @@
 "key_infuse_reminder" = "Video will open in Infuse";
 "key_last_releases" = "Latest releases";
 "key_lists" = "Listed in";
-"key_login+to+add+bookmarks" = "Log in to add moves and TV shows to bookmarks";
+"key_login+to+add+bookmarks" = "Log in to add movies and TV shows to bookmarks";
 "key_login_description" = "Authorize to synchronize your series viewing status and track the release of new episodes";
 "key_logout_description" = "Are you sure you want to log out?";
 "key_mail+not+valid" = "Mail is not valid";
 "key_more" = "more";
 "key_no" = "No";
-"key_no+cat" = "You don't have any categories! Try creating one in the \"bookmarks\" section";
+"key_no+cat" = "No categories yet. Create one in Profile → Bookmarks.";
 "key_no_subtitles" = "No subtitles";
 "key_not_logged_in" = "You are not logged in";
 "key_nothing+found" = "Nothing found";
@@ -116,7 +115,6 @@
 "key_section.history.footer" = "If this toggle is disabled, watched content will not be saved to «watch «later».";
 "key_select_quality" = "Select quality";
 "key_series_updates" = "Series updates";
-"key_series_updates_description" = "Track the release of new episodes of the series you watch";
 "key_share+with+universal+link" = "Universal link";
 "key_share+with+url" = "Website";
 "key_shareMenuVariation" = "Share menu type";
@@ -137,7 +135,6 @@
 "key_username+already+taken" = "This username is already taken";
 "key_watch" = "Watch";
 "key_watch_later" = "Watch later";
-"key_watch_later_description" = "Continue watching movies and series where you left off";
 "key_wrong+password+length" = "Password must be at least 6 characters long";
 "key_wrong+username+lenght" = "The username should be between 3 and 30 characters in length";
 "key_wrong_login_or_password" = "Wrong login or password";
@@ -166,7 +163,6 @@
 "key_unreachable_title" = "The site isn’t responding";
 "key_refresh_failed" = "Couldn’t refresh";
 "key_login_network_error" = "Couldn’t reach the site. Check the connection or change the mirror in Settings.";
-"key_voice_and_quality" = "Voice-over";
 "key_episode_and_voice" = "Episodes";
 "key_in_bookmarks" = "In bookmarks";
 "key_cast" = "Cast";
@@ -211,3 +207,5 @@
 "key_mirror_custom" = "Your own address";
 "key_mirror_custom_placeholder" = "Mirror address";
 "key_mirror_custom_footer" = "An address without https://, for example rezka.ag. You can get a personal mirror by emailing [mirror@hdrezka.org](mailto:mirror@hdrezka.org).";
+"key_add_to_bookmarks" = "Bookmark";
+"key_bookmark_failed" = "Couldn’t save. Check the connection and try again.";

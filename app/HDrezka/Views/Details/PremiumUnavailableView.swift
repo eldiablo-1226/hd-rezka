@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PremiumUnavailableView: View {
     @Environment(\.openURL) var openURL
+    @AppStorage("mirror") private var mirror: String = DefaultSettings.mirror
 
     var body: some View {
         VStack {
@@ -13,7 +14,8 @@ struct PremiumUnavailableView: View {
                 .font(.callout)
                 .padding(.bottom, 12)
             Button {
-                openURL(URL(string: "https://hdrezka.ag/payments")!)
+                // improvement: the chosen mirror; 1.6.0 hard-coded hdrezka.ag, which is blocked on some networks.
+                if let url = URL(string: "https://\(mirror)/payments") { openURL(url) }
             } label: {
                 Label("key_buy", systemImage: "star.fill")
                     .labelStyle(TextFirstLabel())
@@ -21,9 +23,11 @@ struct PremiumUnavailableView: View {
                     .padding(6)
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .secondaryButtonStyle()
+            // improvement: the app accent instead of `.tint(.purple)`; set here, since glass draws an untinted label in
+            // the primary colour (`.bordered` used the accent by itself).
+            .tint(.accentColor)
             .padding(.horizontal, 12)
-            // improvement: the app accent instead of `.tint(.purple)`.
             .padding(.bottom, 6)
             Text("key_this+premium+acting+caption")
                 .font(.caption)

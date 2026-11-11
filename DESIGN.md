@@ -63,12 +63,12 @@ components:
     backgroundColor: "{colors.accent-fill}"
     textColor: "{colors.on-accent-fill}"
     typography: "{typography.headline}"
-    rounded: "{rounded.radiusButton}"
+    rounded: "capsule (Liquid Glass, iOS 26+); {rounded.radiusButton} before"
     height: "44pt min"
     width: "100%"
   button-secondary:
     typography: "{typography.label}"
-    rounded: "{rounded.radiusButton}"
+    rounded: "capsule (Liquid Glass, iOS 26+); {rounded.radiusButton} before"
     height: "44pt min"
   chip-list:
     typography: "{typography.subheadline}"
@@ -100,7 +100,7 @@ components:
 
 A dense, informative catalogue that looks like iOS itself. The system's own grounds, bars, segmented controls, menus, forms and selection lists carry the structure; the brand speaks only through one ember accent taken from the app icon and through how much the screen tells you at a glance. Posters, ratings, voice actings, seasons and percentages are the decoration: data sits on posters and in rows, not in marketing cards.
 
-Since the user's decision of 2026-11-11 («боле нативные по гайдлайну iOS, без наворотов»), the world is native per the HIG with no hand-drawn chrome. Toolbar actions are bare SF Symbols that the system bar draws as buttons; back is the system back button with its edge swipe. Actions are `.borderedProminent` and `.bordered` buttons; choices are menu pickers, `Form` rows and lists with a trailing system checkmark. The cinematic Apple TV header (blurred art, white Play, glass buttons) is the rejected default for the title page.
+Since the user's decision of 2026-11-11 («боле нативные по гайдлайну iOS, без наворотов»), the world is native per the HIG with no hand-drawn chrome. Toolbar actions are bare SF Symbols that the system bar draws as buttons; back is the system back button with its edge swipe. Actions are the system's Liquid Glass buttons on iOS 26 and later (`.glassProminent` for the one primary action, `.glass` for the rest; the user's choice of 2026-11-11, «кнопки в liquid»), and `.borderedProminent` / `.bordered` before it; choices are menu pickers, `Form` rows and lists with a trailing system checkmark. The cinematic Apple TV header (blurred art over the whole top, a white Play) is still the rejected default for the title page.
 
 Density is high but legible: an 8 pt grid, Dynamic Type text styles everywhere, monospaced digits wherever numbers line up, and layouts that restack at accessibility sizes instead of truncating.
 
@@ -156,26 +156,26 @@ An 8 pt grid (4, 8, 16, 24). System horizontal margins (`.padding(.horizontal)`)
 
 ## Elevation & Depth
 
-Flat. No shadows anywhere in the system. Depth comes only from the platform: the toolbar and tab bar glass, sheet presentation, the pinned segment sitting on `systemBackground` under the bar's scroll edge. Loading states are quiet `.quinary` fills.
+Flat. No shadows anywhere in the system. Depth comes only from the platform: the toolbar and tab bar glass, the system glass button styles, the trailer's glass play disc, sheet presentation, the pinned segment sitting on `systemBackground` under the bar's scroll edge. Loading states are quiet `.quinary` fills.
 
 ### Named Rules
 **The System Depth Rule.** Only system bars, sheets and materials create depth; views add no shadows or hand-rolled blur.
 
 ## Shapes
 
-Continuous rounded rectangles on a concentric scale: posters at radiusPoster, buttons and the trailer tile at radiusButton, poster badges at radiusBadge (concentric with the poster at a 4 pt inset). Posters are 2:3, trailers 16:9. Person photos are clipped to circles as content. Capsules appear only as the system border shape of list chips. Controls get no hand-drawn circles, capsules, gauges or badges.
+Continuous rounded rectangles on a concentric scale: posters at radiusPoster, the trailer tile at radiusButton (and buttons before iOS 26), poster badges at radiusBadge (concentric with the poster at a 4 pt inset). Posters are 2:3, trailers 16:9. Person photos are clipped to circles as content. Capsules appear as the system border shape of glass buttons and list chips; the trailer's play symbol sits on a system glass disc. Controls get no hand-drawn circles, capsules, gauges or badges.
 
 ## Components
 
 ### Buttons
 Native and quiet, with one loud exception.
-- **Shape:** gently rounded (radiusButton), via `.buttonBorderShape(.roundedRectangle)`.
-- **Primary:** `PrimaryActionButton`, `.borderedProminent`, `.controlSize(.large)`, full width, tinted Ember Fill with white text: SF Symbol, the title in headline, and a second line in subheadline naming exactly what plays or saves («Сезон 2, Серия 8 · HDrezka Studio · с 23:14»). The second line rewrites itself with a numeric-text transition when the choice changes; a spinner replaces the symbol while loading. The VoiceOver label reads the title plus the second line. One per screen: the page's «Смотреть / Продолжить», the download sheet's «Скачать».
-- **Secondary:** `.bordered`, tinted `.primary` (grey, not ember), label in subheadline medium with a leading SF Symbol, equal widths side by side and stacking when they don't fit («Скачать · В закладки»).
+- **Shape:** capsules on iOS 26 and later, like the bars and the segment around them (`primaryButtonStyle()` / `secondaryButtonStyle()` in Extensions.swift set it), and radiusButton rectangles at accessibility sizes, where wrapped labels would run into a capsule's ends; gently rounded (radiusButton) rectangles with the bordered styles before iOS 26.
+- **Primary:** `PrimaryActionButton`, `primaryButtonStyle()` (`.glassProminent`, `.borderedProminent` before iOS 26), `.controlSize(.large)`, full width, tinted Ember Fill with white text: SF Symbol, the title in headline, and a second line in subheadline naming exactly what plays or saves («Сезон 2, Серия 8 · HDrezka Studio · с 23:14»). The second line rewrites itself with a numeric-text transition when the choice changes; a spinner replaces the symbol while loading. The VoiceOver label reads the title plus the second line. One per screen: the page's «Смотреть / Продолжить», the download sheet's «Скачать».
+- **Secondary:** `secondaryButtonStyle()` (`.glass`, `.bordered` before iOS 26), tinted `.primary` (not ember), label in subheadline medium with a leading SF Symbol, equal widths side by side and stacking when they don't fit («Скачать · В закладки»).
 - **Text actions:** plain buttons in the accent, subheadline medium, 44 pt hit area («Читать полностью», «Все озвучки · N»).
 
 ### Chips
-- **Style:** list chips are `.bordered` buttons with the system capsule border shape, tinted `.primary`, subheadline, one line clamped to column width.
+- **Style:** list chips are `secondaryButtonStyle()` buttons with the system capsule border shape, tinted `.primary`, subheadline, one line clamped to column width.
 - **State:** action only; no selected state.
 
 ### Inputs / Fields
@@ -186,10 +186,13 @@ Native and quiet, with one loud exception.
 Season and episode on the page are system `Menu { Picker }` with the current value as the label, followed by an SF Symbol `chevron.up.chevron.down`, in the accent; side by side, stacking when they don't fit.
 
 ### Selection lists
-`VoiceActingRow`: a full-width plain button with the name (lock symbol when premium can't play), flags under it in caption secondary («Премиум · Экранка · С рекламой»), the popularity percent in subheadline monospaced secondary, and a trailing accent `checkmark` whose space is always reserved. Rows separate with the system divider. Up to four rows, the chosen one in its own place, then «Все озвучки · N». Quality selection in its sheet follows the same trailing-checkmark pattern.
+`VoiceActingRow`: a full-width plain button with the name (lock symbol when premium can't play), flags under it in caption secondary («Премиум · Экранка · С рекламой»), the popularity percent in subheadline monospaced secondary, and a trailing accent `checkmark` whose space is always reserved. Rows separate with the system divider. Up to four rows, the chosen one in its own place, then «Все озвучки · N». Quality selection in its sheet follows the same trailing-checkmark pattern, and so does the bookmark sheet (a system `List`, one row per category, a failed request takes the mark back and says so in the footer).
 
 ### Navigation
-System `NavigationStack` with the inline title appearing in the bar once the header scrolls away; the system back button and edge swipe; bare SF Symbols in toolbar items (share). Tab bar for the top-level sections, which iPadOS draws as the top tab bar.
+System `NavigationStack` with the inline title appearing in the bar once the header scrolls away; the system back button and edge swipe; bare SF Symbols in toolbar items (share). Tab bar for the top-level sections, which iPadOS draws as the top tab bar. The logged-in Profile is an inset-grouped system `List` (Premium row, then «Досмотреть», «Закладки», «Обновления сериалов»), not cards.
+
+### Trailer
+`TrailerTile`: the YouTube thumbnail at 16:9 (radiusButton) with a system glass play disc. A tap plays the trailer in the system full-screen player (AVKit: close, AirPlay, ±10 s, speed); closing it brings the tile back and the next tap resumes. While it starts, a spinner takes the play symbol's place on the same disc. The YouTube web view only feeds that player: on iPhone it sits behind the thumbnail, so YouTube's web chrome never shows; iPad's WebKit plays in place, so there the player takes over the tile. A trailer that YouTube won't embed opens in YouTube after the tap; any other failure stays on the page and the next tap loads the player again. Leaving the page pauses it.
 
 ### Facts strip
 `InfoTabView`: equal cells, caption over Data Value, for IMDb, КиноПоиск (tap opens the rating page), duration and age; four columns, two at accessibility sizes.
@@ -200,7 +203,7 @@ System `NavigationStack` with the inline title appearing in the bar once the hea
 ## Do's and Don'ts
 
 ### Do:
-- **Do** use system controls first: `.borderedProminent` for the one primary action, `.bordered` for the rest, menu pickers for choices, `Form` for input, selection lists with a trailing system checkmark.
+- **Do** use system controls first: `primaryButtonStyle()` (Liquid Glass prominent) for the one primary action, `secondaryButtonStyle()` (glass) for the rest, menu pickers for choices, `Form` for input, selection lists with a trailing system checkmark.
 - **Do** fill the primary button with Ember Fill (AccentFill), never the tint, and give it a second line naming what it will play or save.
 - **Do** use spacing and radii from DesignTokens (4 / 8 / 16 / 24; 4 / 8 / 12) and add a token only when a second view needs the same number.
 - **Do** use Dynamic Type text styles and restack layouts at accessibility sizes; keep every control at least 44 pt.
@@ -213,4 +216,5 @@ System `NavigationStack` with the inline title appearing in the bar once the hea
 - **Don't** use the accent on non-interactive elements or introduce a second accent hue.
 - **Don't** add shadows or hand-rolled blur; depth belongs to system bars and sheets.
 - **Don't** hard-code point sizes for text.
-- **Don't** build the details page as a cinematic Apple TV header with blurred art, a white Play and glass buttons.
+- **Don't** build the details page as a cinematic Apple TV header with blurred art and a white Play.
+- **Don't** play trailers in a sheet or show YouTube's web player: the tile plays in the system full-screen player.

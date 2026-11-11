@@ -1,39 +1,32 @@
 import SwiftUI
 
-/// Premium subscription card at the top of the logged-in profile (0x1000fb7e4).
+/// Premium subscription card at the top of the logged-in profile (0x1000fb7e4). improvement: a row of the profile's
+/// system list, without its own grey card.
 struct PremiumCard: View {
     var status: PremiumStatus
-    @Environment(\.dynamicTypeSize) private var typeSize
 
+    // The list row's own label and value; it stacks them at accessibility sizes, where «Премиум» used to break
+    // mid-word next to the days.
     var body: some View {
-        // Side by side at accessibility sizes «Премиум» broke mid-word next to the days: they stack instead.
-        let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignTokens.space8))
-            : AnyLayout(HStackLayout(spacing: 14))
-        layout {
-            // improvement: the system star; 1.6.0 drew it in a tinted circle with three endlessly twinkling sparkles.
-            Image(systemName: "star.fill")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-                .frame(width: 44, height: 44)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("key_premium")
-                    .bold()
-                Text(status.daysLeft == nil ? "key_premium_active" as LocalizedStringKey : "key_premium_days_left")
-                    .font(.subheadline)
+        LabeledContent {
+            Text(status.displayText)
+                .monospacedDigit()
+                .foregroundStyle(daysColor)
+        } label: {
+            Label {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("key_premium")
+                    Text(status.daysLeft == nil ? "key_premium_active" as LocalizedStringKey : "key_premium_days_left")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            } icon: {
+                // improvement: the system star; 1.6.0 drew it in a tinted circle with three endlessly twinkling sparkles.
+                Image(systemName: "star.fill")
                     .foregroundStyle(.secondary)
             }
-            Spacer()
-            Text(status.displayText)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(daysColor)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(15)
-        .background {
-            RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous)
-                .foregroundStyle(.quinary)
-        }
+        .accessibilityElement(children: .combine)
     }
 
     // improvement: one accent, and only when the subscription is about to run out (1.6.0: orange / gold).

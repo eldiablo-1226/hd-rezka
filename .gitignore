@@ -16,3 +16,6 @@ xcuserdata/
 # Impeccable review captures and decision-page state (regenerated per run)
 .impeccable/review/
 .impeccable/questions/
+
+# Python bytecode from re/tools (embeds local paths)
+__pycache__/

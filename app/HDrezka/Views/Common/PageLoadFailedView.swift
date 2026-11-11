@@ -143,14 +143,14 @@ struct PageLoadFailedView: View {
         // improvement: full-size controls; at the default size they measured under 44 pt.
         if failure == .needsLogin {
             Button("login") { isPresentingLogin = true }
-                .buttonStyle(.borderedProminent)
+                .primaryButtonStyle()
                 // The fill, not the tint: white on the dark-mode tint is about 3:1.
                 .tint(Color("AccentFill"))
                 .controlSize(.large)
         }
         // Grey, as secondary buttons are; the accent marks the one fix (login, or the mirror link).
         Button("key_retry", action: retry)
-            .buttonStyle(.bordered)
+            .secondaryButtonStyle()
             .tint(.primary)
             .controlSize(.large)
         if failure.suggestsMirrorChange {
