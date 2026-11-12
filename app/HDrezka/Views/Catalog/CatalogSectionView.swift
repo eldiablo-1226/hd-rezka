@@ -12,7 +12,7 @@ struct CatalogSectionView: View {
         List {
             Section {
                 NavigationLink {
-                    CatalogListingView(title: NSLocalizedString(section.titleKey, comment: ""), path: section.path)
+                    CatalogListingView(title: NSLocalizedString(section.allKey, comment: ""), path: section.path)
                 } label: {
                     Label(LocalizedStringKey(section.allKey), systemImage: section.symbol)
                 }

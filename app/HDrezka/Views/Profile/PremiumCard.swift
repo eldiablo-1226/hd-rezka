@@ -9,9 +9,19 @@ struct PremiumCard: View {
     // mid-word next to the days.
     var body: some View {
         LabeledContent {
-            Text(status.displayText)
-                .monospacedDigit()
-                .foregroundStyle(daysColor)
+            HStack(spacing: DesignTokens.space4) {
+                // improvement: the system warning symbol when it is about to run out; the days used to turn ember, and
+                // ember marks what can be tapped. The number itself says how many days, so VoiceOver skips the symbol.
+                if status.isRunningOut {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundStyle(.red)
+                        .accessibilityHidden(true)
+                }
+                // Primary, not LabeledContent's secondary value style.
+                Text(status.displayText)
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+            }
         } label: {
             Label {
                 VStack(alignment: .leading, spacing: 2) {
@@ -27,12 +37,6 @@ struct PremiumCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-    }
-
-    // improvement: one accent, and only when the subscription is about to run out (1.6.0: orange / gold).
-    private var daysColor: Color {
-        if let days = status.daysLeft, days <= 3 { return .accentColor }
-        return .primary
     }
 }
 
@@ -68,6 +72,9 @@ struct PremiumStatus {
 }
 
 extension PremiumStatus {
+    /// Three days or fewer left (1.6.0 turned them orange / gold).
+    var isRunningOut: Bool { (daysLeft ?? .max) <= 3 }
+
     // shortcut: name guessed, the binary inlined this into PremiumCard's body (0x1000fbef8); verify only if a symbol turns up.
     /// "<days> <day word>", or the site text when it has no number.
     var displayText: String {

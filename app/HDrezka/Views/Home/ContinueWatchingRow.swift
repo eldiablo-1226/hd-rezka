@@ -85,14 +85,28 @@ enum ContinueWatchingCache {
         return (try? JSONDecoder().decode([MovieWatchLater].self, from: data)) ?? []
     }
 
-    /// The row shows ten at most, so ten are kept.
+    /// The whole list: the row shows ten, and `contains` answers for every title the account is watching.
     static func save(_ items: [MovieWatchLater], to defaults: UserDefaults = .standard) {
-        defaults.set(try? JSONEncoder().encode(Array(items.prefix(10))), forKey: key)
+        defaults.set(try? JSONEncoder().encode(items), forKey: key)
     }
 
     /// On sign-out: the list belongs to the account.
     static func clear(_ defaults: UserDefaults = .standard) {
         defaults.removeObject(forKey: key)
+    }
+
+    /// improvement: the account is watching this title (it's in the site's «Досмотреть»), whichever mirror either id
+    /// was listed on. The page then opens on «Смотреть» even without a position saved on this device.
+    static func contains(_ id: String, in defaults: UserDefaults = .standard) -> Bool {
+        let title = titleKey(id)
+        return load(from: defaults).contains { titleKey($0.id) == title }
+    }
+
+    /// The site's post number («93813» in ".../93813-zakon-alisii-2026.html»): the same on every mirror and with or
+    /// without the "-latest" the site adds to some addresses. The address without its mirror when there is no number.
+    private static func titleKey(_ id: String) -> String {
+        let post = id.getMovieId()
+        return !post.isEmpty && post.allSatisfy(\.isNumber) ? post : id.removeMirror()
     }
 }
 

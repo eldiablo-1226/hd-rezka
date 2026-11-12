@@ -19,7 +19,9 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView(.vertical, showsIndicators: true) {
-                VStack {
+                // improvement: no stack spacing, and the header's 44 pt hit area grows above its text: the grid sat about
+                // 35 pt under «Последние поступления», more than the header sat under the row above it.
+                VStack(spacing: 0) {
                     ContinueWatchingRow(refreshToken: refreshCount)
                     Self.listingMenu($startupPageVariation)
                         .padding(.horizontal)
@@ -100,7 +102,7 @@ struct HomeView: View {
                     // The menu says it's a menu; VoiceOver read the symbol's name too.
                     .accessibilityHidden(true)
             }
-            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .bottomLeading)
             .contentShape(Rectangle())
         }
         .accessibilityHint(Text("key_listing_hint"))

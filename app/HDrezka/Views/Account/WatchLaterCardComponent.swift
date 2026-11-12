@@ -1,128 +1,52 @@
 import SwiftUI
 import NukeUI
 
-/// One "continue watching" card: tap opens the details, a long press switches to delete / cancel
-/// (body 0x10005d5e8, content 0x10005daf0). improvement: a poster, the title before the details, a readable date and
-/// «Продолжить», which opens the page and starts the marked episode at once.
+/// One "continue watching" entry (1.6.0's card, body 0x10005d5e8, content 0x10005daf0): poster, title, the year, what
+/// the site marks as watched, its news about new episodes and the date. improvement: the content of a system list row
+/// in WatchLaterView, which opens the page on «Смотреть» and owns delete (1.6.0: a grey card with its own
+/// «Продолжить», a tap and a long press on its background).
 struct WatchLaterCardComponent: View {
     var movie: MovieWatchLater
-    var moviePosition: Int
-    @State var isRemoveMode: Bool = false
-    @State var isPresented: Bool = false
-    @State var opensOnWatch: Bool = false
-    @State var poster: String? = nil
-    @Binding var movieList: [MovieWatchLater]
+    /// Its removal is on its way to the site.
+    var isRemoving = false
+    @State private var poster: String? = nil
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
-    // improvement: VoiceOver lands on the confirm button when remove mode opens (the card element it was on is gone).
-    @AccessibilityFocusState var isDeleteFocused: Bool
 
     var body: some View {
-        ViewThatFits {
-            VStack {
-                if !isRemoveMode {
-                    // improvement: the tap and long-press gestures live on the background shape, which VoiceOver can't
-                    // reach; the card's text becomes one button-like element with "delete" as a named action.
-                    VStack(alignment: .leading, spacing: DesignTokens.space8) {
-                        HStack(alignment: .top, spacing: DesignTokens.space16) {
-                            WatchLaterPoster(url: poster)
-                            VStack(alignment: .leading, spacing: DesignTokens.space4) {
-                                Text(movie.name)
-                                    .font(.headline)
-                                    .lineLimit(2)
-                                Text(movie.details)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                Text(movie.watchingInfo)
-                                    .font(.subheadline)
-                                    .lineLimit(2)
-                                // The site's "смотреть ещё 5 серий в 1 сезоне": news, not what «Продолжить» plays.
-                                if let buttonText = movie.buttonText {
-                                    // improvement: secondary; the accent is for what can be tapped.
-                                    Text(verbatim: buttonText)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(2)
-                                }
-                                Text(Self.displayDate(movie.date))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityAddTraits(.isButton)
-                        .accessibilityAction { open(onWatch: false) }
-                        .accessibilityAction(named: Text("key_delete")) {
-                            withAnimation(.default.speed(1.2)) { isRemoveMode = true }
-                        }
-                        // Opens the page on «Смотреть», at the episode it marks (where the user stopped).
-                        Button {
-                            open(onWatch: true)
-                        } label: {
-                            Label("key_continue", systemImage: "play.fill")
-                                .font(.subheadline.weight(.semibold))
-                                .frame(maxWidth: .infinity)
-                        }
-                        // Tinted, not filled: a filled accent button on every card made the list shout.
-                        .secondaryButtonStyle()
-                        .tint(.accentColor)
-                        .buttonBorderShape(.roundedRectangle(radius: DesignTokens.radiusButton))
-                    }
-                } else {
-                    HStack {
-                        // improvement: destructive role (VoiceOver announces it; system red). Bold, so white on system
-                        // red (3.4–3.5:1) meets the HIG's 3:1 minimum for bold text (4.5:1 applies to regular ≤17pt).
-                        Button(role: .destructive) {
-                            _ = withAnimation(.default) { movieList.remove(at: moviePosition) }
-                            Task { try await AccountService().removeWatchingItem(item: movie) }
-                        } label: {
-                            Text("key_delete").bold().frame(maxWidth: .infinity)
-                        }
-                        .primaryButtonStyle()
-                        .accessibilityFocused($isDeleteFocused)
-                        .onAppear { isDeleteFocused = true }
-                        Spacer()
-                        Button {
-                            withAnimation(.default) { isRemoveMode = false }
-                        } label: {
-                            Text("key_cancel")
-                                .frame(maxWidth: .infinity)
-                                .foregroundStyle(.primary)
-                        }
+        HStack(alignment: .top, spacing: DesignTokens.space16) {
+            WatchLaterPoster(url: poster)
+            VStack(alignment: .leading, spacing: DesignTokens.space4) {
+                Text(movie.name)
+                    .font(.headline)
+                    .lineLimit(2)
+                Text(movie.details)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                Text(movie.watchingInfo)
+                    .font(.subheadline)
+                    .lineLimit(2)
+                // The site's "смотреть ещё 5 серий в 1 сезоне": news, not what the row plays.
+                if let buttonText = movie.buttonText {
+                    Text(verbatim: buttonText)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
-                        .secondaryButtonStyle()
-                    }
-                    .frame(maxWidth: .infinity)
+                        .lineLimit(2)
                 }
+                Text(Self.displayDate(movie.date))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .padding(15)
-            .background(alignment: .center) {
-                // The gestures sit on the background shape, as in the binary (closure #2 in closure #1).
-                RoundedRectangle(cornerRadius: DesignTokens.radiusButton, style: .continuous)
-                    .foregroundStyle(.quinary)
-                    .onTapGesture {
-                        open(onWatch: false)
-                    }
-                    .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10) {
-                        withAnimation(.default.speed(1.2)) { isRemoveMode = true }
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if isRemoving {
+                ProgressView()
             }
         }
-        .padding(.horizontal)
-        .navigationDestination(isPresented: $isPresented) {
-            DetailsView(id: movie.id, opensOnWatch: opensOnWatch)
-        }
+        .padding(.vertical, DesignTokens.space4)
         .task(id: movie.id) {
             poster = await PosterCache.shared.poster(loading: movie.id, mirror: settingStore, version: remoteVersion)
         }
-    }
-
-    private func open(onWatch: Bool) {
-        opensOnWatch = onWatch
-        isPresented = true
     }
 
     /// improvement: the site's "04-11-2026" as "4 ноября 2026"; "сегодня" / "вчера" and anything else stay as they are.

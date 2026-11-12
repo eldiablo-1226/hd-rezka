@@ -15,6 +15,7 @@ struct MovieListView: View {
     @State var loadFailure: PageLoadFailure? = nil
     @Binding var isPresentedMoreSheet: Bool
     @EnvironmentObject var network: Network
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         NavigationStack {
@@ -32,7 +33,7 @@ struct MovieListView: View {
                             }
                         }
                     } else {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 10)]) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: TitleCardComponent.columnMinimum(typeSize)), spacing: 10)]) {
                             ForEach(list) { movie in
                                 NavigationLink {
                                     DetailsView(id: movie.id, preview: movie).onAppear { navId = movie.id }

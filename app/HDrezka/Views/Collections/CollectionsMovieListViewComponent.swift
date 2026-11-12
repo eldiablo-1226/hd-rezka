@@ -4,7 +4,7 @@ import SwiftUI
 /// improvement: skeleton cards while it loads, then the films, an empty state or the failure with Retry (1.6.0 showed a
 /// blank page until the answer and kept it on a failure).
 struct CollectionsMovieListViewComponent: View {
-    var columns: [GridItem] = [GridItem(.adaptive(minimum: 110), spacing: 10)]
+    @Environment(\.dynamicTypeSize) private var typeSize
     var id: String
     var name: String
     @EnvironmentObject var collectionsParser: CollectionsParser
@@ -16,7 +16,7 @@ struct CollectionsMovieListViewComponent: View {
                 if collectionsParser.moviesInCollections.isEmpty && phase == .loading {
                     SlowLoadNotice()
                 }
-                LazyVGrid(columns: columns) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: TitleCardComponent.columnMinimum(typeSize, phone: 110)), spacing: 10)]) {
                     ForEach(collectionsParser.moviesInCollections) { movie in
                         NavigationLink(destination: DetailsView(id: movie.id, preview: movie)) {
                             TitleCardComponent(model: movie)

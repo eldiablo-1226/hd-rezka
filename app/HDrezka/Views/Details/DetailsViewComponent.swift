@@ -178,6 +178,7 @@ struct DetailsViewComponent: View {
                 // improvement: half height first; the sheet's four pickers and its button fit there.
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+                .opaqueSheetBackground()
         }
         .sheet(isPresented: $isPresentedBookmarksSheet) {
             BookmarksSelectionListViewComponent(bookmarks: $bookmarks, filmId: id, title: title, onSignedIn: reloadAfterSignIn)
@@ -288,8 +289,10 @@ struct DetailsViewComponent: View {
             try await MovieDetailsService().getSeriesSeasons(movieId: id, voiceActing: acting)
         }
         if mode == nil {
-            mode = DetailsMode.initial(canPlay: Self.canPlay(detail), opensOnWatch: opensOnWatch,
-                                       hasProgress: PlaybackProgressStore.shared.hasProgress(forTitle: id))
+            // Progress on this device, or the account's «Досмотреть» (the site's own `active` voice acting is set on
+            // guest pages too, so it can't tell a watched title from a new one).
+            let isWatching = PlaybackProgressStore.shared.hasProgress(forTitle: id) || ContinueWatchingCache.contains(id)
+            mode = DetailsMode.initial(canPlay: Self.canPlay(detail), opensOnWatch: opensOnWatch, hasProgress: isWatching)
         }
     }
 

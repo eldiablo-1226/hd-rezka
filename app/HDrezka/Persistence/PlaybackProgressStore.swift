@@ -4,7 +4,8 @@ import CoreData
 /// Playback positions in CoreData. The model is built in code (the app ships no .momd):
 /// entity `PlaybackProgress` { key: String, time: Double = 0, updatedAt: Date }, all non-optional,
 /// stored at Application Support/PlaybackProgress.sqlite. Keep this exact so existing stores load.
-final class PlaybackProgressStore {
+/// improvement: observable, so the page's «Смотреть» button picks up the position the player writes as it closes.
+final class PlaybackProgressStore: ObservableObject {
     static let shared = PlaybackProgressStore()
     private let entityName = "PlaybackProgress"
     let container: NSPersistentContainer
@@ -63,6 +64,9 @@ final class PlaybackProgressStore {
         object.setValue(Date(), forKey: "updatedAt")
         do {
             try context.save()
+            // On the next turn of the run loop: the player's last save runs while SwiftUI tears it down, inside a view
+            // update, where publishing a change isn't allowed.
+            DispatchQueue.main.async { self.objectWillChange.send() }
         } catch {
             print("PlaybackProgressStore save error: \(error)")
         }

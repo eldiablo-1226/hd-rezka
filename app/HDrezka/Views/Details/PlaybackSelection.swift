@@ -153,7 +153,8 @@ enum VoiceFlag: CaseIterable {
 enum DetailsMode: Hashable {
     case watch, about
 
-    /// «Смотреть» when the title has saved progress or the page opened to continue it; «О фильме» otherwise, and
+    /// «Смотреть» when the title has saved progress (on this device or in the account's «Досмотреть») or the page opened
+    /// to continue it; «О фильме» otherwise, and
     /// always when nothing can play here.
     static func initial(canPlay: Bool, opensOnWatch: Bool, hasProgress: Bool) -> DetailsMode {
         return canPlay && (opensOnWatch || hasProgress) ? .watch : .about
@@ -199,15 +200,21 @@ extension PlaybackChoice {
         return (seconds ?? 0) >= Self.resumeThreshold
     }
 
+    /// «·» between the line's parts, held to the part before it by a no-break space: a wrap starts the next line with a
+    /// name, not with «·» («· с 0:29» used to sit alone on the button's third line).
+    static let separator = "\u{00A0}· "
+
     /// The primary button's second line: «Сезон 2, Серия 8 · HDrezka Studio · с 23:14»; a film names its voice acting.
     /// `voiceName` stands in for a page without a translator list, whose one voice acting has no name of its own.
     func detailLine(resume seconds: Double?, voiceName: String? = nil) -> String {
         let episodePart = [season.map(EpisodeNames.season), episode.map(EpisodeNames.episode)]
             .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")
         let voice = acting.name.isEmpty ? voiceName ?? "" : acting.name
+        // «с 23:14» stays in one piece.
         let resume = isResume(seconds) ? String(format: NSLocalizedString("key_resume_from", comment: ""),
-                                                EpisodeNames.clock(seconds ?? 0)) : ""
-        return [episodePart, voice, resume].filter { !$0.isEmpty }.joined(separator: " · ")
+                                                EpisodeNames.clock(seconds ?? 0))
+            .replacingOccurrences(of: " ", with: "\u{00A0}") : ""
+        return [episodePart, voice, resume].filter { !$0.isEmpty }.joined(separator: Self.separator)
     }
 }
 

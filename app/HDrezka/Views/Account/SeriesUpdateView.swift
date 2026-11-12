@@ -1,35 +1,39 @@
 import SwiftUI
 
 /// Followed-series updates grouped by day (body 0x1000170c0, load 0x100018538…).
+/// improvement: a system list with a section per day and the screen's title (1.6.0: untitled grey cards, and a lone
+/// circle symbol when there was nothing).
 struct SeriesUpdateView: View {
     @State var updatesGroup: [SeriesUpdateGroup]? = nil
     /// improvement: a failed request is an error with Retry, not "nothing here" (1.6.0 showed an empty list).
     @State var loadFailure: PageLoadFailure? = nil
 
     var body: some View {
+        content
+            .navigationTitle("key_series_updates")
+    }
+
+    @ViewBuilder
+    private var content: some View {
         if let updatesGroup {
             if !updatesGroup.isEmpty {
-                ScrollView(.vertical, showsIndicators: true) {
+                List {
                     ForEach(updatesGroup) { group in
-                        HStack {
-                            Text(group.date).bold()
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading)
-                        .padding(.vertical)
-                        ForEach(group.releasedEpisodes) { episode in
-                            SeriesUpdateCardView(episode: episode)
+                        Section(group.date.trimmingCharacters(in: .whitespaces)) {
+                            // By position: two episodes of one series on one day share the series' id.
+                            ForEach(group.releasedEpisodes.indices, id: \.self) { index in
+                                let episode = group.releasedEpisodes[index]
+                                NavigationLink {
+                                    DetailsView(id: episode.id)
+                                } label: {
+                                    SeriesUpdateCardView(episode: episode)
+                                }
+                            }
                         }
                     }
                 }
             } else {
-                Image(systemName: "circle")
-                    .font(.largeTitle)
-                    .foregroundStyle(.secondary)
-                    .padding(4)
-                Text("key_nothing+here")
-                    .font(.title3)
-                    .bold()
+                ContentUnavailableView("key_nothing+here", systemImage: "bell")
             }
         } else if let loadFailure {
             // Back to the orb, whose task loads the updates again.

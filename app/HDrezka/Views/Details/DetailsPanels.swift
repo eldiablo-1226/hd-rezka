@@ -83,6 +83,9 @@ struct DetailsWatchPanel: View {
     var download: () -> Void
     var bookmark: () -> Void
     @AppStorage("hasPremium") private var hasPremium: String = ""
+    /// Redraws the button when a position is saved: the player writes its last one only as it closes, after the page
+    /// is back on screen, so «Смотреть» stayed until something else redrew the page.
+    @ObservedObject private var progress = PlaybackProgressStore.shared
     @State private var showsAllVoices = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -385,7 +388,8 @@ struct PrimaryActionButton: View {
     /// "Продолжить, Сезон 2, Серия 8, HDrezka Studio, с 23:14": the dots read as pauses.
     private var accessibilityText: Text {
         guard let detail, !detail.isEmpty else { return Text(title) }
-        return Text(title) + Text(verbatim: ", " + detail.replacingOccurrences(of: " · ", with: ", "))
+        return Text(title) + Text(verbatim: ", " + detail.replacingOccurrences(of: PlaybackChoice.separator, with: ", ")
+            .replacingOccurrences(of: "\u{00A0}", with: " "))
     }
 }
 

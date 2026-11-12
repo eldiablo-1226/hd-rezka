@@ -14,7 +14,8 @@ struct HomeGridViewIpad: View {
     var body: some View {
         NavigationStack {
             ScrollView(.vertical, showsIndicators: true) {
-                VStack {
+                // As on the phone: no stack spacing under the listing name, whose hit area grows above its text.
+                VStack(spacing: 0) {
                     ContinueWatchingRow(refreshToken: refreshCount)
                     HomeView.listingMenu($startupPageVariation)
                         .padding(.horizontal)

@@ -214,6 +214,7 @@
 "key_category_delete_title %@" = "Удалить категорию «%@» вместе с закладками?";
 "key_category_delete_message" = "Это нельзя отменить.";
 "key_category_delete_failed" = "Не удалось удалить категорию.";
+"key_watch_later_delete_failed" = "Не удалось убрать из «Досмотреть».";
 "key_category_rename_title" = "Переименовать категорию";
 "key_category_rename_failed" = "Не удалось переименовать категорию.";
 "key_category_reorder_failed" = "Не удалось сохранить порядок категорий.";

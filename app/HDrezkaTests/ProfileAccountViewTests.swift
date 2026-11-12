@@ -7,6 +7,14 @@ final class ProfileAccountViewTests: XCTestCase {
 
     // MARK: PremiumStatus
 
+    /// improvement: three days or fewer is flagged with a warning symbol, not ember text (ember marks what can be tapped).
+    func testPremiumIsRunningOutAtThreeDaysOrFewer() {
+        XCTAssertEqual(PremiumStatus(raw: "3 дня")?.isRunningOut, true)
+        XCTAssertEqual(PremiumStatus(raw: "1 день")?.isRunningOut, true)
+        XCTAssertEqual(PremiumStatus(raw: "97 дней")?.isRunningOut, false)
+        XCTAssertEqual(PremiumStatus(raw: "Активен")?.isRunningOut, false, "no number, nothing to count down")
+    }
+
     func testPremiumStatusEmptyOrBlankIsNil() {
         XCTAssertNil(PremiumStatus(raw: ""))
         XCTAssertNil(PremiumStatus(raw: "  \n\t "))

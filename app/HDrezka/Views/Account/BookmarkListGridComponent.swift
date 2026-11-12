@@ -10,9 +10,10 @@ struct BookmarkListGridComponent: View {
     var canLoadMore = true
 
     private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: isPhone ? 100 : 160), spacing: isPhone ? 10 : 16)]) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: isPhone ? TitleCardComponent.columnMinimum(typeSize) : 160), spacing: isPhone ? 10 : 16)]) {
             ForEach(network.bookmarks) { movie in
                 NavigationLink {
                     DetailsView(id: movie.id, preview: movie)

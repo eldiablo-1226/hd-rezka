@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import HDrezka
 
 /// improvement (Details redesign, «Два режима одной страницы»): the selection behind «Смотреть», the voice acting
@@ -185,6 +186,20 @@ final class DetailsRedesignTests: XCTestCase {
         XCTAssertFalse(PlaybackProgressStore.shared.hasProgress(forTitle: id + "x"))
     }
 
+    // MARK: the facts strip
+
+    /// One row of equal cells only while every cell fits whole, else two by two: the cells used to shrink one by one,
+    /// so at xxLarge the four values came out in four sizes.
+    func testFactsWrapRatherThanShrinkWhenFourDontFitWhole() throws {
+        let detail = try self.detail("details-film-hunger-games.html", id: "https://example.test/films/x.html")
+        func height(_ size: DynamicTypeSize, width: CGFloat) -> CGFloat {
+            UIHostingController(rootView: InfoTabView(detail: detail).environment(\.dynamicTypeSize, size))
+                .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude)).height
+        }
+        XCTAssertEqual(height(.large, width: 600), height(.large, width: 700), "one row when there is room")
+        XCTAssertGreaterThan(height(.xxLarge, width: 280), height(.xxLarge, width: 700), "two rows, not four shrunk cells")
+    }
+
     // MARK: what the primary button says
 
     func testBareNumbersReadAsSeasonAndEpisode() {
@@ -207,17 +222,52 @@ final class DetailsRedesignTests: XCTestCase {
         let seasonTwo = MovieSeason(id: "2", name: "Сезон 2", episodes: [], isSelected: false, url: nil)
         let episodeEight = MovieEpisode(id: "8", name: "Серия 8", isSelected: false, url: nil)
         let choice = PlaybackChoice(acting: studio, season: seasonTwo, episode: episodeEight)
+        // A wrap lands after «·», never before it («· с 0:29» alone on a line) or inside «с 23:14»: no-break spaces.
         let from = String(format: NSLocalizedString("key_resume_from", comment: ""), "23:14")
-        XCTAssertEqual(choice.detailLine(resume: 1394), "Сезон 2, Серия 8 · HDrezka Studio · \(from)")
-        XCTAssertEqual(choice.detailLine(resume: nil), "Сезон 2, Серия 8 · HDrezka Studio")
-        XCTAssertEqual(choice.detailLine(resume: 5), "Сезон 2, Серия 8 · HDrezka Studio", "a few seconds is not a resume point")
+            .replacingOccurrences(of: " ", with: "\u{00A0}")
+        XCTAssertEqual(choice.detailLine(resume: 1394), "Сезон 2, Серия 8\u{00A0}· HDrezka Studio\u{00A0}· \(from)")
+        XCTAssertEqual(choice.detailLine(resume: nil), "Сезон 2, Серия 8\u{00A0}· HDrezka Studio")
+        XCTAssertEqual(choice.detailLine(resume: 5), "Сезон 2, Серия 8\u{00A0}· HDrezka Studio",
+                       "a few seconds is not a resume point")
         XCTAssertEqual(PlaybackChoice(acting: studio, season: nil, episode: nil).detailLine(resume: nil), "HDrezka Studio")
         let nameless = PlaybackChoice(acting: acting("5", ""), season: seasonTwo, episode: episodeEight)
-        XCTAssertEqual(nameless.detailLine(resume: nil, voiceName: "Дубляж"), "Сезон 2, Серия 8 · Дубляж",
+        XCTAssertEqual(nameless.detailLine(resume: nil, voiceName: "Дубляж"), "Сезон 2, Серия 8\u{00A0}· Дубляж",
                        "a page without a translator list names its one voice acting")
         XCTAssertTrue(choice.isResume(1394))
         XCTAssertFalse(choice.isResume(5))
         XCTAssertFalse(choice.isResume(nil))
+    }
+
+    /// The player writes its last position as it closes, and nothing else on the page changes then: the button must
+    /// still turn into «Продолжить … · с 0:29» by itself.
+    func testTheWatchButtonPicksUpAPositionSavedWhileItIsOnScreen() throws {
+        let wasOn = try setAccessibilityAutomation(true)
+        defer { _ = try? setAccessibilityAutomation(wasOn) }
+        let studio = acting("111", "HDrezka Studio", selected: true)
+        let page = [season("1", selected: true, [episode("1", selected: true)])]
+        let selection = PlaybackSelection()
+        selection.configure(actings: [studio], seasons: page,
+                            initial: PlaybackChoice(acting: studio, season: page[0], episode: page[0].episodes[0])) { _ in page }
+        let key = "https://example.test/series/\(UUID().uuidString).html|111|1|1"
+        let detail = try self.detail("details-series-hawaii.html", id: "https://example.test/series/x.html")
+        let panel = DetailsWatchPanel(detail: detail, selection: selection,
+                                      resumeSeconds: { _ in PlaybackProgressStore.shared.time(forKey: key) },
+                                      isBookmarked: false, play: { _ in }, download: {}, bookmark: {})
+        let host = UIHostingController(rootView: panel)
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 874))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        host.view.layoutIfNeeded()
+        let from = String(format: NSLocalizedString("key_resume_from", comment: ""), "0:29")
+        XCTAssertFalse(accessibilityLabels(in: host.view).isEmpty, "SwiftUI exposed no accessibility elements")
+        XCTAssertFalse(accessibilityLabels(in: host.view).contains { $0.contains(from) })
+
+        PlaybackProgressStore.shared.save(time: 29, forKey: key)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        host.view.layoutIfNeeded()
+        XCTAssertTrue(accessibilityLabels(in: host.view).contains { $0.contains(from) },
+                      "the button still names no resume point: \(accessibilityLabels(in: host.view))")
     }
 }
 

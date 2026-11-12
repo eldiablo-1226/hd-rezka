@@ -65,6 +65,7 @@ struct BookmarksSelectionListViewComponent: View {
                 }
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+                .opaqueSheetBackground()
             }
         }
     }

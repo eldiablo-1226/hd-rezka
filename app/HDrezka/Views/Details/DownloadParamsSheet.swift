@@ -180,7 +180,7 @@ struct DownloadParamsSheet: View {
     private var downloadDetail: String? {
         guard let choice = selection.choice else { return nil }
         let quality = Self.qualityName(of: video, in: movieVideo)
-        return [choice.detailLine(resume: nil), quality].filter { !$0.isEmpty }.joined(separator: " · ")
+        return [choice.detailLine(resume: nil), quality].filter { !$0.isEmpty }.joined(separator: PlaybackChoice.separator)
     }
 
     // closure #1 in closure #2 (0x10002c9ec); DownloadManager.download is inlined there.

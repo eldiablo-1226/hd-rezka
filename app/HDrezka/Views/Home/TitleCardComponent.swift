@@ -4,9 +4,20 @@ import NukeUI
 /// iPhone movie card (0x1000d7248; poster 0x1000d7b64, loading shimmer 0x1000d83c4).
 struct TitleCardComponent: View {
     var model: MovieSimple
+    /// improvement: a grid's card fills its column at accessibility sizes, where the grid shows two (`columnMinimum`);
+    /// a card in a horizontal row keeps the phone's 113 pt poster.
+    var fillsColumn = true
     @State var isAnimated: Bool = false
     // improvement: the text block grows with Dynamic Type (1.6.0: a fixed 44pt under fixed 12/10pt fonts).
     @ScaledMetric(relativeTo: .caption) var textHeight: CGFloat = 48
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// About three columns on a phone; two at accessibility sizes, so titles wrap instead of ending in «…».
+    static func columnMinimum(_ size: DynamicTypeSize, phone: CGFloat = 100) -> CGFloat {
+        size.isAccessibilitySize ? 150 : phone
+    }
+
+    private var isFilling: Bool { fillsColumn && typeSize.isAccessibilitySize }
 
     var body: some View {
         VStack {
@@ -37,24 +48,44 @@ struct TitleCardComponent: View {
                 }
             }
             .scaledToFill()
-            .frame(width: 113, height: 171)
+            .modifier(PosterFrame(fills: isFilling))
             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster), style: FillStyle())
             .overlay(alignment: .bottomLeading) {
                 TitleBadge(entity: model.entity, info: model.info)
                     .padding(DesignTokens.space4)
             }
             VStack(alignment: .leading) {
+                // improvement: no shrinking: a long title ends in «…» at the grid's one size (it shrank to 80%, so
+                // neighbouring titles came out in different sizes).
                 Text(model.name)
                     .font(.caption.bold())
                     .lineLimit(2)
-                    .minimumScaleFactor(0.8)
                 Text(model.details)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
-            .frame(width: 112, height: textHeight, alignment: .topLeading)
+            // The phone's fixed 112 pt: in a horizontal row nothing else gives the block a width, and a short title would
+            // sit centred under the poster.
+            .frame(width: isFilling ? nil : 112, alignment: .topLeading)
+            .frame(maxWidth: isFilling ? .infinity : nil, alignment: .topLeading)
+            .frame(height: textHeight, alignment: .topLeading)
             .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+/// The phone's 113 × 171 poster, or the column's width at 2:3.
+private struct PosterFrame: ViewModifier {
+    var fills: Bool
+
+    func body(content: Content) -> some View {
+        if fills {
+            Color.clear
+                .aspectRatio(2 / 3, contentMode: .fit)
+                .overlay { content }
+        } else {
+            content.frame(width: 113, height: 171)
         }
     }
 }

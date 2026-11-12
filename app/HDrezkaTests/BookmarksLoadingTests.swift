@@ -66,4 +66,27 @@ final class BookmarksLoadingTests: XCTestCase {
         ContinueWatchingCache.clear(defaults)
         XCTAssertEqual(ContinueWatchingCache.load(from: defaults), [])
     }
+
+    /// A page opened from a grid starts on «Смотреть» when the account is watching the title, on whatever mirror
+    /// either list came from (the site's own `active` voice acting is set on guest pages too, so it can't tell).
+    func testATitleTheAccountIsWatchingIsFoundWhicheverMirrorListedIt() throws {
+        let suite = "BookmarksLoadingTests.continueWatchingContains"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        let item = MovieWatchLater(id: "https://ijobs.app/series/comedy/1-y.html", name: "Y", details: "2026",
+                                   watchingInfo: "1 сезон 2 серия (Дубляж)", date: "сегодня", buttonText: nil, dataId: "7")
+        XCTAssertFalse(ContinueWatchingCache.contains("https://ijobs.app/series/comedy/1-y.html", in: defaults))
+        ContinueWatchingCache.save([item], to: defaults)
+        XCTAssertTrue(ContinueWatchingCache.contains("https://ijobs.app/series/comedy/1-y.html", in: defaults))
+        XCTAssertTrue(ContinueWatchingCache.contains("https://hdrezka.ag/series/comedy/1-y.html", in: defaults))
+        XCTAssertTrue(ContinueWatchingCache.contains("https://ijobs.app/series/comedy/1-y-latest.html", in: defaults),
+                      "the site adds -latest to some addresses: the post number is the title")
+        XCTAssertFalse(ContinueWatchingCache.contains("https://ijobs.app/series/comedy/2-z.html", in: defaults))
+        // The whole list, not the ten the row shows: an older title still counts.
+        let many = (1...12).map { MovieWatchLater(id: "https://ijobs.app/films/drama/\($0)00-x.html", name: "\($0)", details: "",
+                                                  watchingInfo: "", date: "", buttonText: nil, dataId: "\($0)") }
+        ContinueWatchingCache.save(many, to: defaults)
+        XCTAssertTrue(ContinueWatchingCache.contains("https://ijobs.app/films/drama/1200-x.html", in: defaults))
+        defaults.removePersistentDomain(forName: suite)
+    }
 }

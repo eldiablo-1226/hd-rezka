@@ -77,6 +77,24 @@ final class HardeningTests: XCTestCase {
                        [false, true, false, false, false, true])
     }
 
+    /// The fix the message names («Попробуйте другое») comes first and prominent, with Retry beside it: below Retry,
+    /// «Сменить зеркало» ended under Home's tab bar.
+    @MainActor
+    func testADeadMirrorOffersAnotherMirrorFirstWithRetryBesideIt() throws {
+        let wasOn = try setAccessibilityAutomation(true)
+        defer { _ = try? setAccessibilityAutomation(wasOn) }
+        let host = UIHostingController(rootView: PageLoadFailedView(failure: .unreachable, retry: {}))
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 874))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        host.view.layoutIfNeeded()
+        let change = NSLocalizedString("key_change_mirror", comment: ""), retry = NSLocalizedString("key_retry", comment: "")
+        let buttons = accessibilityLeaves(in: host.view).filter { [change, retry].contains($0.accessibilityLabel ?? "") }
+        XCTAssertEqual(buttons.map { $0.accessibilityLabel ?? "" }, [change, retry])
+        XCTAssertEqual(buttons.first?.accessibilityFrame.minY, buttons.last?.accessibilityFrame.minY, "side by side")
+    }
+
     // MARK: mirror typed by the user
 
     /// improvement: the known mirrors, checked on 2026-11-11 from the user's network the way the app asks for them: the

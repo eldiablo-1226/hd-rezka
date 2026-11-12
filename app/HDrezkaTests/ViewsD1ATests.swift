@@ -80,6 +80,48 @@ final class ViewsD1ATests: XCTestCase {
         XCTAssertEqual(TitleBadge.shortInfo("2 сезон, 26 серия"), "2 сезон, 26 серия")
     }
 
+    // improvement: at accessibility sizes the grids show two columns and a card fills its column, so a title wraps
+    // instead of ending as «Дюна: Часть вто…» under a 113 pt poster.
+    func testGridsShowTwoColumnsAtAccessibilitySizes() {
+        XCTAssertEqual(TitleCardComponent.columnMinimum(.large), 100)
+        XCTAssertEqual(TitleCardComponent.columnMinimum(.xxxLarge, phone: 110), 110)
+        XCTAssertEqual(TitleCardComponent.columnMinimum(.accessibility1), 150)
+        XCTAssertEqual(TitleCardComponent.columnMinimum(.accessibility5, phone: 110), 150)
+    }
+
+    @MainActor
+    func testACardFillsItsColumnOnlyAtAccessibilitySizes() {
+        let movie = MovieSimple(id: "x", name: "Дюна: Часть вторая", details: "2024, США, Фантастика", poster: "")
+        func height(_ size: DynamicTypeSize, width: CGFloat, inRow: Bool = false) -> CGFloat {
+            let card = TitleCardComponent(model: movie, fillsColumn: !inRow).environment(\.dynamicTypeSize, size)
+            return UIHostingController(rootView: card)
+                .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude)).height
+        }
+        XCTAssertEqual(height(.large, width: 240), height(.large, width: 180), "the phone's 113 pt poster")
+        XCTAssertGreaterThan(height(.accessibility2, width: 240), height(.accessibility2, width: 180))
+        XCTAssertEqual(height(.accessibility2, width: 240, inRow: true), height(.accessibility2, width: 180, inRow: true),
+                       "a card in a horizontal row keeps its width")
+    }
+
+    /// In the person page's horizontal row nothing gives the card a width: its text block keeps the phone's 112 pt, so
+    /// a short title starts at the poster's edge instead of being centred under it.
+    @MainActor
+    func testACardInARowKeepsItsTitleAtThePostersEdge() throws {
+        let wasOn = try setAccessibilityAutomation(true)
+        defer { _ = try? setAccessibilityAutomation(wasOn) }
+        let movie = MovieSimple(id: "x", name: "Дюна", details: "2021", poster: "")
+        let host = UIHostingController(rootView: ScrollView(.horizontal) {
+            HStack { TitleCardComponent(model: movie, fillsColumn: false) }
+        })
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 874))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        host.view.layoutIfNeeded()
+        let title = try XCTUnwrap(accessibilityLeaves(in: host.view).first { $0.accessibilityLabel == "Дюна" })
+        XCTAssertLessThan(title.accessibilityFrame.minX, 2, "the title starts \(title.accessibilityFrame.minX) pt in")
+    }
+
     // MARK: strings used by the shell, home and share views
 
     func testLocalizationKeysExistInEveryTable() throws {

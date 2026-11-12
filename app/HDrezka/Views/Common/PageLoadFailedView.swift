@@ -156,6 +156,7 @@ struct PageLoadFailedView: View {
                 }
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+                .opaqueSheetBackground()
             }
     }
 
@@ -169,28 +170,38 @@ struct PageLoadFailedView: View {
         }
     }
 
-    /// One prominent action: the fix most likely to work; Retry stays next to it.
-    @ViewBuilder
+    /// One prominent action, the fix most likely to work, with Retry beside it; under each other when they don't fit.
+    /// improvement: side by side, so under Home's listing header both stay above the tab bar.
     private var actions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: DesignTokens.space8) { actionButtons }
+            VStack(spacing: DesignTokens.space8) { actionButtons }
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
         // improvement: full-size controls; at the default size they measured under 44 pt.
         if failure == .needsLogin {
-            Button("login") { isPresentingLogin = true }
-                .primaryButtonStyle()
-                // The fill, not the tint: white on the dark-mode tint is about 3:1.
-                .tint(Color("AccentFill"))
-                .controlSize(.large)
+            fix("login") { isPresentingLogin = true }
+        } else if failure.suggestsMirrorChange {
+            // The fix the message names («Попробуйте другое»): a link under Retry, it ended under Home's tab bar.
+            fix("key_change_mirror") { isPresentingMirror = true }
         }
-        // Grey, as secondary buttons are; the accent marks the one fix (login, or the mirror link). An empty answer is
-        // final, so it has no Retry; pull to refresh still asks again.
+        // Grey, as secondary buttons are. An empty answer is final, so it has no Retry; pull to refresh still asks again.
         if failure != .notFound {
             Button("key_retry", action: retry)
                 .secondaryButtonStyle()
                 .tint(.primary)
                 .controlSize(.large)
         }
-        if failure.suggestsMirrorChange {
-            Button("key_change_mirror") { isPresentingMirror = true }
-                .controlSize(.large)
-        }
+    }
+
+    private func fix(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .primaryButtonStyle()
+            // The fill, not the tint: white on the dark-mode tint is about 3:1.
+            .tint(Color("AccentFill"))
+            .controlSize(.large)
     }
 }

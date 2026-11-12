@@ -63,5 +63,6 @@ struct QuickPlaySheet: View {
         // improvement: large too, so a long quality list (up to 4K) isn't cut at half height.
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .opaqueSheetBackground()
     }
 }

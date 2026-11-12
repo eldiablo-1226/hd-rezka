@@ -4,11 +4,11 @@ import SwiftUI
 struct PersonGridComponent: View {
     var movies: [MovieSimple]
     var title: LocalizedStringKey
-    var columns: [GridItem] = [GridItem(.adaptive(minimum: 100), spacing: 10)]
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: TitleCardComponent.columnMinimum(typeSize)), spacing: 10)]) {
                 ForEach(movies) { movie in
                     NavigationLink {
                         DetailsView(id: movie.id, preview: movie)

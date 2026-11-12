@@ -31,7 +31,7 @@ struct PesonHorizontalGrid: View {
                                 .onAppear { isNavigated = true }
                                 .onDisappear { isNavigated = false }
                         } label: {
-                            TitleCardComponent(model: movie)
+                            TitleCardComponent(model: movie, fillsColumn: false)
                                 .padding(.leading)
                         }
                         .buttonStyle(.plain)

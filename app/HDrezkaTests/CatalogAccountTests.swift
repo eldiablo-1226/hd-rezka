@@ -191,6 +191,16 @@ final class CatalogAccountTests: XCTestCase {
         XCTAssertEqual(parser.seriesUpdates.count, 2)
     }
 
+    /// A list row says «15 серия (1 сезон)» over «Дубляж», from the site's "15 серия ", "(1 сезон)" and "(Дубляж)".
+    func testSeriesUpdateRowTidiesTheSitesText() {
+        let item = SeriesUpdateItem(id: "x", seriesName: "Малыш Карлхен", season: "(1 сезон)",
+                                    releasedEpisode: "15 серия ", chosenVoiceActing: "(Дубляж)")
+        XCTAssertEqual(SeriesUpdateCardView.episodeLine(item), "15 серия (1 сезон)")
+        XCTAssertEqual(SeriesUpdateCardView.voiceName("(Дубляж)"), "Дубляж")
+        XCTAssertEqual(SeriesUpdateCardView.voiceName("Субтитры"), "Субтитры")
+        XCTAssertNil(SeriesUpdateCardView.voiceName(" "))
+    }
+
     @MainActor
     func testWatchLaterDropsHeaderRow() throws {
         let parser = AccountParser()

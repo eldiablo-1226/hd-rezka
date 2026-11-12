@@ -214,6 +214,7 @@
 "key_category_delete_title %@" = "Delete “%@” with its bookmarks?";
 "key_category_delete_message" = "This can’t be undone.";
 "key_category_delete_failed" = "Couldn’t delete the category.";
+"key_watch_later_delete_failed" = "Couldn’t remove it from Watch later.";
 "key_category_rename_title" = "Rename category";
 "key_category_rename_failed" = "Couldn’t rename the category.";
 "key_category_reorder_failed" = "Couldn’t save the order of the categories.";
