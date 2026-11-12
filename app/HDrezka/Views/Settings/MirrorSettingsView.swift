@@ -58,7 +58,7 @@ struct MirrorSettingsView: View {
                     .autocorrectionDisabled(true)
                     .submitLabel(.done)
                     .onSubmit(save)
-                    .onChange(of: text) { _ in isInvalid = false }
+                    .onChange(of: text) { isInvalid = false }
                 Button("key_mirror_save", action: save)
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             } header: {

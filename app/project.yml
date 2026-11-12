@@ -2,7 +2,8 @@ name: HDrezka
 options:
   bundleIdPrefix: me.keet
   deploymentTarget:
-    iOS: "16.0"
+    # 1.6.0 ran on 16.0; Libraries.dev's root manifest needs 17.0.
+    iOS: "17.0"
   createIntermediateGroups: true
 settings:
   base:
@@ -38,6 +39,10 @@ packages:
   Flow:
     url: https://github.com/tevelee/SwiftUI-Flow
     from: "1.0.0"
+  Libraries.dev:
+    # ThinkingOrbsKit, the loading orb. Its tags predate the root manifest, so it tracks main; Package.resolved pins it.
+    url: https://github.com/Jakubantalik/Libraries.dev
+    branch: main
 targets:
   HDrezka:
     type: application
@@ -57,6 +62,8 @@ targets:
       - package: YouTubePlayerKit
       - package: AlertKit
       - package: Flow
+      - package: Libraries.dev
+        product: ThinkingOrbsKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: me.keet.HDRezka

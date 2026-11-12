@@ -151,7 +151,7 @@ struct DownloadParamsSheet: View {
                 loadQualities()
             }
         }
-        .onChange(of: selection.choice?.id) { _ in
+        .onChange(of: selection.choice?.id) {
             loadQualities()
         }
     }

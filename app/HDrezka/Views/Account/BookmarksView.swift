@@ -110,32 +110,19 @@ struct BookmarksView: View {
         switch phase {
         case .loading:
             VStack(spacing: DesignTokens.space8) {
-                ProgressView()
+                LoadingOrb()
                 SlowLoadNotice()
             }
             .padding()
         case .failed(let failure):
             PageLoadFailedView(failure: failure) { Task { await load() } }
         case .loaded:
-            if #available(iOS 17.0, *) {
-                ContentUnavailableView {
-                    Label("key_no_categories_title", systemImage: "bookmark")
-                } description: {
-                    Text("key_no_categories_text")
-                } actions: {
-                    createButton
-                }
-            } else {
-                VStack(spacing: DesignTokens.space16) {
-                    Label("key_no_categories_title", systemImage: "bookmark")
-                        .font(.title3.bold())
-                    Text("key_no_categories_text")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    createButton
-                }
-                .padding(DesignTokens.space16)
+            ContentUnavailableView {
+                Label("key_no_categories_title", systemImage: "bookmark")
+            } description: {
+                Text("key_no_categories_text")
+            } actions: {
+                createButton
             }
         }
     }

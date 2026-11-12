@@ -1,6 +1,7 @@
 import SwiftUI
 import Alamofire
 import SwiftSoup
+import ThinkingOrbsKit
 
 /// improvement: why a page did not load, so the error says what happened and offers the fix that can work.
 enum PageLoadFailure: Equatable {
@@ -79,6 +80,19 @@ enum PageLoadFailure: Equatable {
     }
 }
 
+/// improvement: a Thinking orb (ThinkingOrbsKit) instead of the page spinner. The state names the wait: `.searching` for search,
+/// `.connecting` for the watch sheet's links, `.working` for a page. Rows, buttons and grids keep the system spinner and
+/// skeletons, because their waits are short and a flashing orb reads as a glitch.
+struct LoadingOrb: View {
+    var state: OrbState = .working
+
+    var body: some View {
+        ThinkingOrb(state: state, size: .px64)
+            // The kit's labels are English («Searching…») in every language.
+            .accessibilityLabel("key_loading")
+    }
+}
+
 /// improvement: after 8 s of loading it names the mirror that is slow, so a stall doesn't look like a frozen app. The
 /// request gives up at `siteTimeout` and PageLoadFailedView takes over.
 struct SlowLoadNotice: View {
@@ -145,27 +159,13 @@ struct PageLoadFailedView: View {
             }
     }
 
-    @ViewBuilder
     private var message: some View {
-        if #available(iOS 17.0, *) {
-            ContentUnavailableView {
-                Label(failure.title, systemImage: failure.systemImage)
-            } description: {
-                Text(failure.message)
-            } actions: {
-                actions
-            }
-        } else {
-            VStack(spacing: DesignTokens.space16) {
-                Label(failure.title, systemImage: failure.systemImage)
-                    .font(.title3.bold())
-                Text(failure.message)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                actions
-            }
-            .padding(DesignTokens.space16)
+        ContentUnavailableView {
+            Label(failure.title, systemImage: failure.systemImage)
+        } description: {
+            Text(failure.message)
+        } actions: {
+            actions
         }
     }
 

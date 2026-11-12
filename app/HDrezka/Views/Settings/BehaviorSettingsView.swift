@@ -32,11 +32,8 @@ struct BehaviorSettingsView: View {
                     Section(header: Label("key_share_menu_header", systemImage: "square.and.arrow.up"),
                             footer: Text("key_shareMenuVariation+description")) {
                         Picker("key_shareMenuVariation", selection: $shareMenuVariation) {
-                            // No "Ask" option on iOS 16.0: the share menu needs 16.1.
-                            if #available(iOS 16.1, *) {
-                                Text("key_shareMenuVariation+selectOption")
-                                    .tag(ShareMenuVariation.selectOption)
-                            }
+                            Text("key_shareMenuVariation+selectOption")
+                                .tag(ShareMenuVariation.selectOption)
                             Text("key_share+with+url")
                                 .tag(ShareMenuVariation.url)
                             Text("key_share+with+universal+link")

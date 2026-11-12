@@ -54,13 +54,8 @@ extension View {
 
     /// improvement: an opaque grouped ground under a list sheet. On iOS 26 a medium-detent sheet is glass, and the page's
     /// ember «Смотреть» button showed through it as an orange band behind the title.
-    @ViewBuilder
     func opaqueSheetBackground() -> some View {
-        if #available(iOS 16.4, *) {
-            presentationBackground(Color(uiColor: .systemGroupedBackground))
-        } else {
-            self
-        }
+        presentationBackground(Color(uiColor: .systemGroupedBackground))
     }
 }
 

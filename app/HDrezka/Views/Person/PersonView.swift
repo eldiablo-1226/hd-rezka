@@ -82,10 +82,10 @@ struct PersonView: View {
                 }
             }
         } else if let loadFailure {
-            // Back to the spinner, whose onAppear loads the page again.
+            // Back to the orb, whose onAppear loads the page again.
             PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
-            ProgressView()
+            LoadingOrb()
                 .onAppear {
                     Task { @MainActor in
                         do {

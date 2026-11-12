@@ -1,7 +1,7 @@
 import SwiftUI
 import Alamofire
 
-/// Full search results for `request`. improvement: a spinner until the answer arrives, then the results,
+/// Full search results for `request`. improvement: the loading orb until the answer arrives, then the results,
 /// "nothing found" or the error (1.6.0 said "nothing found" after 4 s even while the request was still running).
 struct SearchResultsView: View {
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
@@ -26,19 +26,9 @@ struct SearchResultsView: View {
             } else if case .failed(let failure) = phase {
                 PageLoadFailedView(failure: failure, retry: search)
             } else if phase == .loading {
-                ProgressView()
+                LoadingOrb(state: .searching)
             } else {
-                if #available(iOS 17.0, *) {
-                    ContentUnavailableView.search(text: request)
-                } else {
-                    Image(systemName: "magnifyingglass")
-                        .font(.largeTitle)
-                        .foregroundStyle(.secondary)
-                        .padding(4)
-                    Text("key_nothing+found")
-                        .font(.title3)
-                        .bold()
-                }
+                ContentUnavailableView.search(text: request)
             }
         }
         .onAppear(perform: search)

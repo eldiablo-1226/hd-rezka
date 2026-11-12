@@ -56,7 +56,7 @@ struct BookmarkMovieListView: View {
         }
         .preferredColorScheme(nil)
         .onLoad { Task { await fetch(page: 1) } }
-        .onChange(of: page) { page in
+        .onChange(of: page) { _, page in
             Task { await fetch(page: page) }
         }
         .preferredColorScheme(nil)  // second nil writer, as in the binary (outermost layer of 0x10043bfa0)
@@ -70,20 +70,8 @@ struct BookmarkMovieListView: View {
         case .failed(let failure):
             PageLoadFailedView(failure: failure) { Task { await fetch(page: 1) } }
         case .loaded:
-            if #available(iOS 17.0, *) {
-                ContentUnavailableView("key_category_empty_title", systemImage: "bookmark",
-                                       description: Text("key_category_empty_text"))
-            } else {
-                VStack(spacing: DesignTokens.space8) {
-                    Text("key_category_empty_title")
-                        .font(.title3.bold())
-                    Text("key_category_empty_text")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding()
-            }
+            ContentUnavailableView("key_category_empty_title", systemImage: "bookmark",
+                                   description: Text("key_category_empty_text"))
         }
     }
 

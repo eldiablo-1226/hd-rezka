@@ -22,7 +22,7 @@ struct SearchView: View {
                     .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled(true)
-                    .onChange(of: search) { typed in
+                    .onChange(of: search) { _, typed in
                         // 0x100070cac: every edit fires its own request 0.2 s later with the text current then.
                         // improvement: only when the text is still the same (a debounce), and an answer for older text
                         // is dropped, so a slow reply can't replace the suggestions for what is typed now.

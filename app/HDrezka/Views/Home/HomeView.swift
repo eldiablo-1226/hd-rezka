@@ -41,18 +41,18 @@ struct HomeView: View {
         .refreshFailureNotice(network)
         .preferredColorScheme(nil)
         .onLoad { page = 1 }
-        .onChange(of: startupPageVariation) { variation in
+        .onChange(of: startupPageVariation) { _, variation in
             network.movies.removeAll()
             Self.refresh(network, page: $page, variation: variation)
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             Task {
                 if phase == .active {
                     remoteVersion = try await HeaderUpdater.updateHeader()
                 }
             }
         }
-        .onChange(of: page) { _ in
+        .onChange(of: page) {
             Task {
                 try await network.fetchMovies(page: page, filter: Self.filter(for: startupPageVariation))
             }
@@ -117,7 +117,7 @@ private struct RefreshFailureNotice: ViewModifier {
     @ObservedObject var network: Network
 
     func body(content: Content) -> some View {
-        content.onChange(of: network.moviesRefreshFailed) { failed in
+        content.onChange(of: network.moviesRefreshFailed) { _, failed in
             guard failed else { return }
             network.moviesRefreshFailed = false
             AlertKitAPI.present(title: String(localized: "key_refresh_failed"), icon: .error, style: .iOS17AppleMusic, haptic: .error)

@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/eldiablo-1226/hd-rezka/releases/latest"><img src="https://img.shields.io/github/v/release/eldiablo-1226/hd-rezka?label=IPA&color=D92D00" alt="Последний релиз"></a>
   <a href="https://github.com/eldiablo-1226/hd-rezka/actions/workflows/release-ipa.yml"><img src="https://github.com/eldiablo-1226/hd-rezka/actions/workflows/release-ipa.yml/badge.svg" alt="Сборка IPA"></a>
-  <img src="https://img.shields.io/badge/iOS-16%2B-black" alt="iOS 16+">
+  <img src="https://img.shields.io/badge/iOS-17%2B-black" alt="iOS 17+">
 </p>
 
 <p align="center">
@@ -82,7 +82,7 @@ open HDrezka.xcodeproj
 - `./build-ipa.sh` собирает IPA без подписи в `.build/ipa/HDrezka.ipa`, так же как CI.
 - `SIM_ID=<UDID симулятора> ./build.sh dev test` запускает тесты.
 
-Зависимости подключены через Swift Package Manager: Alamofire, SwiftSoup, Nuke, YouTubePlayerKit, AlertKit и SwiftUI-Flow. Версии закреплены в `app/Package.resolved`. Alamofire 5.8.0 и SwiftSoup 2.6.1 закреплены намеренно: с более новыми версиями парсер страниц сайта ведёт себя иначе.
+Зависимости подключены через Swift Package Manager: Alamofire, SwiftSoup, Nuke, YouTubePlayerKit, AlertKit, SwiftUI-Flow и ThinkingOrbsKit из [Libraries.dev](https://libraries.dev/orbs) (орб загрузки). Версии закреплены в `app/Package.resolved`. Alamofire 5.8.0 и SwiftSoup 2.6.1 закреплены намеренно: с более новыми версиями парсер страниц сайта ведёт себя иначе.
 
 ## Что где лежит
 

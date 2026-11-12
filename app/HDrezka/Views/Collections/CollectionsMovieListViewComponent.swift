@@ -81,12 +81,7 @@ struct CollectionLoadState: View {
         case .failed(let failure):
             PageLoadFailedView(failure: failure, retry: retry)
         case .loaded:
-            if #available(iOS 17.0, *) {
-                ContentUnavailableView("key_nothing+here", systemImage: "film")
-            } else {
-                Text("key_nothing+here")
-                    .font(.title3.bold())
-            }
+            ContentUnavailableView("key_nothing+here", systemImage: "film")
         }
     }
 }

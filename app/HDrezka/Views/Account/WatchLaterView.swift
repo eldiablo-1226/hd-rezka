@@ -26,16 +26,11 @@ struct WatchLaterView: View {
             if watchingLaterMovies.isEmpty {
                 switch phase {
                 case .loading:
-                    ProgressView()
+                    LoadingOrb()
                 case .failed(let failure):
                     PageLoadFailedView(failure: failure, retry: load)
                 case .loaded:
-                    if #available(iOS 17.0, *) {
-                        ContentUnavailableView("key_nothing+here", systemImage: "clock")
-                    } else {
-                        Text("key_nothing+here")
-                            .font(.title3.bold())
-                    }
+                    ContentUnavailableView("key_nothing+here", systemImage: "clock")
                 }
             }
         }

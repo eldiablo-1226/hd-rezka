@@ -44,17 +44,17 @@ struct MovieListView: View {
                         }
                     }
                 }
-                .onChange(of: page) { _ in
+                .onChange(of: page) {
                     Task { load(page: page) }
                 }
                 .padding(.horizontal)
                 .navigationTitle(name)
             } else if let loadFailure {
-                // Back to the spinner, whose onAppear loads the first page again.
+                // Back to the orb, whose onAppear loads the first page again.
                 PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
             } else {
                 VStack(spacing: DesignTokens.space8) {
-                    ProgressView()
+                    LoadingOrb()
                     SlowLoadNotice()
                 }
                 .padding()

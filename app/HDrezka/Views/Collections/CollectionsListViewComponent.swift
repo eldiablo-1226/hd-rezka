@@ -63,7 +63,7 @@ struct CollectionsListViewComponent: View {
         }
         // Both reload the current page and append it; the parser skips collections it already has.
         .onAppear { Task { await load() } }
-        .onChange(of: page) { _ in Task { await load() } }
+        .onChange(of: page) { Task { await load() } }
     }
 
     /// improvement: pull to refresh. Page 1 replaces the list when it brings collections; until then, and when it

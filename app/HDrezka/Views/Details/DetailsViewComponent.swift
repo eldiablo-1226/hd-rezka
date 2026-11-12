@@ -58,7 +58,7 @@ struct DetailsViewComponent: View {
                 .onAppear { pageDidLoad(detail) }
                 .task(priority: .userInitiated) { loadTrailer() }
         } else if let loadFailure {
-            // Back to the spinner, whose onAppear loads the page again; the system bar has the way back.
+            // Back to the orb, whose onAppear loads the page again; the system bar has the way back.
             PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
             DetailsLoadingView(preview: preview)
@@ -163,7 +163,7 @@ struct DetailsViewComponent: View {
                         .accessibilityHidden(!isTitleInBar)
                 }
             }
-            ToolbarItem(placement: trailingPlacement) {
+            ToolbarItem(placement: .topBarTrailing) {
                 ShareButton(filmId: id)
             }
         }
@@ -337,7 +337,7 @@ struct DetailsViewComponent: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     // improvement: buttons instead of onTapGesture on a bare image (VoiceOver, ≥44pt hit area).
-                    ToolbarItem(placement: trailingPlacement) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button("done") {
                             isPresentedScheduleSheet = false
                         }
@@ -347,19 +347,11 @@ struct DetailsViewComponent: View {
             .presentationDragIndicator(.visible)
         }
     }
-
-    private var trailingPlacement: ToolbarItemPlacement {
-        if #available(iOS 17.0, *) {
-            return .topBarTrailing
-        } else {
-            return .navigationBarTrailing
-        }
-    }
 }
 
 /// improvement: while the page loads, the card that was tapped stays in view: its poster and title sit where the page's
-/// header will be, over a spinner. 1.6.0 showed a spinner at a fixed 0.5 on a blank page. Without a card (a deep link,
-/// the continue row) only the spinner shows.
+/// header will be, over the loading orb in the middle of the space left. 1.6.0 showed a spinner at a fixed 0.5 on a blank
+/// page. Without a card (a deep link, the continue row) only the orb shows, in the middle of the screen.
 private struct DetailsLoadingView: View {
     var preview: MovieSimple?
     @Environment(\.horizontalSizeClass) private var sizeClass
@@ -373,14 +365,14 @@ private struct DetailsLoadingView: View {
                     .padding(.horizontal, isRegular ? 28 : DesignTokens.space16)
             }
             VStack(spacing: DesignTokens.space8) {
-                ProgressView()
+                LoadingOrb()
                 SlowLoadNotice()
             }
             .padding(.horizontal, DesignTokens.space16)
-            .frame(maxWidth: .infinity)
+            // All the height under the header (the whole screen without a card), with the orb in its middle.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.top, isRegular ? DesignTokens.space24 : DesignTokens.space8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: preview == nil ? .center : .top)
     }
 
     /// The loaded page's header (DetailsHeaderBlock) with what the card knows: poster, title and «год, страна, жанр».

@@ -183,26 +183,11 @@ struct BookmarksSelectionListViewComponent: View {
         }
     }
 
-    @ViewBuilder
     private var signInNotice: some View {
-        if #available(iOS 17.0, *) {
-            ContentUnavailableView {
-                Label("key_login+to+add+bookmarks", systemImage: "person.crop.circle")
-            } actions: {
-                signInButton
-            }
-        } else {
-            VStack(spacing: DesignTokens.space16) {
-                Image(systemName: "person.crop.circle")
-                    .font(.largeTitle)
-                    .foregroundStyle(.secondary)
-                Text("key_login+to+add+bookmarks")
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
-                signInButton
-            }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ContentUnavailableView {
+            Label("key_login+to+add+bookmarks", systemImage: "person.crop.circle")
+        } actions: {
+            signInButton
         }
     }
 

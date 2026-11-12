@@ -27,7 +27,7 @@ ios
 
 ## Capabilities and Constraints
 
-- SwiftUI, iOS 16+, iPhone и iPad (отдельные `*Ipad.swift` экраны), проект собирается через XcodeGen.
+- SwiftUI, iOS 17+, iPhone и iPad (отдельные `*Ipad.swift` экраны), проект собирается через XcodeGen.
 - Локализации: ru (основная), en, uk.
 - С сайта приходят такие данные об озвучке: имя, `isSelected`, `isPremium`, `isCamrip`, `isAds`, `isDirector` и рейтинг озвучек в процентах (`MovieVoiceActingRating`). Субтитры приходят вместе с видео. С одного взгляда должны читаться все четыре сигнала: какая выбрана, премиум, популярность, пометки. Подтверждено 2026-11-11.
 - Alamofire 5.8.0 и SwiftSoup 2.6.1 зафиксированы намеренно, иначе меняется разбор страниц. Bundle ID сохранён ради совместимости данных.

@@ -24,7 +24,7 @@ struct HomeGridViewIpad: View {
                 }
             }
             .navigationTitle("Home")
-            .onChange(of: startupPageVariation) { variation in
+            .onChange(of: startupPageVariation) { _, variation in
                 network.movies.removeAll()
                 HomeView.refresh(network, page: $page, variation: variation)
             }
@@ -35,7 +35,7 @@ struct HomeGridViewIpad: View {
                 await network.nextPageArrival()
             }
             .refreshFailureNotice(network)
-            .onChange(of: page) { _ in
+            .onChange(of: page) {
                 Task {
                     try await network.fetchMovies(page: page, filter: HomeView.filter(for: startupPageVariation))
                 }

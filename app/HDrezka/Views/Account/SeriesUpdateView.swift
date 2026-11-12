@@ -32,10 +32,10 @@ struct SeriesUpdateView: View {
                     .bold()
             }
         } else if let loadFailure {
-            // Back to the spinner, whose task loads the updates again.
+            // Back to the orb, whose task loads the updates again.
             PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
-            ProgressView()
+            LoadingOrb()
                 .task(priority: .userInitiated) {
                     do {
                         let groups = try await AccountService().getSeriesUpdates()

@@ -86,12 +86,12 @@ struct QualitySelectionSheet: View {
             }
             .navigationBarTitle("key_select_quality", displayMode: .inline)
         } else if let loadFailure {
-            // Back to the spinner, whose onAppear loads the links again.
+            // Back to the orb, whose onAppear loads the links again.
             PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
                 .navigationBarTitle("key_select_quality", displayMode: .inline)
         } else {
             ViewThatFits {
-                ProgressView()
+                LoadingOrb(state: .connecting)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // The list's own background, so the switch to it doesn't flash (1.6.0: systemGray6 under a grouped list).

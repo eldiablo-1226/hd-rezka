@@ -39,7 +39,7 @@ struct CatalogListingView: View {
         .refreshFailureNotice(network)
         // As on Home: page 1 is fetched through onChange.
         .onLoad { page = 1 }
-        .onChange(of: page) { page in
+        .onChange(of: page) { _, page in
             Task { try await network.fetchMovies(page: page, filter: "") }
         }
     }

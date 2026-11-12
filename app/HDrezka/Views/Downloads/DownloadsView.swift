@@ -38,12 +38,8 @@ struct DownloadsView: View {
         .overlay(alignment: .center) {
             // improvement: says where downloads appear and how to start one (1.6.0: «Сейчас ничего не загружается»).
             if downloadManager.downloads.isEmpty {
-                if #available(iOS 17.0, *) {
-                    ContentUnavailableView("No downloads", systemImage: "arrow.down.circle",
-                                           description: Text("key_downloads_empty_hint"))
-                } else {
-                    Text("No downloads").bold()
-                }
+                ContentUnavailableView("No downloads", systemImage: "arrow.down.circle",
+                                       description: Text("key_downloads_empty_hint"))
             }
         }
         .navigationTitle("Downloads")
