@@ -30,6 +30,11 @@ struct DetailsViewComponent: View {
     @State var isPresentedList = false
     @State var video: String = ""
     @State var coverData: CoverData? = nil
+    /// When the player last opened: its saves since then name the episode it ended on.
+    @State private var playerOpenedAt: Date? = nil
+    /// The player saves its last position as it closes, after the page is back (DetailsWatchPanel): the page follows
+    /// the first save after the close too.
+    @State private var awaitsPlayersLastSave = false
     @State var trailer: String? = nil
     @State var personId: String = ""
     @State var listData = MovieList(id: "", name: "", moviePosition: 0)
@@ -180,8 +185,11 @@ struct DetailsViewComponent: View {
                 .environmentObject(MovieDetailsService())
         }
         .sheet(isPresented: $isPresentedDownloadSheet) {
-            DownloadParamsSheet(id: id, name: title, poster: detail.hPoster, voiceActing: detail.voiceActing, seasons: detail.seasons,
-                                initial: selection.choice)
+            // improvement: the seasons of the voice acting the page has chosen; the marked one's seasons came with another
+            // voice acting's choice, and a season that voice acting lacks could be picked.
+            // (Without a choice the sheet starts on the marked voice acting, whose seasons are the page's.)
+            DownloadParamsSheet(id: id, name: title, poster: detail.hPoster, voiceActing: detail.voiceActing,
+                                seasons: selection.choice == nil ? detail.seasons : selection.seasons, initial: selection.choice)
                 .environmentObject(MovieDetailsService())
                 // improvement: half height first; the sheet's four pickers and its button fit there.
                 .presentationDetents([.medium, .large])
@@ -197,12 +205,21 @@ struct DetailsViewComponent: View {
         .sheet(isPresented: $isPresentedScheduleSheet) {
             scheduleSheet(detail)
         }
-        .fullScreenCover(item: $coverData) { data in
+        .onReceive(PlaybackProgressStore.shared.objectWillChange) {
+            guard awaitsPlayersLastSave, coverData == nil else { return }
+            awaitsPlayersLastSave = false
+            followPlayer()
+        }
+        .fullScreenCover(item: $coverData, onDismiss: {
+            followPlayer()
+            awaitsPlayersLastSave = true
+        }) { data in
             PlayerViewComponent(url: data.body, subtitles: data.subtitles, name: title,
                                 voiceActing: data.actingName, poster: detail.hPoster,
                                 progressKey: data.progressKey, autoplay: data.autoplay, localFileURL: nil)
                 .ignoresSafeArea(.all, edges: .all)
                 .persistentSystemOverlays(.hidden)
+                .onAppear { playerOpenedAt = Date() }
         }
     }
 
@@ -306,11 +323,23 @@ struct DetailsViewComponent: View {
         }
     }
 
-    /// After a sign-in from the bookmark sheet: the page again, now with the account's categories.
+    /// After a sign-in from the bookmark sheet: the page again, now with the account's categories, voice acting and
+    /// episode (`reset`: the guest's choice stayed on «Смотреть»).
     private func reloadAfterSignIn() {
         isPresentedBookmarksSheet = false
         bookmarksLoaded = false
+        selection.reset()
         detailsNetwork.movieDetailed.removeAll()
+    }
+
+    /// improvement: autoplay moves on inside the player; when it closes, «Смотреть» moves to the episode it saved last.
+    /// 1.6.0 kept the episode it started with, whose position autoplay had set back to 0. Nothing saved since it opened
+    /// (a stream that never started) leaves the choice as it was.
+    private func followPlayer() {
+        guard let opened = playerOpenedAt, selection.isSeries, let acting = selection.acting,
+              let last = PlaybackProgressStore.shared.latestEpisode(forTitle: id, translatorId: acting.translatorId,
+                                                                    since: opened) else { return }
+        selection.open(EpisodeTarget(season: last.season, episode: last.episode, voice: nil))
     }
 
     private func resumeSeconds(_ choice: PlaybackChoice) -> Double? {

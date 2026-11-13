@@ -72,6 +72,13 @@ struct PlayerViewComponent: UIViewControllerRepresentable {
         return saved
     }
 
+    /// What the player stores at `seconds`: 0 where it wouldn't resume from (the first 5 s, the last 10 s).
+    /// improvement: a title closed at its end stored its whole length, and the page and «Досмотреть» offered to resume
+    /// there («с 1:39:55») while the player started from 0:00.
+    nonisolated static func positionToSave(_ seconds: Double, duration: Double) -> Double {
+        restorePosition(saved: seconds, duration: duration) ?? 0
+    }
+
     /// Fills `item` with the poster (JPEG data, tagged PNG as in the original) once it is downloaded.
     private func setupArtworkMetadata(_ item: AVMutableMetadataItem) {
         guard let url = URL(string: poster) else { return }
@@ -138,7 +145,9 @@ struct PlayerViewComponent: UIViewControllerRepresentable {
             if let progressKey, let player, didRestore {
                 let seconds = player.currentTime().seconds
                 if seconds.isFinite, seconds > 0 {
-                    PlaybackProgressStore.shared.save(time: seconds, forKey: progressKey)
+                    let duration = player.currentItem?.duration.seconds ?? .nan
+                    PlaybackProgressStore.shared.save(time: PlayerViewComponent.positionToSave(seconds, duration: duration),
+                                                      forKey: progressKey)
                 }
             }
             if let timeObserver {
@@ -215,7 +224,9 @@ struct PlayerViewComponent: UIViewControllerRepresentable {
                 guard self.didRestore, let progressKey = self.progressKey else { return }
                 let seconds = time.seconds
                 if seconds.isFinite, seconds > 0 {
-                    PlaybackProgressStore.shared.save(time: seconds, forKey: progressKey)
+                    let duration = self.player?.currentItem?.duration.seconds ?? .nan
+                    PlaybackProgressStore.shared.save(time: PlayerViewComponent.positionToSave(seconds, duration: duration),
+                                                      forKey: progressKey)
                 }
             }
         }

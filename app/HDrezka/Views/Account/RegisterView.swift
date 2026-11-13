@@ -63,18 +63,24 @@ struct RegisterView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    /// Validates, then signs up; the session is the cookie Alamofire keeps. Network errors are dropped.
+    /// Validates, then signs up; the session is the cookie Alamofire keeps. improvement: a request that fails says so,
+    /// as login does; 1.6.0 dropped the error, cleared the last message and left the button looking dead.
     private func register() {
         Task {
-            if let message = try await checkout(email: email, name: username, pass: password, conf_pass: confirm_password) {
-                error = true
-                errorText = message
-            } else if try await AccountService().signUp(email: email, username: username, password: password) {
-                isLoggedIn = true
-                dismiss()
-            } else {
-                errorText = String(localized: "key_something+went+wrong")
-                error = true
+            do {
+                if let message = try await checkout(email: email, name: username, pass: password, conf_pass: confirm_password) {
+                    error = true
+                    errorText = message
+                } else if try await AccountService().signUp(email: email, username: username, password: password) {
+                    isLoggedIn = true
+                    dismiss()
+                } else {
+                    errorText = String(localized: "key_something+went+wrong")
+                    error = true
+                }
+            } catch {
+                errorText = String(localized: "key_login_network_error")
+                self.error = true
             }
         }
     }

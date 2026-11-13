@@ -63,7 +63,7 @@ struct HomeView: View {
 
     /// Pull to refresh on phone and iPad: the listing again from page 1, which replaces the list when it arrives (the list
     /// stays on screen meanwhile and if the refresh fails). Setting `page` fetches through the views' onChange, page 1 is
-    /// fetched here. Resetting `page` matters: the grid's paging cell asks for `page + 1` next.
+    /// fetched here. The pages after it come from `Network.fetchNextPage`, which goes on after the list's last page.
     @MainActor
     static func refresh(_ network: Network, page: Binding<Int>, variation: StartupPageVariation) {
         refresh(network, page: page, filter: filter(for: variation))

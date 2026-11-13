@@ -27,8 +27,7 @@ struct CollectionsListViewComponentIpad: View {
                     } else {
                         LazyVGrid(columns: columns) {
                             ForEach(collectionsParser.collections, id: \.name) { collection in
-                                NavigationLink(destination: CollectionsMovieListViewComponentIpad(name: collection.name, id: collection.id)
-                                    .environmentObject(CollectionsParser())) {
+                                NavigationLink(destination: CollectionsMovieListViewComponentIpad(name: collection.name, id: collection.id)) {
                                     CollectionsCardViewComponentIpad(collection: collection)
                                 }
                                 .buttonStyle(.plain)

@@ -8,11 +8,12 @@ class HeaderUpdater {
         return try version(fromUpdates: response)
     }
 
-    /// `{"code":"45","version":"2.2.5",...}` -> "2.2.5". Like the original it traps on any other
-    /// JSON shape (all values must be strings); invalid JSON throws.
+    /// `{"code":"45","version":"2.2.5",...}` -> "2.2.5". improvement: any other shape throws; 1.6.0 trapped when a value
+    /// was not a string (a number or null), and HomeView reads this on every return to the foreground.
     static func version(fromUpdates response: String) throws -> String {
-        let json = try JSONSerialization.jsonObject(with: response.data(using: .utf8)!) as! [String: String]
-        return json["version"]!
+        guard let json = try JSONSerialization.jsonObject(with: Data(response.utf8)) as? [String: Any],
+              let version = json["version"] as? String else { throw URLError(.cannotParseResponse) }
+        return version
     }
 
     /// Update feed of the official Android app, requested without the app headers.

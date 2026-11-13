@@ -26,6 +26,14 @@ class Network: ObservableObject {
     /// A refresh failed while the list stayed on screen; Home shows a short notice and clears it.
     @Published var moviesRefreshFailed = false
     private var pageWaiters: [CheckedContinuation<Void, Never>] = []
+    /// improvement: the highest listing page in `movies` since the list was last replaced, and whether a page is on its
+    /// way. The grids counted pages themselves: a failed page was skipped for good, a failed refresh set the count back
+    /// to page 1 under pages 1…N (the next page added nothing and the list stalled), and two pages could be asked at once.
+    private(set) var loadedPage = 0
+    private(set) var isFetchingPage = false
+    /// The cards on the listing page `parse` read last: a page without any (a 403 or 5xx page sent with a body, a block
+    /// page, a page past the end) doesn't count as loaded.
+    private var pageCards = 0
     /// improvement: the site page this listing pages through for «Каталог» ("films/drama/"); empty for the start page.
     let listingPath: String
 
@@ -38,6 +46,7 @@ class Network: ObservableObject {
     /// arrives. 1.6.0 dropped network and parse errors; they now set `moviesLoadFailed`.
     func fetchMovies(page: Int, filter: String) async throws {
         lastMoviesRequest = (page, filter)
+        isFetchingPage = true
         let generation = moviesGeneration
         siteSession.request(moviesURL(page: page, filter: filter), headers: siteHeaders(version: remoteVersion, contentType: false))
             .responseString { response in
@@ -56,11 +65,23 @@ class Network: ObservableObject {
             : PageLoadFailure(error: error, statusCode: statusCode)
     }
 
-    /// Starts over from page 1 without clearing the list: the caller fetches page 1, which then replaces it.
+    /// The listing page the grid asks for next: the one after the last in the list, again if it failed.
+    var nextPage: Int { loadedPage + 1 }
+
+    /// The grid's paging cell: the next page of the last listing asked for, one at a time.
+    func fetchNextPage() {
+        guard !isFetchingPage, let filter = lastMoviesRequest?.filter else { return }
+        isFetchingPage = true  // now: a second trigger in this turn must not pass the guard
+        Task { try await fetchMovies(page: nextPage, filter: filter) }
+    }
+
+    /// Starts over from page 1 without clearing the list: the caller fetches page 1, which then replaces it. A list
+    /// already emptied (another listing) starts its count over too.
     func beginRefresh() {
         moviesGeneration += 1
         replaceOnNextPage = true
         moviesLoadFailed = false
+        if movies.isEmpty { loadedPage = 0 }
     }
 
     private func resumePageWaiters() {
@@ -90,7 +111,10 @@ class Network: ObservableObject {
     /// Parses an arrived listing page. improvement: no body, a parse error or a page that still leaves `movies`
     /// empty sets `moviesLoadFailed`, so Home offers Retry.
     func finishMoviesRequest(html: String?, page: Int? = nil) {
-        defer { resumePageWaiters() }
+        defer {
+            isFetchingPage = false
+            resumePageWaiters()
+        }
         if replaceOnNextPage && (page ?? 1) == 1 {
             replaceOnNextPage = false
             let previous = movies
@@ -99,10 +123,13 @@ class Network: ObservableObject {
                 movies = previous
                 moviesRefreshFailed = !previous.isEmpty
                 moviesLoadFailed = previous.isEmpty
+            } else {
+                loadedPage = 1
             }
             return
         }
         let parsed = html.flatMap { try? parse(html: $0) } != nil
+        if parsed && pageCards > 0 { loadedPage = max(loadedPage, page ?? 1) }
         moviesLoadFailed = !parsed || movies.isEmpty
     }
 
@@ -128,7 +155,9 @@ class Network: ObservableObject {
     func parse(html: String) throws -> [MovieSimple] {
         let document = try SwiftSoup.parse(html)
         _ = try document.checkPremium()
-        document.getMovies()?.forEach { append($0, to: \.movies) }
+        let cards = document.getMovies()
+        pageCards = cards?.size() ?? 0
+        cards?.forEach { append($0, to: \.movies) }
         return movies
     }
 
@@ -239,12 +268,16 @@ private extension Element {
     }
 
     /// The link text without the name and the rating: " (The Matrix, 1999)".
+    /// improvement: only the leading name and the trailing rating are cut; 1.6.0 cut them out of the whole line, so
+    /// «1984 (Nineteen Eighty-Four, 1984)» lost its year.
     func getDetailsSearch() -> String? {
         do {
-            let rating = try getElementsByTag("a").first()!.getElementsByClass("rating").first()?.text()
-            let details = try getElementsByTag("a").first()!.text().replacingOccurrences(of: getNameSearch()!, with: "")
-            guard let rating else { return details }
-            return details.replacingOccurrences(of: rating, with: "")
+            let link = try getElementsByTag("a").first()!
+            let rating = try link.getElementsByClass("rating").first()?.text()
+            var details = try link.text()
+            if let name = getNameSearch(), details.hasPrefix(name) { details.removeFirst(name.count) }
+            if let rating, details.hasSuffix(rating) { details.removeLast(rating.count) }
+            return details
         } catch {
             print("error")
             return nil

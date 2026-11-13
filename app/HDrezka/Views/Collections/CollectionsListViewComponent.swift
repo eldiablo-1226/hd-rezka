@@ -30,8 +30,7 @@ struct CollectionsListViewComponent: View {
                     } else {
                         LazyVGrid(columns: columns) {
                             ForEach(collectionsParser.collections) { collection in
-                                NavigationLink(destination: CollectionsMovieListViewComponent(id: collection.id, name: collection.name)
-                                    .environmentObject(CollectionsParser())) {
+                                NavigationLink(destination: CollectionsMovieListViewComponent(id: collection.id, name: collection.name)) {
                                     CollectionsCardViewComponent(collection: collection)
                                         .onAppear {
                                             if collection == collectionsParser.collections.last {

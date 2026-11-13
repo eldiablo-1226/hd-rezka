@@ -12,7 +12,8 @@ struct InfoTabView: View {
     var detail: MovieDetailed
 
     var body: some View {
-        let cells = 2 + (detail.imdbRating == nil ? 0 : 1) + (detail.kpRating == nil ? 0 : 1)
+        let cells = 1 + (MovieDetailed.shown(detail.duration) == nil ? 0 : 1) + (detail.imdbRating == nil ? 0 : 1)
+            + (detail.kpRating == nil ? 0 : 1)
         ViewThatFits(in: .horizontal) {
             EqualColumns(columns: cells, spacing: DesignTokens.space16) { facts }
                 .fixedSize(horizontal: true, vertical: false)
@@ -30,7 +31,10 @@ struct InfoTabView: View {
         if let kp = detail.kpRating {
             rating(kp, title: "КиноПоиск", format: "%.2f")
         }
-        cell(caption: Text("Duration"), value: duration)
+        // improvement: a page without «Время» has no duration cell; it showed the parser's placeholder «nil».
+        if let duration = MovieDetailed.shown(detail.duration) {
+            cell(caption: Text("Duration"), value: durationText(duration))
+        }
         cell(caption: Text("Age"), value: Text(verbatim: detail.ageRestriction))
     }
 
@@ -52,8 +56,8 @@ struct InfoTabView: View {
     }
 
     /// "172" + "мин" when the site writes minutes, else the site's text as is.
-    private var duration: Text {
-        guard let minutes = Self.durationNumber(detail.duration) else { return Text(verbatim: detail.duration) }
+    private func durationText(_ duration: String) -> Text {
+        guard let minutes = Self.durationNumber(duration) else { return Text(verbatim: duration) }
         return Text(verbatim: minutes + " ") + Text("Minutes").font(.subheadline.weight(.medium))
     }
 

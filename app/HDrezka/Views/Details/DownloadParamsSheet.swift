@@ -151,7 +151,9 @@ struct DownloadParamsSheet: View {
                 loadQualities()
             }
         }
-        .onChange(of: selection.choice?.id) {
+        // The whole choice: two voice actings of a film can share a translatorId (and so `id`) and still differ in
+        // their links (director's cut, camrip).
+        .onChange(of: selection.choice) {
             loadQualities()
         }
     }
@@ -204,11 +206,11 @@ struct DownloadParamsSheet: View {
         qualitiesFailed = false
         qualitiesRequest += 1
         let request = qualitiesRequest
-        guard let choice = selection.choice else {
-            movieVideo = []
-            video = ""
-            return
-        }
+        // improvement: no link until the new choice's arrive; Download stayed on and saved the last episode's file under
+        // the new episode's name.
+        movieVideo = []
+        video = ""
+        guard let choice = selection.choice else { return }
         Task { @MainActor in
             let qualities: [Quality]
             do {

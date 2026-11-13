@@ -161,8 +161,8 @@ struct BookmarksView: View {
     }
 
     private func rename(_ bookmark: Bookmark) {
-        guard let newName = Self.validName(name) else { return }
-        pending.insert(bookmark.id)
+        // The swipe still works on a row with a spinner: one request per row, as in WatchLaterView.
+        guard let newName = Self.validName(name), pending.insert(bookmark.id).inserted else { return }
         Task {
             let renamed = (try? await AccountService().changeBookmarksCategoryName(id: bookmark.id, newName: newName)) == true
             pending.remove(bookmark.id)
@@ -176,7 +176,7 @@ struct BookmarksView: View {
 
     /// Removed by id once the site confirms, so a second swipe or a reordered list can't take another row.
     private func delete(_ bookmark: Bookmark) {
-        pending.insert(bookmark.id)
+        guard pending.insert(bookmark.id).inserted else { return }
         Task {
             let deleted = (try? await AccountService().deleteBookmarksCategory(id: bookmark.id))?.isSuccess() == true
             pending.remove(bookmark.id)

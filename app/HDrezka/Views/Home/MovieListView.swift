@@ -78,12 +78,18 @@ struct MovieListView: View {
                     // checkPremium + card selectors as Network.parse); a throwaway Network gives the same result.
                     // Switch to that method if Network gains it (contract request d1-1).
                     if let html = response.value, let movies = try? Network().parse(html: html), !movies.isEmpty {
-                        list.append(contentsOf: movies)
+                        list = Self.merged(list, movies)
                     } else if list.isEmpty {
                         loadFailure = PageLoadFailure(error: response.error, statusCode: response.response?.statusCode)
                     }
                 }
             }
+    }
+
+    /// improvement: a page that arrives twice (page 1 is asked for again when the loading view reappears) adds no title
+    /// twice; 1.6.0 appended it whole.
+    static func merged(_ list: [MovieSimple], _ page: [MovieSimple]) -> [MovieSimple] {
+        list + page.filter { movie in !list.contains { $0.id == movie.id } }
     }
 
     /// GET "<listURL>/page/<page>" with the two app headers, no Content-Type.

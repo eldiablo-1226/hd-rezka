@@ -27,10 +27,21 @@ final class PlaybackSelection: ObservableObject {
         isConfigured = true
         self.actings = actings ?? []
         self.seasons = seasons
-        acting = initial?.acting
+        // improvement: with no initial choice (the marked season has no episodes yet), the marked voice acting; 1.6.0's
+        // nil left the page with no voice acting, so no season could play.
+        acting = initial?.acting ?? DownloadParamsSheet.initialActing(in: actings)
         season = initial?.season
         episode = initial?.episode
         loadSeasons = loader
+    }
+
+    /// improvement: the page again, as after a sign-in from the bookmark sheet: the next `configure` takes the account's
+    /// marks (1.6.0 kept the guest's voice acting and episode).
+    func reset() {
+        isConfigured = false
+        loadToken += 1
+        isLoadingSeasons = false
+        seasonsFailed = false
     }
 
     var isSeries: Bool { !(seasons?.isEmpty ?? true) }
@@ -64,6 +75,8 @@ final class PlaybackSelection: ObservableObject {
     }
 
     func select(season newSeason: MovieSeason) {
+        // improvement: the season on screen picked again from its menu keeps its episode (it went back to the first).
+        guard newSeason != season else { return }
         season = newSeason
         episode = Self.markedOrFirst(newSeason.episodes)
     }
@@ -283,7 +296,13 @@ extension MovieDetailed {
     /// «Фантастика · 2012 · США»: the first genre, the release year (or the date as the site writes it), the country.
     var factsLine: String {
         let date = releaseDate.map { Self.year(in: $0) ?? $0 }
-        return [genres.first?.name, date, country].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+        return [genres.first?.name, date, Self.shown(country)].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
+    /// A row's value as the page shows it; nil for a page without the row, where the parser writes "nil" (as 1.6.0's
+    /// model did; `MovieDetailsParserTests` pins it) and the page showed it as text.
+    static func shown(_ value: String) -> String? {
+        value.isEmpty || value == "nil" ? nil : value
     }
 
     /// "19 сентября 2026 года" -> "2026".

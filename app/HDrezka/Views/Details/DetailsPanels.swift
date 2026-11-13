@@ -550,7 +550,7 @@ struct DetailsAboutPanel: View {
     private var factRows: [(key: LocalizedStringKey, value: String)] {
         var rows: [(key: LocalizedStringKey, value: String)] = []
         if let date = detail.releaseDate, !date.isEmpty { rows.append(("key_releasedate", date)) }
-        if !detail.country.isEmpty { rows.append(("key_country", detail.country)) }
+        if let country = MovieDetailed.shown(detail.country) { rows.append(("key_country", country)) }
         if !detail.genres.isEmpty { rows.append(("key_genre", detail.genres.map(\.name).joined(separator: ", "))) }
         return rows
     }

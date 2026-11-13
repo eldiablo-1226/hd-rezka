@@ -149,10 +149,17 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         guard let id = downloadTask.taskDescription.flatMap(UUID.init(uuidString:)),
               let download = DispatchQueue.main.sync(execute: { downloads.first(where: { $0.id == id }) }) else { return }
         var failure: Error?
-        do {
-            try persistDownloadedFile(at: location, for: download)
-        } catch {
-            failure = error
+        // improvement: an error page is not the film. An expired link answers 403 with a page, which URLSession hands over
+        // as a finished download; 1.6.0 saved it as the film and announced it downloaded.
+        if let status = (downloadTask.response as? HTTPURLResponse)?.statusCode, !(200..<300).contains(status) {
+            failure = NSError(domain: NSURLErrorDomain, code: NSURLErrorBadServerResponse,
+                              userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: status)])
+        } else {
+            do {
+                try persistDownloadedFile(at: location, for: download)
+            } catch {
+                failure = error
+            }
         }
         setTask(nil, for: id)
         DispatchQueue.main.async {
@@ -179,6 +186,11 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
             DispatchQueue.main.async { self.setState(.paused, for: id) }
             return
         }
+        // improvement: a task cut off by the network keeps what it downloaded, and Resume goes on from there; 1.6.0
+        // dropped it and started again from byte 0.
+        if let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data, !resumeData.isEmpty {
+            try? resumeData.write(to: resumeDataURL(for: id))
+        }
         setTask(nil, for: id)
         // `downloads` and `lastProgressPersist` are only touched on main.
         DispatchQueue.main.async {
@@ -190,9 +202,15 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         }
     }
 
+    /// The system's handler for a background session's events (AppDelegate hands it over). improvement: kept here;
+    /// 1.6.0 kept it on AppDelegate and looked for it through `UIApplication.shared.delegate`, which in a SwiftUI app is
+    /// SwiftUI's own delegate, so the system was never told the events were handled.
+    var backgroundCompletionHandler: (() -> Void)?
+
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         DispatchQueue.main.async {
-            (UIApplication.shared.delegate as? AppDelegate)?.backgroundCompletionHandler?()
+            self.backgroundCompletionHandler?()
+            self.backgroundCompletionHandler = nil
         }
     }
 

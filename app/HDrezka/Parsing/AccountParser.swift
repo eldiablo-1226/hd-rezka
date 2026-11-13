@@ -37,8 +37,11 @@ class AccountParser: ObservableObject {
         return try parseWatchingLaterMovies(html: html)
     }
 
-    /// The HTML half of `parseWatchingLaterMovies()` (inline in the original).
+    /// The HTML half of `parseWatchingLaterMovies()` (inline in the original). improvement: each answer replaces the
+    /// list; 1.6.0 appended it, so two loads in flight at once (back to the list before the last one answered) showed
+    /// every title twice.
     func parseWatchingLaterMovies(html: String) throws -> [MovieWatchLater] {
+        var watchingLaterMovies: [MovieWatchLater] = []
         for item in try SwiftSoup.parse(html).getWatchingLaterMovies() {
             let id = try item.getId()
             let name = try item.getElementsByClass("td title").first()!.getElementsByTag("a").text()
@@ -52,6 +55,7 @@ class AccountParser: ObservableObject {
             watchingLaterMovies.append(MovieWatchLater(id: id, name: name, details: details, watchingInfo: watchingInfo,
                                                        date: date, buttonText: buttonText, dataId: dataId))
         }
+        self.watchingLaterMovies = watchingLaterMovies
         return watchingLaterMovies
     }
 

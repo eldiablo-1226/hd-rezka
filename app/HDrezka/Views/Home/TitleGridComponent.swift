@@ -36,7 +36,8 @@ struct TitleGridComponent: View {
                 }
                 // improvement: no paging cell under the skeletons, or a Retry would also request the next page.
                 if startPaging && !network.movies.isEmpty {
-                    Color.clear.onAppear { page += 1 }
+                    // improvement: Network asks for the page after the last one it has, one at a time (`fetchNextPage`).
+                    Color.clear.onAppear { network.fetchNextPage() }
                 }
             }
             .padding()

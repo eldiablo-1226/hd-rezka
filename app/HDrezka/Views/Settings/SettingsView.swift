@@ -63,8 +63,7 @@ struct SettingsView: View {
                             }
                             .confirmationDialog("key_logout_description", isPresented: $isConfirmingLogout, titleVisibility: .visible) {
                                 Button("key_logout", role: .destructive) {
-                                    // The session cookie is dropped by the site's answer to GET /logout;
-                                    // the binary does no cookie work of its own (no HTTPCookieStorage use outside Alamofire).
+                                    // AccountService.logout sends GET /logout, then drops the session cookies itself.
                                     Task {
                                         try? await AccountService().logout()
                                     }

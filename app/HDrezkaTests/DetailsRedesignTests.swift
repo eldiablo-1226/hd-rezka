@@ -269,7 +269,7 @@ final class DetailsRedesignTests: XCTestCase {
     }
 
     func testProgressOfATitleIsFoundByItsKeyPrefix() {
-        let id = "https://example.test/films/\(UUID().uuidString).html"
+        let id = "https://example.test/films/t\(UUID().uuidString).html"  // a "t": a UUID can start with a number, which reads as a post number
         XCTAssertFalse(PlaybackProgressStore.shared.hasProgress(forTitle: id))
         PlaybackProgressStore.shared.save(time: 120, forKey: id + "|111|0|0")
         XCTAssertTrue(PlaybackProgressStore.shared.hasProgress(forTitle: id))

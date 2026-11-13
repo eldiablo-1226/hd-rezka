@@ -83,13 +83,16 @@ class AccountService {
         return true
     }
 
-    /// Ends the session (the site drops the cookie in its answer to GET /logout) and forgets the premium badge,
-    /// which the original kept until the next listing page.
+    /// Ends the session and forgets the premium badge, which the original kept until the next listing page.
+    /// improvement: the session cookies go here too, after GET /logout whatever it answers. 1.6.0 left that to the site's
+    /// answer, so offline, or on a mirror the cookie doesn't belong to, «Выйти» cleared only the flag and every request
+    /// stayed signed in.
     func logout(network: AccountNetwork = AccountNetwork()) async throws {
         await MainActor.run {
             UserDefaults.standard.set("", forKey: "hasPremium")
             ContinueWatchingCache.clear()  // improvement: the row's list belongs to the account
         }
+        defer { HTTPCookieStorage.shared.removeCookies(since: .distantPast) }
         _ = try await network.logout()
     }
 
@@ -118,13 +121,17 @@ class AccountService {
          "current_time": "1"]
     }
 
-    /// The registration form serialized into one "data" field: unescaped `key=value` pairs in
-    /// dictionary order (the outer form encoding escapes the whole string once).
+    /// The registration form serialized into one "data" field: `key=value` pairs in dictionary order (the outer form
+    /// encoding escapes the whole string once). The site's own form sends it through jQuery's serialize() and
+    /// quick_register.php reads it like PHP's parse_str. improvement: a value's "&", "+", "=" and "%" (and what a query
+    /// can't hold) are escaped; 1.6.0 sent them raw, so «p&ss» was stored as «p» and «neo+hd@…» as «neo hd@…».
     static func signUpData(email: String, username: String, password: String) -> String {
         let fields = ["email": email, "prevent_autofill_name": "", "name": username,
                       "prevent_autofill_password1": "", "password1": password, "rules": "1",
                       "submit_reg": "submit_reg", "do": "register"]
-        return fields.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
+        let plain = CharacterSet.urlQueryAllowed.subtracting(CharacterSet(charactersIn: "&+="))
+        return fields.map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: plain) ?? $0.value)" }
+            .joined(separator: "&")
     }
 
     static func reorderParams(_ bookmarks: [Bookmark]) -> [String: [String]] {

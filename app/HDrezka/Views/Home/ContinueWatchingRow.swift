@@ -100,15 +100,8 @@ enum ContinueWatchingCache {
     /// improvement: the account is watching this title (it's in the site's «Досмотреть»), whichever mirror either id
     /// was listed on. The page then opens on «Смотреть» even without a position saved on this device.
     static func contains(_ id: String, in defaults: UserDefaults = .standard) -> Bool {
-        let title = titleKey(id)
-        return load(from: defaults).contains { titleKey($0.id) == title }
-    }
-
-    /// The site's post number («93813» in ".../93813-zakon-alisii-2026.html»): the same on every mirror and with or
-    /// without the "-latest" the site adds to some addresses. The address without its mirror when there is no number.
-    private static func titleKey(_ id: String) -> String {
-        let post = id.getMovieId()
-        return !post.isEmpty && post.allSatisfy(\.isNumber) ? post : id.removeMirror()
+        let title = id.titleKey
+        return load(from: defaults).contains { $0.id.titleKey == title }
     }
 }
 

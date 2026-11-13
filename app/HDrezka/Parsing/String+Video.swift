@@ -10,16 +10,19 @@ extension String {
     /// Reads the player JSON: a get_cdn_series answer ({"url": ...}) or a details page whose
     /// initCDN*Events(...) call carries {"id":"cdnplayer","streams": ...}. With the X-Hdrezka-Ios-App
     /// headers the site sends plain "[360p]https://….mp4,[720p]…" lists, so nothing is decoded here.
+    /// improvement: an answer without links (a refusal `{"success":false}`, `"url":false`, a page without the player JSON,
+    /// a 403 or block page) gives no qualities, which the sheets show with Retry; 1.6.0 trapped on every one of them.
     func getMovieVideo() -> MovieVideo {
-        let json = (try? JSONSerialization.jsonObject(with: data(using: .utf8)!, options: .fragmentsAllowed)) as? [String: Any]
-            ?? pagePlayerJSON()!
-        let streams = json["url"] as? String ?? json["streams"] as! String
+        let json = (try? JSONSerialization.jsonObject(with: Data(utf8), options: .fragmentsAllowed)) as? [String: Any]
+            ?? pagePlayerJSON() ?? [:]
+        let streams = json["url"] as? String ?? json["streams"] as? String ?? ""
 
         var links: [String: String] = [:]
         do {
-            try streams.split(separator: ",").forEach { item in
+            for item in streams.split(separator: ",") {
                 // A label may be HTML, e.g. <span class="pjs-prem-quality">1080p Ultra<img ...></span>.
                 let parts = item.replacingOccurrences(of: "[", with: "").trimmingCharacters(in: .whitespaces).split(separator: "]")
+                guard parts.count > 1 else { continue }  // a label without its link
                 let label = try SwiftSoup.parse(String(parts[0])).text()
                 links[label] = String(parts[1])
             }
@@ -47,10 +50,9 @@ extension String {
 
     /// The player JSON inside a details page: from `{"id":` through the `}` of the closing `});`.
     private func pagePlayerJSON() -> [String: Any]? {
-        let start = range(of: "{\"id\":")!
-        guard let end = range(of: "});", range: start.lowerBound..<endIndex) else { return nil }
+        guard let start = range(of: "{\"id\":"), let end = range(of: "});", range: start.lowerBound..<endIndex) else { return nil }
         let object = self[start.lowerBound...end.lowerBound]
-        return (try? JSONSerialization.jsonObject(with: object.data(using: .utf8)!, options: .fragmentsAllowed)) as? [String: Any]
+        return (try? JSONSerialization.jsonObject(with: Data(object.utf8), options: .fragmentsAllowed)) as? [String: Any]
     }
 
     /// `success` of an ajax JSON answer; false when it is not JSON or has no Bool `success`.
@@ -63,6 +65,13 @@ extension String {
     /// "https://<mirror>/films/x.html" -> "films/x.html"; strings not starting with "http" stay as they are.
     func removeMirror() -> String {
         starts(with: "http") ? split(separator: "/").dropFirst(2).joined(separator: "/") : self
+    }
+
+    /// The site's post number («93813» in ".../93813-zakon-alisii-2026.html»): the same on every mirror and with or
+    /// without the "-latest" the site adds to some addresses. The address without its mirror when there is no number.
+    var titleKey: String {
+        let post = getMovieId()
+        return !post.isEmpty && post.allSatisfy(\.isNumber) ? post : removeMirror()
     }
 
     /// Vote counts: "(9 715)" -> "9,7K", "(503 278)" -> "503K". The decimal is the first digit of the
@@ -80,9 +89,11 @@ extension String {
 }
 
 extension MovieVideo {
+    /// improvement: no empty link, and not the literal "null" the site gives a guest for a quality that needs an account
+    /// (1080p of film 205): 1.6.0 offered it, preselected it for download and auto-played it, and nothing played.
     func getAvailableQualities() -> [Quality] {
         [("360p", _360p), ("480p", _480p), ("720p", _720p), ("1080p", _1080p), ("1080p Ultra", _1080pUltra), ("2K", _1440p), ("4K", _2160p)]
-            .compactMap { name, url in url.map { Quality(name: name, url: $0) } }
+            .compactMap { name, url in url.flatMap { $0.isEmpty || $0 == "null" ? nil : Quality(name: name, url: $0) } }
     }
 }
 

@@ -7,7 +7,9 @@ struct CollectionsMovieListViewComponent: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     var id: String
     var name: String
-    @EnvironmentObject var collectionsParser: CollectionsParser
+    /// improvement: owned here. The list built it in its body, so a redraw (its next page arriving) handed this page a
+    /// new, empty parser, and the films vanished behind «Похоже, тут ничего нет».
+    @StateObject private var collectionsParser = CollectionsParser()
     @State private var phase: CollectionLoadPhase = .loading
 
     var body: some View {
