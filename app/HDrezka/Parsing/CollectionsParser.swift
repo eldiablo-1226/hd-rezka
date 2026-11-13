@@ -4,6 +4,8 @@ import SwiftSoup
 class CollectionsParser: ObservableObject {
     @Published var collections: [Collection] = []
     @Published var moviesInCollections: [MovieSimple] = []
+    /// The collections on the page `parseCollections` read last, whether or not the list had them already.
+    private(set) var lastPageCount = 0
 
     /// One page of a collection with the "watching" filter, appended to `moviesInCollections`.
     // shortcut: only this method is known to be main-actor isolated (it hops at entry); whether the whole
@@ -16,7 +18,9 @@ class CollectionsParser: ObservableObject {
 
     /// Collections list page, appended to `collections`.
     func parseCollections(_ html: String) throws -> [Collection] {
-        for item in try SwiftSoup.parse(html).select("div.b-content__collections_item") {
+        let items = try SwiftSoup.parse(html).select("div.b-content__collections_item")
+        lastPageCount = items.size()
+        for item in items {
             let url = try item.attr("data-url")
             // "https://<mirror>/collections/<slug>/" -> "https://<mirror>/<slug>" -> "<slug>"
             let id = String(url.replacingOccurrences(of: "collections/", with: "").dropLast(1))

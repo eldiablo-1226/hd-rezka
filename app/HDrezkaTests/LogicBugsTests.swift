@@ -260,6 +260,34 @@ final class LogicBugsTests: XCTestCase {
         XCTAssertEqual(manager.downloads.first { $0.id == id }?.state, .failed)
     }
 
+    /// A Wi-Fi login page or a CDN page answers 200 with HTML: it is not the film either.
+    func testAnHTMLPageIsNotSavedAsTheDownload() throws {
+        let manager = DownloadManager.shared
+        let id = UUID()
+        let download = Download(id: id, title: "Movie", subtitle: "", poster: "", quality: "720p", sourceURL: "https://x/y.mp4",
+                                fileName: id.uuidString + ".mp4", state: .downloading, createdAt: Date(), destination: .app,
+                                receivedBytes: 0, totalBytes: 0)
+        let location = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try Data("<html>Войдите в сеть Wi-Fi</html>".utf8).write(to: location)
+        let saved = downloadsDirectory.appendingPathComponent(download.fileName)
+        defer {
+            try? FileManager.default.removeItem(at: location)
+            manager.delete(download)
+            drainMainQueue()
+        }
+        manager.downloads.insert(download, at: 0)
+        let task = AnsweredTask(id: id, status: 200, contentType: "text/html; charset=utf-8")
+        let finished = expectation(description: "delegate returned")
+        DispatchQueue.global().async {
+            manager.urlSession(URLSession.shared, downloadTask: task, didFinishDownloadingTo: location)
+            finished.fulfill()
+        }
+        wait(for: [finished], timeout: 5)
+        drainMainQueue()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: saved.path))
+        XCTAssertEqual(manager.downloads.first { $0.id == id }?.state, .failed)
+    }
+
     /// `UIApplication.shared.delegate` is SwiftUI's own delegate, not AppDelegate (checked in this host on 2026-11-13), so
     /// the handler AppDelegate kept for background downloads was never found and never called.
     func testBackgroundDownloadsTellTheSystemTheyAreDone() {
@@ -281,6 +309,23 @@ final class LogicBugsTests: XCTestCase {
         defer { storage.deleteCookie(cookie) }
         try? await AccountService().logout(network: OfflineAccountNetwork())
         XCTAssertEqual(storage.cookies(for: URL(string: "https://mirror.test/")!)?.count ?? 0, 0)
+    }
+
+    /// The cookies stayed until GET /logout answered (up to 30 s on a mirror that hangs): a sign-in in that time was
+    /// wiped when they went, and an app killed meanwhile kept them. They go at once; the request carries the old session
+    /// as a header, so the site ends it too, and nothing it answers touches the cookie store.
+    func testSigningOutDropsTheSessionBeforeAskingTheSite() async throws {
+        let storage = HTTPCookieStorage.shared
+        let cookie = try XCTUnwrap(HTTPCookie(properties: [.domain: "mirror.test", .path: "/", .name: "dle_user_id", .value: "7",
+                                                           .expires: Date().addingTimeInterval(3600)]))
+        storage.setCookie(cookie)
+        defer { storage.deleteCookie(cookie) }
+        let network = WatchingAccountNetwork()
+        try? await AccountService().logout(network: network)
+        let sent = try XCTUnwrap(network.logoutRequest)
+        XCTAssertEqual(network.cookiesWhenSent, 0, "the store was already empty when the request went")
+        XCTAssertFalse(sent.httpShouldHandleCookies)
+        XCTAssertEqual(sent.value(forHTTPHeaderField: "Cookie"), "dle_user_id=7")
     }
 
     // MARK: - The page's choice
@@ -405,9 +450,10 @@ private final class AnsweredTask: URLSessionDownloadTask {
     private let id: UUID
     private let answer: URLResponse?
 
-    init(id: UUID, status: Int) {
+    init(id: UUID, status: Int, contentType: String? = nil) {
         self.id = id
-        answer = HTTPURLResponse(url: URL(string: "https://x/y.mp4")!, statusCode: status, httpVersion: nil, headerFields: nil)
+        answer = HTTPURLResponse(url: URL(string: "https://x/y.mp4")!, statusCode: status, httpVersion: nil,
+                                 headerFields: contentType.map { ["Content-Type": $0] })
         super.init()
     }
 
@@ -458,6 +504,33 @@ final class ListingPagingTests: XCTestCase {
         XCTAssertEqual(network.nextPage, 3)
     }
 
+    /// A later page that failed showed nothing at the end of the list: now the grid shows «Повторить» there until a page
+    /// arrives. The site's own 404 past the last page is the list's end, not a failure.
+    func testAFailedLaterPageOffersRetryButTheEndDoesNot() throws {
+        let network = Network()
+        for page in 1...2 { network.finishMoviesRequest(html: try listing(), page: page) }
+        network.finishMoviesRequest(html: nil, page: 3)
+        XCTAssertTrue(network.pageFailed)
+        network.finishMoviesRequest(html: try listing(), page: 3)
+        XCTAssertFalse(network.pageFailed)
+        network.moviesLoadFailure = .notFound
+        network.finishMoviesRequest(html: #"<div id="topnav-menu"></div>"#, page: 4)
+        XCTAssertFalse(network.pageFailed)
+    }
+
+    /// Past its last page the site answers 404 with its own page: the listing ends there and stops asking (it asked for
+    /// that page again each time the end scrolled into view). A refresh that replaces the list starts it over.
+    func testAListingRemembersItsEnd() throws {
+        let network = Network()
+        for page in 1...2 { network.finishMoviesRequest(html: try listing(), page: page) }
+        network.moviesLoadFailure = .notFound
+        network.finishMoviesRequest(html: #"<div id="topnav-menu"></div>"#, page: 3)
+        XCTAssertTrue(network.reachedEnd)
+        network.beginRefresh()
+        network.finishMoviesRequest(html: try listing(), page: 1)
+        XCTAssertFalse(network.reachedEnd)
+    }
+
     func testARefreshThatArrivedGoesOnFromPageTwo() throws {
         let network = Network()
         for page in 1...3 { network.finishMoviesRequest(html: try listing(), page: page) }
@@ -476,5 +549,133 @@ final class ListingPagingTests: XCTestCase {
         XCTAssertEqual(network.nextPage, 1)
         network.finishMoviesRequest(html: try listing(), page: 1)
         XCTAssertEqual(network.nextPage, 2)
+    }
+}
+
+/// The rest of the hunt's list: Photos, the category order, the premium badge, and paging of the lists a view loads itself.
+@MainActor
+final class RemainingBugsTests: XCTestCase {
+    private func drainMainQueue() {
+        let drained = expectation(description: "main queue drained")
+        DispatchQueue.main.async { drained.fulfill() }
+        wait(for: [drained], timeout: 5)
+    }
+
+    /// Photos refused the film (no access, no room): it was deleted, after the whole download. It stays in the app's
+    /// downloads instead, playable there.
+    func testSavingToPhotosFailingKeepsTheFilmInTheApp() throws {
+        let manager = DownloadManager.shared
+        let original = manager.saveToPhotos
+        manager.saveToPhotos = { _ in throw CocoaError(.fileWriteNoPermission) }
+        defer { manager.saveToPhotos = original }
+        let id = UUID()
+        let download = Download(id: id, title: "Movie", subtitle: "", poster: "", quality: "720p", sourceURL: "https://x/y.mp4",
+                                fileName: id.uuidString + ".mp4", state: .downloading, createdAt: Date(), destination: .gallery,
+                                receivedBytes: 0, totalBytes: 0)
+        let location = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try Data("video".utf8).write(to: location)
+        let kept = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Downloads", isDirectory: true).appendingPathComponent(download.fileName)
+        defer {
+            try? FileManager.default.removeItem(at: location)
+            manager.delete(download)
+            drainMainQueue()
+        }
+        manager.downloads.insert(download, at: 0)
+        let task = URLSession.shared.downloadTask(with: URL(string: "https://example.invalid/movie.mp4")!)
+        task.taskDescription = id.uuidString
+        let finished = expectation(description: "delegate returned")
+        DispatchQueue.global().async {
+            manager.urlSession(URLSession.shared, downloadTask: task, didFinishDownloadingTo: location)
+            finished.fulfill()
+        }
+        wait(for: [finished], timeout: 5)
+        drainMainQueue()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: kept.path))
+        let entry = try XCTUnwrap(manager.downloads.first { $0.id == id })
+        XCTAssertEqual(entry.destination, .app)
+        XCTAssertEqual(entry.state, .completed)
+        XCTAssertEqual(manager.localURL(for: entry)?.lastPathComponent, download.fileName)
+    }
+
+    /// The site refused a new order: the whole old list came back, with a category deleted meanwhile and the old name of
+    /// one renamed meanwhile, and without one created meanwhile. Only the old order comes back.
+    func testAFailedReorderKeepsTheChangesMadeMeanwhile() {
+        let a = Bookmark(id: 1, name: "A"), b = Bookmark(id: 2, name: "B"), c = Bookmark(id: 3, name: "C"), x = Bookmark(id: 4, name: "X")
+        let current = [b, Bookmark(id: 1, name: "A2"), c, Bookmark(id: 5, name: "New")]
+        XCTAssertEqual(BookmarksView.restoringOrder(of: [a, b, c, x], in: current),
+                       [Bookmark(id: 1, name: "A2"), b, c, Bookmark(id: 5, name: "New")])
+    }
+
+    /// A 403, 5xx or block page instead of the listing read as "no premium": premium voice actings locked until the next
+    /// good page. Only the site's own page (its header menu) can say the badge is gone.
+    func testAnErrorPageKeepsThePremiumBadge() throws {
+        let defaults = UserDefaults.standard
+        let saved = defaults.string(forKey: "hasPremium")
+        defer { defaults.set(saved, forKey: "hasPremium") }
+        defaults.set("осталось 12 дней", forKey: "hasPremium")
+        Network().finishMoviesRequest(html: "<html><body><h1>403 Forbidden</h1></body></html>", page: 2)
+        XCTAssertEqual(defaults.string(forKey: "hasPremium"), "осталось 12 дней")
+    }
+
+    /// The collections list counts a page's items the way the parser finds them, not by matching the markup's text.
+    func testTheCollectionsParserCountsThePageItRead() throws {
+        let html = try String(contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/catalog-collections.html"), encoding: .utf8)
+        let parser = CollectionsParser()
+        _ = try parser.parseCollections(html)
+        XCTAssertEqual(parser.lastPageCount, 36)
+        _ = try parser.parseCollections(html)
+        XCTAssertEqual(parser.lastPageCount, 36, "the page's own items, though the list already had them")
+    }
+
+    // MARK: PageCursor («Входит в списки», «Подборки»)
+
+    /// Page 3 failed: no automatic request while the Retry row shows, and Retry asks for page 3 again. The lists counted
+    /// pages on each trigger, so page 3 was skipped.
+    func testAFailedPageIsAskedForAgain() {
+        var cursor = PageCursor()
+        for page in 1...2 {
+            XCTAssertEqual(cursor.next(), page)
+            cursor.finish(page: page, items: 36, isEnd: false)
+        }
+        XCTAssertEqual(cursor.next(), 3)
+        cursor.finish(page: 3, items: 0, isEnd: false)
+        XCTAssertTrue(cursor.failed)
+        XCTAssertNil(cursor.next())
+        XCTAssertEqual(cursor.retry(), 3)
+        XCTAssertFalse(cursor.failed)
+    }
+
+    func testOnePageAtATime() {
+        var cursor = PageCursor()
+        XCTAssertEqual(cursor.next(), 1)
+        XCTAssertNil(cursor.next(), "page 1 is on its way")
+        cursor.finish(page: 1, items: 10, isEnd: false)
+        XCTAssertEqual(cursor.next(), 2)
+    }
+
+    /// Past its last page the site answers 404 with its own page: the list ends there, with no Retry.
+    func testA404PastTheLastPageEndsTheList() {
+        var cursor = PageCursor()
+        _ = cursor.next()
+        cursor.finish(page: 1, items: 10, isEnd: false)
+        _ = cursor.next()
+        cursor.finish(page: 2, items: 0, isEnd: true)
+        XCTAssertFalse(cursor.failed)
+        XCTAssertTrue(cursor.reachedEnd)
+        XCTAssertNil(cursor.next())
+    }
+}
+
+/// Records the /logout request and how many cookies the store still held for its host when it went.
+private final class WatchingAccountNetwork: AccountNetwork {
+    var logoutRequest: URLRequest?
+    var cookiesWhenSent = -1
+    override var settingStore: String { get { "mirror.test" } set {} }
+    override func send(_ request: URLRequest) async throws -> String {
+        logoutRequest = request
+        cookiesWhenSent = HTTPCookieStorage.shared.cookies(for: URL(string: "https://mirror.test/")!)?.count ?? 0
+        return ""
     }
 }

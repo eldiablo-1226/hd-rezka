@@ -462,3 +462,15 @@ extension AutoplayContext {
         return season.episodes[index + 1]
     }
 }
+
+/// improvement: the «Безопасная зона» switch (Профиль → Плеер): on, the video keeps clear of the notch or Dynamic Island
+/// behind black bars, as the switch's picture shows; off, it fills the screen. 1.6.0 stored the switch and read it nowhere.
+struct PlayerSafeArea: ViewModifier {
+    @AppStorage("hideNotch") private var hidesNotch = false
+
+    func body(content: Content) -> some View {
+        content
+            .ignoresSafeArea(.all, edges: hidesNotch ? .vertical : .all)
+            .background(Color.black.ignoresSafeArea())
+    }
+}

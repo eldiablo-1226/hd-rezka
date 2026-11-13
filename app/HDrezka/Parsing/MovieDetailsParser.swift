@@ -146,10 +146,14 @@ class MovieDetailsParser: ObservableObject {
 // SwiftUI (for @AppStorage) also declares a `Document`, hence the module prefix.
 extension SwiftSoup.Document {
     /// Reads the signed-in account's premium badge into the "hasPremium" AppStorage value ("" for guests).
+    /// improvement: a page without the badge clears it only when it is the site's own (its header menu): a 403, 5xx or
+    /// block page read as "no premium" and locked premium voice actings until the next good page.
     func checkPremium() throws -> SwiftSoup.Document {
         @AppStorage("hasPremium") var hasPremium: String = ""
         // improvement: a document without <body> counts as a guest ("") instead of trapping.
-        hasPremium = try body()?.select(".b-tophead-premuser").select("b").text() ?? ""
+        let badge = try body()?.select(".b-tophead-premuser").select("b").text() ?? ""
+        let isSitePage = try !select("#topnav-menu").isEmpty()
+        if !badge.isEmpty || isSitePage { hasPremium = badge }
         return self
     }
 

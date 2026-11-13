@@ -37,8 +37,17 @@ class AccountNetwork {
         try await send(request("/continue/"))
     }
 
+    /// improvement: the session's cookies leave the store first; the request carries them as a header and handles no
+    /// cookies itself. The site still ends the session, its answer (however late) can't touch a sign-in made meanwhile, and
+    /// an app killed meanwhile keeps no session. 1.6.0 left the cookies to the site's answer.
     func logout() async throws -> String {
-        try await send(request("/logout"))
+        var request = try request("/logout")
+        let storage = HTTPCookieStorage.shared
+        let session = request.url.flatMap(storage.cookies(for:)) ?? []
+        storage.removeCookies(since: .distantPast)
+        request.httpShouldHandleCookies = false
+        HTTPCookie.requestHeaderFields(with: session).forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+        return try await send(request)
     }
 
     func performBookmarksAction(_ params: [String: String]) async throws -> String {

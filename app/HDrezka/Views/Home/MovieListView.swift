@@ -9,7 +9,8 @@ struct MovieListView: View {
     var movieId: String
     @AppStorage("remoteVersion") var remoteVersion: String = "0.0.0"  // both construction sites (0x10004e5ec, 0x1000d32d8)
     @State var list: [MovieSimple] = []
-    @State var page: Int = 1
+    /// improvement: the next page, one at a time, a failed one again (`PageCursor`); 1.6.0 counted on each last card.
+    @State private var cursor = PageCursor()
     @State var navId: String = ""
     /// improvement: a first page that didn't load says why and offers Retry (1.6.0 spun forever).
     @State var loadFailure: PageLoadFailure? = nil
@@ -27,7 +28,7 @@ struct MovieListView: View {
                                 NavigationLink {
                                     DetailsView(id: movie.id, preview: movie).onAppear { navId = movie.id }
                                 } label: {
-                                    TitleCardComponentIpad(model: movie).onAppear { if list.last == movie { page += 1 } }
+                                    TitleCardComponentIpad(model: movie).onAppear { if list.last == movie { loadNext() } }
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -38,15 +39,19 @@ struct MovieListView: View {
                                 NavigationLink {
                                     DetailsView(id: movie.id, preview: movie).onAppear { navId = movie.id }
                                 } label: {
-                                    TitleCardComponent(model: movie).onAppear { if list.last == movie { page += 1 } }
+                                    TitleCardComponent(model: movie).onAppear { if list.last == movie { loadNext() } }
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
                     }
-                }
-                .onChange(of: page) {
-                    Task { load(page: page) }
+                    // improvement: a later page that failed says so; Retry asks for it again.
+                    if cursor.failed {
+                        Button("key_retry") { loadNext(retrying: true) }
+                            .secondaryButtonStyle()
+                            .tint(.primary)
+                            .padding(.vertical)
+                    }
                 }
                 .padding(.horizontal)
                 .navigationTitle(name)
@@ -59,7 +64,8 @@ struct MovieListView: View {
                     SlowLoadNotice()
                 }
                 .padding()
-                .onAppear { Task { load(page: 1) } }
+                // Also after the first page's Retry; a second appearance while it loads asks for nothing.
+                .onAppear { loadNext(retrying: true) }
             }
         }
         .onAppear { navId = movieId }
@@ -68,9 +74,16 @@ struct MovieListView: View {
         }
     }
 
+    private func loadNext(retrying: Bool = false) {
+        if let page = retrying ? cursor.retry() : cursor.next() { load(page: page) }
+    }
+
     /// 0x10008faa4 / 0x10009061c, response 0x10008fecc.
     private func load(page: Int) {
-        guard let request = try? Self.pageRequest(listURL: id, page: page, version: remoteVersion) else { return }
+        guard let request = try? Self.pageRequest(listURL: id, page: page, version: remoteVersion) else {
+            cursor.finish(page: page, items: 0, isEnd: false)
+            return
+        }
         siteSession.request(request)
             .responseString { response in
                 Task { @MainActor in
@@ -79,8 +92,15 @@ struct MovieListView: View {
                     // Switch to that method if Network gains it (contract request d1-1).
                     if let html = response.value, let movies = try? Network().parse(html: html), !movies.isEmpty {
                         list = Self.merged(list, movies)
-                    } else if list.isEmpty {
-                        loadFailure = PageLoadFailure(error: response.error, statusCode: response.response?.statusCode)
+                        cursor.finish(page: page, items: movies.count, isEnd: false)
+                    } else {
+                        // The site's 404 past the last page ends the list; page 1 failing is a failure (Retry).
+                        let isEnd = page > 1 && response.response?.statusCode == 404
+                            && response.value?.contains("id=\"topnav-menu\"") == true
+                        cursor.finish(page: page, items: 0, isEnd: isEnd)
+                        if list.isEmpty {
+                            loadFailure = PageLoadFailure(error: response.error, statusCode: response.response?.statusCode)
+                        }
                     }
                 }
             }

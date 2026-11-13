@@ -63,7 +63,7 @@ struct SettingsView: View {
                             }
                             .confirmationDialog("key_logout_description", isPresented: $isConfirmingLogout, titleVisibility: .visible) {
                                 Button("key_logout", role: .destructive) {
-                                    // AccountService.logout sends GET /logout, then drops the session cookies itself.
+                                    // AccountNetwork.logout drops the session cookies, then sends GET /logout with them.
                                     Task {
                                         try? await AccountService().logout()
                                     }

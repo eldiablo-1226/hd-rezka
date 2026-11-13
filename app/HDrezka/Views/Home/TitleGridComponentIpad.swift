@@ -34,7 +34,7 @@ struct TitleGridComponentIpad: View {
                     }
                 }
                 // improvement: no paging cell under the skeletons, or a Retry would also request the next page.
-                if startPaging && !network.movies.isEmpty {
+                if startPaging && !network.movies.isEmpty && !network.pageFailed && !network.reachedEnd {
                     // improvement: Network asks for the page after the last one it has, one at a time (`fetchNextPage`).
                     Color.clear.onAppear { network.fetchNextPage() }
                 }
@@ -44,6 +44,13 @@ struct TitleGridComponentIpad: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     Task { startPaging = true }
                 }
+            }
+            // improvement: a later page that failed says so under the grid; Retry asks for it again.
+            if network.pageFailed && !network.movies.isEmpty {
+                Button("key_retry") { network.retryNextPage() }
+                    .secondaryButtonStyle()
+                    .tint(.primary)
+                    .padding(.bottom)
             }
         }
     }

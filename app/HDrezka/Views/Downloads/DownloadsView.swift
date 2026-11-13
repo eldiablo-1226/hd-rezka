@@ -9,7 +9,8 @@ struct DownloadsView: View {
         List {
             ForEach(downloadManager.downloads) { download in
                 DownloadRow(download: download) {
-                    if download.state == .completed, download.destination == .app {
+                    // improvement: only with its file there; a missing file opened an empty player that couldn't close.
+                    if downloadManager.localURL(for: download) != nil {
                         playing = download
                     }
                 }
@@ -47,7 +48,7 @@ struct DownloadsView: View {
             if let url = downloadManager.localURL(for: download) {
                 PlayerViewComponent(url: "", subtitles: [], name: download.title, voiceActing: download.subtitle,
                                     poster: download.poster, progressKey: nil, autoplay: nil, localFileURL: url)
-                    .ignoresSafeArea(.all, edges: .all)
+                    .modifier(PlayerSafeArea())
                     .persistentSystemOverlays(.hidden)
             }
         }

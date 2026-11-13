@@ -254,3 +254,4 @@
 "key_studios" = "Studios";
 "key_genres" = "Genres";
 "key_not_found_text" = "The site found nothing for this request.";
+"key_download_kept_in_app" = "Couldn’t save to Photos: the film is in the app’s downloads";

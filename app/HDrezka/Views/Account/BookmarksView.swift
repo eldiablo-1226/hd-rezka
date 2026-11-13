@@ -188,7 +188,7 @@ struct BookmarksView: View {
         }
     }
 
-    /// The new order goes to the site; a failure puts the old one back.
+    /// The new order goes to the site; a failure puts the old order back.
     private func move(from source: IndexSet, to destination: Int) {
         let previous = bookmarks
         bookmarks.move(fromOffsets: source, toOffset: destination)
@@ -196,11 +196,21 @@ struct BookmarksView: View {
         isReordering = true
         Task {
             if (try? await AccountService().reorderBookmarksCategories(order)) != true {
-                withAnimation(.default) { bookmarks = previous }
+                withAnimation(.default) { bookmarks = Self.restoringOrder(of: previous, in: bookmarks) }
                 presentFailure("key_category_reorder_failed")
             }
             isReordering = false
         }
+    }
+
+    /// The rows on screen now, in their order of `previous`; rows `previous` lacks (created meanwhile) stay at the end.
+    /// improvement: a refused reorder put back the whole old list, so a category deleted or renamed meanwhile came back
+    /// as it was, and one created meanwhile went.
+    static func restoringOrder(of previous: [Bookmark], in current: [Bookmark]) -> [Bookmark] {
+        let rank = Dictionary(previous.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return current.enumerated()
+            .sorted { (rank[$0.element.id] ?? Int.max, $0.offset) < (rank[$1.element.id] ?? Int.max, $1.offset) }
+            .map(\.element)
     }
 
     /// A category name without surrounding spaces, or nil when nothing is left (the site's form refuses an empty one).

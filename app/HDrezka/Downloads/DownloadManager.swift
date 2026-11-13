@@ -28,6 +28,7 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
 
     private override init() {
         super.init()
+        saveToPhotos = { [unowned self] in try self.saveVideoToPhotos($0) }
         let saved = Self.loadMetadata(from: downloadsDirectory().appendingPathComponent("downloads.json"))
         downloads = saved.downloads
         reconcileOnLaunch(save: saved.intact)
@@ -149,14 +150,18 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         guard let id = downloadTask.taskDescription.flatMap(UUID.init(uuidString:)),
               let download = DispatchQueue.main.sync(execute: { downloads.first(where: { $0.id == id }) }) else { return }
         var failure: Error?
+        var destination = download.destination
         // improvement: an error page is not the film. An expired link answers 403 with a page, which URLSession hands over
         // as a finished download; 1.6.0 saved it as the film and announced it downloaded.
         if let status = (downloadTask.response as? HTTPURLResponse)?.statusCode, !(200..<300).contains(status) {
             failure = NSError(domain: NSURLErrorDomain, code: NSURLErrorBadServerResponse,
                               userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: status)])
+        } else if downloadTask.response?.mimeType == "text/html" {
+            // A Wi-Fi login page or a CDN's page answers 200 with HTML.
+            failure = NSError(domain: NSURLErrorDomain, code: NSURLErrorBadServerResponse)
         } else {
             do {
-                try persistDownloadedFile(at: location, for: download)
+                destination = try persistDownloadedFile(at: location, for: download)
             } catch {
                 failure = error
             }
@@ -164,9 +169,20 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         setTask(nil, for: id)
         DispatchQueue.main.async {
             self.lastProgressPersist[id] = nil
+            guard let index = self.downloads.firstIndex(where: { $0.id == id }) else {
+                // Deleted while the file was being saved (Photos takes a while): no row points at it any more.
+                if failure == nil, destination == .app {
+                    try? self.fileManager.removeItem(at: self.downloadsDirectory().appendingPathComponent(download.fileName))
+                }
+                return
+            }
+            self.downloads[index].destination = destination
             self.setState(failure == nil ? .completed : .failed, for: id)
         }
-        if let failure {
+        if failure == nil, destination != download.destination {
+            notificate(String(localized: "Download successfully"), id.uuidString,
+                       download.displayName + "\n" + String(localized: "key_download_kept_in_app"))
+        } else if let failure {
             notificate(String(localized: "Download failed"), id.uuidString,
                        download.displayName + " " + String(localized: "failed to download") + "\n" + failure.localizedDescription)
         } else {
@@ -240,6 +256,12 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
                     let hasResumeData = self.fileManager.fileExists(atPath: self.resumeDataURL(for: self.downloads[index].id).path)
                     self.downloads[index].state = hasResumeData ? .paused : .failed
                 }
+                // improvement: a finished film whose file is gone reads as failed, not as one to play that does nothing.
+                for index in self.downloads.indices where self.downloads[index].state == .completed
+                    && self.downloads[index].destination == .app
+                    && !self.fileManager.fileExists(atPath: self.downloadsDirectory().appendingPathComponent(self.downloads[index].fileName).path) {
+                    self.downloads[index].state = .failed
+                }
                 if save {
                     self.saveMetadata()
                 }
@@ -297,23 +319,40 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         }
     }
 
-    private func persistDownloadedFile(at location: URL, for download: Download) throws {
+    /// Saves a finished video to Photos; a test puts a stand-in here. Set in `init`: two sessions' delegate queues could
+    /// race to set up a lazy one.
+    var saveToPhotos: (URL) throws -> Void = { _ in }
+
+    /// Where the file ended up: `download.destination`, or `.app` when Photos refused it and it was kept here.
+    private func persistDownloadedFile(at location: URL, for download: Download) throws -> DownloadDestination {
         switch download.destination {
         case .app:
             let destination = downloadsDirectory().appendingPathComponent(download.fileName)
             try? fileManager.removeItem(at: destination)
             try fileManager.moveItem(at: location, to: destination)
+            return .app
         case .gallery:
             let temporary = fileManager.temporaryDirectory.appendingPathComponent(download.id.uuidString + ".mp4")
             try? fileManager.removeItem(at: temporary)
             try fileManager.moveItem(at: location, to: temporary)
-            defer { try? fileManager.removeItem(at: temporary) }
-            try saveVideoToAlbum(videoURL: temporary, albumName: "HDrezka")
+            defer { try? fileManager.removeItem(at: temporary) }  // gone once kept; never left behind in tmp
+            do {
+                try saveToPhotos(temporary)
+                return .gallery
+            } catch {
+                // improvement: Photos refused it (no access, no room); the film stays in the app's downloads. 1.6.0
+                // deleted it, after the whole download.
+                let kept = downloadsDirectory().appendingPathComponent(download.fileName)
+                try? fileManager.removeItem(at: kept)
+                try fileManager.moveItem(at: temporary, to: kept)
+                return .app
+            }
         case .files:
             let documents = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             let destination = documents.appendingPathComponent(suggestedFileName(for: download))
             try? fileManager.removeItem(at: destination)
             try fileManager.moveItem(at: location, to: destination)
+            return .files
         }
     }
 
@@ -330,6 +369,13 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         return PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: options).firstObject
     }
 
+    /// Into the «HDrezka» album, else straight into the library. improvement: the add-only access the app asks for
+    /// can't find or make an album, and a save that didn't happen throws; 1.6.0 reported both as saved.
+    private func saveVideoToPhotos(_ videoURL: URL) throws {
+        if (try? saveVideoToAlbum(videoURL: videoURL, albumName: "HDrezka")) != nil { return }
+        try saveVideo(videoURL: videoURL, to: nil)
+    }
+
     private func saveVideoToAlbum(videoURL: URL, albumName: String) throws {
         if let album = fetchAlbum(named: albumName) {
             try saveVideo(videoURL: videoURL, to: album)
@@ -341,15 +387,20 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
         }
         guard let placeholder,
               let album = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [placeholder.localIdentifier], options: nil).firstObject
-        else { return }
+        else { throw CocoaError(.fileWriteUnknown) }
         try saveVideo(videoURL: videoURL, to: album)
     }
 
-    private func saveVideo(videoURL: URL, to album: PHAssetCollection) throws {
+    private func saveVideo(videoURL: URL, to album: PHAssetCollection?) throws {
+        var created = false
         try PHPhotoLibrary.shared().performChangesAndWait {
-            guard let asset = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)?.placeholderForCreatedAsset,
-                  let albumRequest = PHAssetCollectionChangeRequest(for: album) else { return }
-            albumRequest.addAssets([asset] as NSArray)
+            guard let asset = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)?.placeholderForCreatedAsset
+            else { return }
+            created = true
+            if let album, let albumRequest = PHAssetCollectionChangeRequest(for: album) {
+                albumRequest.addAssets([asset] as NSArray)
+            }
         }
+        guard created else { throw CocoaError(.fileReadUnknown) }
     }
 }

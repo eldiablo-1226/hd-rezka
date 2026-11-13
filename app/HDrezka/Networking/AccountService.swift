@@ -84,15 +84,14 @@ class AccountService {
     }
 
     /// Ends the session and forgets the premium badge, which the original kept until the next listing page.
-    /// improvement: the session cookies go here too, after GET /logout whatever it answers. 1.6.0 left that to the site's
-    /// answer, so offline, or on a mirror the cookie doesn't belong to, «Выйти» cleared only the flag and every request
-    /// stayed signed in.
+    /// improvement: the session cookies go before GET /logout whatever it answers (`AccountNetwork.logout`). 1.6.0 left
+    /// that to the site's answer, so offline, or on a mirror the cookie doesn't belong to, «Выйти» cleared only the flag
+    /// and every request stayed signed in.
     func logout(network: AccountNetwork = AccountNetwork()) async throws {
         await MainActor.run {
             UserDefaults.standard.set("", forKey: "hasPremium")
             ContinueWatchingCache.clear()  // improvement: the row's list belongs to the account
         }
-        defer { HTTPCookieStorage.shared.removeCookies(since: .distantPast) }
         _ = try await network.logout()
     }
 

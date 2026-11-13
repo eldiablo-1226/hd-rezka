@@ -31,6 +31,11 @@ class Network: ObservableObject {
     /// to page 1 under pages 1…N (the next page added nothing and the list stalled), and two pages could be asked at once.
     private(set) var loadedPage = 0
     private(set) var isFetchingPage = false
+    /// improvement: a later page failed while the list is on screen: the grid shows «Повторить» under it instead of
+    /// asking again by itself (1.6.0 showed nothing, and the list looked finished).
+    @Published private(set) var pageFailed = false
+    /// The site answered 404 with its own page past the last one: the grid stops asking until a refresh replaces the list.
+    @Published private(set) var reachedEnd = false
     /// The cards on the listing page `parse` read last: a page without any (a 403 or 5xx page sent with a body, a block
     /// page, a page past the end) doesn't count as loaded.
     private var pageCards = 0
@@ -68,6 +73,13 @@ class Network: ObservableObject {
     /// The listing page the grid asks for next: the one after the last in the list, again if it failed.
     var nextPage: Int { loadedPage + 1 }
 
+    /// The Retry row under the grid: the page that failed, again.
+    func retryNextPage() {
+        guard !isFetchingPage else { return }  // a refresh is on its way; its answer decides
+        pageFailed = false
+        fetchNextPage()
+    }
+
     /// The grid's paging cell: the next page of the last listing asked for, one at a time.
     func fetchNextPage() {
         guard !isFetchingPage, let filter = lastMoviesRequest?.filter else { return }
@@ -81,7 +93,10 @@ class Network: ObservableObject {
         moviesGeneration += 1
         replaceOnNextPage = true
         moviesLoadFailed = false
-        if movies.isEmpty { loadedPage = 0 }
+        if movies.isEmpty {
+            loadedPage = 0
+            reachedEnd = false
+        }
     }
 
     private func resumePageWaiters() {
@@ -125,11 +140,20 @@ class Network: ObservableObject {
                 moviesLoadFailed = previous.isEmpty
             } else {
                 loadedPage = 1
+                pageFailed = false
+                reachedEnd = false
             }
             return
         }
         let parsed = html.flatMap { try? parse(html: $0) } != nil
-        if parsed && pageCards > 0 { loadedPage = max(loadedPage, page ?? 1) }
+        if parsed && pageCards > 0 {
+            loadedPage = max(loadedPage, page ?? 1)
+            pageFailed = false
+        } else if !movies.isEmpty {
+            // The site's own 404 past the last page is the list's end.
+            reachedEnd = moviesLoadFailure == .notFound
+            pageFailed = !reachedEnd
+        }
         moviesLoadFailed = !parsed || movies.isEmpty
     }
 

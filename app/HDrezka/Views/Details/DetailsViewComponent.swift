@@ -32,9 +32,9 @@ struct DetailsViewComponent: View {
     @State var coverData: CoverData? = nil
     /// When the player last opened: its saves since then name the episode it ended on.
     @State private var playerOpenedAt: Date? = nil
-    /// The player saves its last position as it closes, after the page is back (DetailsWatchPanel): the page follows
-    /// the first save after the close too.
-    @State private var awaitsPlayersLastSave = false
+    /// When the player last closed, until the next save: the player writes its last position as it closes, after the
+    /// page is back (DetailsWatchPanel), so the page follows a save made after the close too, once.
+    @State private var playerClosedAt: Date? = nil
     @State var trailer: String? = nil
     @State var personId: String = ""
     @State var listData = MovieList(id: "", name: "", moviePosition: 0)
@@ -206,18 +206,19 @@ struct DetailsViewComponent: View {
             scheduleSheet(detail)
         }
         .onReceive(PlaybackProgressStore.shared.objectWillChange) {
-            guard awaitsPlayersLastSave, coverData == nil else { return }
-            awaitsPlayersLastSave = false
-            followPlayer()
+            // Only saves made after the close: another title's player (a page pushed over this one) saves nothing here.
+            guard let closed = playerClosedAt, coverData == nil else { return }
+            playerClosedAt = nil
+            followPlayer(since: closed)
         }
         .fullScreenCover(item: $coverData, onDismiss: {
             followPlayer()
-            awaitsPlayersLastSave = true
+            playerClosedAt = Date()
         }) { data in
             PlayerViewComponent(url: data.body, subtitles: data.subtitles, name: title,
                                 voiceActing: data.actingName, poster: detail.hPoster,
                                 progressKey: data.progressKey, autoplay: data.autoplay, localFileURL: nil)
-                .ignoresSafeArea(.all, edges: .all)
+                .modifier(PlayerSafeArea())
                 .persistentSystemOverlays(.hidden)
                 .onAppear { playerOpenedAt = Date() }
         }
@@ -335,10 +336,10 @@ struct DetailsViewComponent: View {
     /// improvement: autoplay moves on inside the player; when it closes, «Смотреть» moves to the episode it saved last.
     /// 1.6.0 kept the episode it started with, whose position autoplay had set back to 0. Nothing saved since it opened
     /// (a stream that never started) leaves the choice as it was.
-    private func followPlayer() {
-        guard let opened = playerOpenedAt, selection.isSeries, let acting = selection.acting,
+    private func followPlayer(since start: Date? = nil) {
+        guard let since = start ?? playerOpenedAt, selection.isSeries, let acting = selection.acting,
               let last = PlaybackProgressStore.shared.latestEpisode(forTitle: id, translatorId: acting.translatorId,
-                                                                    since: opened) else { return }
+                                                                    since: since) else { return }
         selection.open(EpisodeTarget(season: last.season, episode: last.episode, voice: nil))
     }
 

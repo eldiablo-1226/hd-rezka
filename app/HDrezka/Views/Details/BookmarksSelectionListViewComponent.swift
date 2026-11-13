@@ -169,8 +169,12 @@ struct BookmarksSelectionListViewComponent: View {
         failure = nil
         Task { @MainActor in
             do {
+                // improvement: an answer that isn't the site's JSON (a block page) didn't create it; only `success: false`
+                // is the site refusing (SiteRefusal). Both used to say the sign-in had expired.
                 guard let category = try await AccountService().createBookmarksCategory(name: name) else {
-                    throw SiteRefusal()
+                    failure = .notCreated
+                    announce("key_category_create_failed")
+                    return
                 }
                 withAnimation(.default) { bookmarks[category] = false }
                 toggle(category)

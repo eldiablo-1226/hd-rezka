@@ -362,7 +362,8 @@ final class MovieDetailsParserTests: XCTestCase {
         let doc = try SwiftSoup.parse(#"<div class="b-tophead-premuser"><a href="/payments/">Premium <b>осталось 12 дней</b></a></div>"#)
         XCTAssertTrue(try doc.checkPremium() === doc)
         XCTAssertEqual(defaults.string(forKey: "hasPremium"), "осталось 12 дней")
-        _ = try SwiftSoup.parse("<p>guest</p>").checkPremium()
+        // A guest's page of the site: its header menu, no badge (a page without the menu says nothing about it).
+        _ = try SwiftSoup.parse(#"<div id="topnav-menu"></div><p>guest</p>"#).checkPremium()
         XCTAssertEqual(defaults.string(forKey: "hasPremium"), "")
     }
 
