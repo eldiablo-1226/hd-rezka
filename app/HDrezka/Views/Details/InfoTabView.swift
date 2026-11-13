@@ -4,7 +4,8 @@ import SwiftUI
 /// improvement (Details redesign): one cell shape for all four, caption over value, so the row lines up (1.6.0 centred
 /// two-line ratings against three-line duration and age, about 5 pt apart). One row of equal cells while every cell
 /// fits whole, else two columns, else one: the cells used to shrink one by one, so at xxLarge the four values came out
-/// in four sizes.
+/// in four sizes. Each cell is as wide as the widest one needs, from the leading edge: across an iPad's header column
+/// four cells stretched to about 280 pt each.
 struct InfoTabView: View {
     @AppStorage("showVotesCount") var showVotesCount: Bool = false
     @Environment(\.openURL) var openURL
@@ -14,7 +15,9 @@ struct InfoTabView: View {
         let cells = 2 + (detail.imdbRating == nil ? 0 : 1) + (detail.kpRating == nil ? 0 : 1)
         ViewThatFits(in: .horizontal) {
             EqualColumns(columns: cells, spacing: DesignTokens.space16) { facts }
+                .fixedSize(horizontal: true, vertical: false)
             EqualColumns(columns: 2, spacing: DesignTokens.space16) { facts }
+                .fixedSize(horizontal: true, vertical: false)
             EqualColumns(columns: 1, spacing: DesignTokens.space16) { facts }
         }
     }

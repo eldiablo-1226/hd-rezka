@@ -3,23 +3,16 @@ import SwiftUI
 @main
 struct HDRezkaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @State var isPresented = false
-    @State var id = ""
     @StateObject private var downloadManager = DownloadManager.shared
     var network = Network()
 
-    /// 0x1000fe7ac, onOpenURL 0x1000feaa0: an hdr:// link opens DetailsView through the shared isPresented/id.
+    /// 0x1000fe7ac. improvement (critique r1): an hdr:// link opens its title in the tab on screen (ContentView); 1.6.0's
+    /// onOpenURL (0x1000feaa0) set an isPresented/id shared by every tab.
     var body: some Scene {
         WindowGroup {
-            ContentView(isPresented: $isPresented, id: $id)
+            ContentView()
                 .environmentObject(network)
                 .environmentObject(downloadManager)
-                .onOpenURL { url in
-                    if let filmURL = Self.filmURL(fromDeepLink: url) {
-                        id = filmURL
-                        isPresented = true
-                    }
-                }
         }
     }
 

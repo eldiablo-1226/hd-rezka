@@ -1,6 +1,5 @@
 import SwiftUI
 import Alamofire
-import NukeUI
 
 /// The movie or series page, on the iPhone and the iPad. improvement (Details redesign, contract «Два режима одной
 /// страницы»): a header of facts over two halves, «Смотреть» and «О фильме» (DetailsPanels.swift), one at a time under
@@ -13,6 +12,8 @@ struct DetailsViewComponent: View {
     var opensOnWatch = false
     /// The card that opened the page, shown while it loads (nil for deep links and the continue row).
     var preview: MovieSimple? = nil
+    /// critique r3: the «Обновления сериалов» row's episode and voice acting, the page's first choice.
+    var target: EpisodeTarget? = nil
     @EnvironmentObject var detailsNetwork: MovieDetailsParser
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
@@ -33,6 +34,9 @@ struct DetailsViewComponent: View {
     @State var personId: String = ""
     @State var listData = MovieList(id: "", name: "", moviePosition: 0)
     @State var loadFailure: PageLoadFailure? = nil
+    /// improvement (critique r1): bumped by «Повторить» under the slow-site notice; an answer to an earlier attempt is
+    /// dropped.
+    @State var loadAttempt = 0
     /// improvement: one-tap playback (QuickPlaySheet).
     @State var quickPlay: PlaybackChoice? = nil
     /// The half a compact width shows, picked once per page by DetailsMode.initial.
@@ -61,10 +65,12 @@ struct DetailsViewComponent: View {
             // Back to the orb, whose onAppear loads the page again; the system bar has the way back.
             PageLoadFailedView(failure: loadFailure) { self.loadFailure = nil }
         } else {
-            DetailsLoadingView(preview: preview)
+            DetailsLoadingView(preview: preview, retry: { loadAttempt += 1 })
                 .onAppear {
                     loadPage()
                 }
+                // A new attempt is a new wait: onAppear asks again, and the notice and its timer start over.
+                .id(loadAttempt)
         }
     }
 
@@ -99,9 +105,11 @@ struct DetailsViewComponent: View {
 
     /// closure #2 in body.getter (0x10004f004): the movie page itself (`id` is its full URL), only the app headers.
     private func loadPage() {
+        let attempt = loadAttempt
         siteSession.request(Self.pageURL(id, mirror: settingStore), method: .get, headers: ["X-Hdrezka-Ios-App": "1", "X-Hdrezka-Ios-App-Version": remoteVersion])
             .responseString { response in
                 Task { @MainActor in
+                    guard attempt == loadAttempt else { return }
                     // improvement: no body, a non-2xx answer or a page without the movie block end in the retry state
                     // instead of the endless spinner (a blocked mirror often answers 200 with its own page).
                     guard let html = response.value, (200..<300).contains(response.response?.statusCode ?? 0),
@@ -201,7 +209,7 @@ struct DetailsViewComponent: View {
     /// Compact width: the header, then one half under a segment that stays pinned below the navigation bar.
     private func segmented(_ detail: MovieDetailed, title: String) -> some View {
         LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
-            header(detail, title: title, posterWidth: 96, titleFont: .title2.bold())
+            header(detail, title: title, isRegular: false)
                 .padding(.horizontal)
                 .padding(.top, DesignTokens.space8)
                 .padding(.bottom, DesignTokens.space16)
@@ -227,7 +235,7 @@ struct DetailsViewComponent: View {
     /// Regular width: the header across, then «Смотреть» beside «О фильме».
     private func sideBySide(_ detail: MovieDetailed, title: String, width: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.space24 + DesignTokens.space8) {
-            header(detail, title: title, posterWidth: 180, titleFont: .largeTitle.bold())
+            header(detail, title: title, isRegular: true)
                 .padding(.horizontal, 28)
             HStack(alignment: .top, spacing: DesignTokens.space24 + DesignTokens.space8) {
                 watchPanel(detail)
@@ -242,8 +250,8 @@ struct DetailsViewComponent: View {
         .padding(.vertical, DesignTokens.space24)
     }
 
-    private func header(_ detail: MovieDetailed, title: String, posterWidth: CGFloat, titleFont: Font) -> some View {
-        DetailsHeaderBlock(detail: detail, title: title, posterWidth: posterWidth, titleFont: titleFont)
+    private func header(_ detail: MovieDetailed, title: String, isRegular: Bool) -> some View {
+        DetailsHeaderBlock(detail: detail, title: title, isRegular: isRegular)
             .onGeometryChange(for: Bool.self) { proxy in
                 proxy.frame(in: .named(Self.scrollSpace)).maxY < 48
             } action: { scrolledAway in
@@ -289,6 +297,8 @@ struct DetailsViewComponent: View {
             try await MovieDetailsService().getSeriesSeasons(movieId: id, voiceActing: acting)
         }
         if mode == nil {
+            // Once per page, like the half: back from a person, the user's own choice stays.
+            if let target { selection.open(target) }
             // Progress on this device, or the account's «Досмотреть» (the site's own `active` voice acting is set on
             // guest pages too, so it can't tell a watched title from a new one).
             let isWatching = PlaybackProgressStore.shared.hasProgress(forTitle: id) || ContinueWatchingCache.contains(id)
@@ -357,6 +367,7 @@ struct DetailsViewComponent: View {
 /// page. Without a card (a deep link, the continue row) only the orb shows, in the middle of the screen.
 private struct DetailsLoadingView: View {
     var preview: MovieSimple?
+    var retry: () -> Void
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -369,7 +380,7 @@ private struct DetailsLoadingView: View {
             }
             VStack(spacing: DesignTokens.space8) {
                 LoadingOrb()
-                SlowLoadNotice()
+                SlowLoadNotice(retry: retry)
             }
             .padding(.horizontal, DesignTokens.space16)
             // All the height under the header (the whole screen without a card), with the orb in its middle.
@@ -380,29 +391,20 @@ private struct DetailsLoadingView: View {
 
     /// The loaded page's header (DetailsHeaderBlock) with what the card knows: poster, title and «год, страна, жанр».
     private func header(_ preview: MovieSimple, isRegular: Bool) -> some View {
-        let posterWidth: CGFloat = isRegular ? 180 : 96
-        let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignTokens.space16))
-            : AnyLayout(HStackLayout(alignment: .top, spacing: DesignTokens.space16))
+        let posterWidth = DetailsHeaderBlock.posterWidth(typeSize, isRegular: isRegular)
+        let layout = DetailsHeaderBlock.layout(typeSize)
         return layout {
-            LazyImage(url: URL(string: preview.poster)) { state in
-                if let image = state.image {
-                    image.resizable().scaledToFill()
-                } else {
-                    Rectangle().foregroundStyle(.quinary)
-                }
-            }
-            .frame(width: posterWidth, height: posterWidth * 1.5)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusPoster, style: .continuous))
-            .accessibilityHidden(true)
+            WatchLaterPoster(url: preview.poster, width: posterWidth)
             VStack(alignment: .leading, spacing: DesignTokens.space4) {
                 Text(preview.name)
                     .font(isRegular ? .largeTitle.bold() : .title2.bold())
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
-                Text(preview.details)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if DetailsHeaderBlock.factsPlacement(typeSize, isRegular: isRegular) != .about {
+                    Text(preview.details)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

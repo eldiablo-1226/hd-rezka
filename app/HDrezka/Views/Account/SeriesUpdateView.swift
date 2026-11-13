@@ -23,8 +23,10 @@ struct SeriesUpdateView: View {
                             // By position: two episodes of one series on one day share the series' id.
                             ForEach(group.releasedEpisodes.indices, id: \.self) { index in
                                 let episode = group.releasedEpisodes[index]
+                                // critique r3 (the TV app opens a new episode on it): «Смотреть», with the row's
+                                // episode and voice acting as the choice.
                                 NavigationLink {
-                                    DetailsView(id: episode.id)
+                                    DetailsView(id: episode.id, opensOnWatch: true, target: episode.target)
                                 } label: {
                                     SeriesUpdateCardView(episode: episode)
                                 }

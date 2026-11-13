@@ -136,7 +136,97 @@ final class DetailsRedesignTests: XCTestCase {
         XCTAssertEqual(PlaybackSelection.visibleVoices(Array(list.prefix(3)), chosen: nil, showsAll: false, limit: 4).count, 3)
     }
 
+    // MARK: a page opened from «Обновления сериалов» (critique r3)
+
+    /// The usual case: the row's voice acting is the one the page marks, so its season and episode come from the page's
+    /// own seasons at once, and the button never shows the page's episode first.
+    func testAnUpdateRowOpensItsEpisodeAtOnceInThePagesVoice() {
+        let cold = acting("238", "колдфильм (Coldfilm)", selected: true)
+        let page = [season("1", selected: true, (1...10).map { episode("\($0)", selected: $0 == 1) })]
+        let calls = Calls()
+        let selection = PlaybackSelection()
+        selection.configure(actings: [acting("1", "LostFilm"), cold], seasons: page,
+                            initial: PlaybackChoice(acting: cold, season: page[0], episode: page[0].episodes[0])) { acting in
+            calls.ids.append(acting.translatorId)
+            return nil
+        }
+        XCTAssertNil(selection.open(EpisodeTarget(season: "1", episode: "10", voice: "Coldfilm")), "nothing to load")
+        XCTAssertEqual(selection.choice?.acting, cold)
+        XCTAssertEqual(selection.choice?.season?.id, "1")
+        XCTAssertEqual(selection.choice?.episode?.id, "10")
+        XCTAssertEqual(calls.ids, [])
+    }
+
+    func testAnUpdateRowInAnotherVoiceLoadsItsSeasonsBeforeItsEpisode() async {
+        let studio = acting("111", "HDrezka Studio", selected: true), cold = acting("238", "колдфильм (Coldfilm)")
+        let page = [season("1", selected: true, [episode("1", selected: true)])]
+        let coldSeasons = [season("1", [episode("1")]),
+                           season("2", selected: true, [episode("1", selected: true), episode("2"), episode("3")])]
+        let selection = PlaybackSelection()
+        selection.configure(actings: [studio, cold], seasons: page,
+                            initial: PlaybackChoice(acting: studio, season: page[0], episode: page[0].episodes[0])) { _ in
+            coldSeasons
+        }
+        await selection.open(EpisodeTarget(season: "2", episode: "3", voice: "Coldfilm"))?.value
+        XCTAssertEqual(selection.choice?.acting, cold)
+        XCTAssertEqual(selection.choice?.season?.id, "2")
+        XCTAssertEqual(selection.choice?.episode?.id, "3")
+    }
+
+    /// Each part the page lacks stays the page's own choice.
+    func testWhatAnUpdateRowNamesAndThePageLacksStaysThePagesChoice() {
+        let studio = acting("111", "HDrezka Studio", selected: true)
+        let page = [season("1", selected: true, [episode("1"), episode("2", selected: true), episode("3")])]
+        let selection = PlaybackSelection()
+        selection.configure(actings: [studio, acting("1", "LostFilm")], seasons: page,
+                            initial: PlaybackChoice(acting: studio, season: page[0], episode: page[0].episodes[1])) { _ in nil }
+        XCTAssertNil(selection.open(EpisodeTarget(season: "1", episode: "9", voice: "HDrezka Studio")))
+        XCTAssertEqual(selection.choice?.episode?.id, "2", "no such episode: the page's marked one")
+        XCTAssertNil(selection.open(EpisodeTarget(season: "1", episode: "3", voice: "Субтитры")), "no such voice acting")
+        XCTAssertEqual(selection.choice?.acting, studio)
+        XCTAssertEqual(selection.choice?.episode?.id, "3", "the page's voice acting, the row's episode")
+    }
+
+    func testAVoiceTappedWhileTheRowsVoiceLoadsWins() async {
+        let cold = acting("238", "колдфильм (Coldfilm)"), lost = acting("1", "LostFilm")
+        let gate = Gate()
+        let selection = PlaybackSelection()
+        selection.configure(actings: [acting("111", "HDrezka Studio", selected: true), cold, lost],
+                            seasons: [season("1", selected: true, [episode("1", selected: true)])], initial: nil) { acting in
+            if acting == cold { await gate.enter() }
+            return [self.season("1", [self.episode("1", selected: true), self.episode("10")])]
+        }
+        let opening = selection.open(EpisodeTarget(season: "1", episode: "10", voice: "Coldfilm"))
+        let entered = await gate.waitUntilEntered()
+        XCTAssertTrue(entered, "the row's voice acting never started loading")
+        await selection.select(lost)
+        await gate.open()
+        await opening?.value
+        XCTAssertEqual(selection.acting, lost)
+        XCTAssertEqual(selection.episode?.id, "1", "the tapped voice acting keeps its marked episode")
+    }
+
+    /// The updates write «Coldfilm» for the page's «колдфильм (Coldfilm)».
+    func testAnUpdateRowsVoiceIsFoundByItsWholeNameOrTheNameInBrackets() {
+        let lost = acting("1", "LostFilm"), cold = acting("238", "колдфильм (Coldfilm)")
+        let fan = acting("5", "FanVoxUA (Украинский)")
+        let actings = [lost, cold, fan]
+        XCTAssertEqual(PlaybackSelection.acting(named: "Coldfilm", in: actings), cold)
+        XCTAssertEqual(PlaybackSelection.acting(named: "lostfilm", in: actings), lost)
+        XCTAssertEqual(PlaybackSelection.acting(named: "FanVoxUA (Украинский)", in: actings), fan)
+        XCTAssertNil(PlaybackSelection.acting(named: "Субтитры", in: actings))
+        XCTAssertNil(PlaybackSelection.acting(named: nil, in: actings))
+    }
+
     // MARK: voice acting signals
+
+    /// critique r3: a voice acting row is a 44 pt target (DESIGN.md `row-selection`, the HIG); at 40.7 pt a thumb's miss
+    /// picked the neighbour.
+    func testAVoiceActingRowIsAtLeast44PointsHigh() {
+        let row = VoiceActingRow(acting: acting("1", "Дубляж"), percent: 98, isChosen: true, isLocked: false) {}
+        XCTAssertGreaterThanOrEqual(UIHostingController(rootView: row)
+            .sizeThatFits(in: CGSize(width: 370, height: CGFloat.greatestFiniteMagnitude)).height, 44)
+    }
 
     func testPopularityMatchesNamesWithoutFlagsCaseOrRepeatedSpaces() {
         let signals = VoiceActingSignals(ratings: [MovieVoiceActingRating(name: "Украинский (1+1) 🇺🇦", percent: 0.34),
@@ -200,6 +290,56 @@ final class DetailsRedesignTests: XCTestCase {
         XCTAssertGreaterThan(height(.xxLarge, width: 280), height(.xxLarge, width: 700), "two rows, not four shrunk cells")
     }
 
+    /// critique r1: the facts sit in the column beside the poster (App Store, the TV app), so a phone's header is no
+    /// longer the poster plus the facts under it; at accessibility sizes a phone leaves them to «О фильме».
+    func testFactsSitBesideThePosterAndOpenAboutAtAccessibilitySizes() throws {
+        let detail = try self.detail("details-film-hunger-games.html", id: "https://example.test/films/x.html")
+        func height(_ view: some View, _ size: DynamicTypeSize) -> CGFloat {
+            UIHostingController(rootView: view.environment(\.dynamicTypeSize, size))
+                .sizeThatFits(in: CGSize(width: 370, height: CGFloat.greatestFiniteMagnitude)).height
+        }
+        let header = DetailsHeaderBlock(detail: detail, title: detail.nameRussian, isRegular: false)
+        let poster = DetailsHeaderBlock.posterWidth(.large, isRegular: false) * 3 / 2
+        XCTAssertLessThan(height(header, .large), poster + DesignTokens.space16 + height(InfoTabView(detail: detail), .large),
+                          "beside the poster, not under it")
+        XCTAssertEqual(DetailsHeaderBlock.factsPlacement(.xxLarge, isRegular: false), .beside)
+        XCTAssertEqual(DetailsHeaderBlock.factsPlacement(.xxxLarge, isRegular: false), .below,
+                       "two columns no longer fit beside a phone's poster")
+        XCTAssertEqual(DetailsHeaderBlock.factsPlacement(.accessibility2, isRegular: false), .about)
+        XCTAssertEqual(DetailsHeaderBlock.factsPlacement(.accessibility5, isRegular: true), .beside, "an iPad has the room")
+        XCTAssertEqual(DetailsHeaderBlock.posterWidth(.accessibility2, isRegular: false), 64)
+    }
+
+    /// critique r3: the cast row ends in half a face at any width and text size, as the App Store's and the TV app's
+    /// shelves cut their last item; a fixed 80 pt item ended on four whole faces at 402 pt and on five at 440 pt.
+    func testTheCastRowAlwaysEndsInHalfAFace() {
+        let margin = DesignTokens.space16, spacing = DesignTokens.space16
+        for circle in [CGFloat(64), 74.7, 213] {
+            for container in [CGFloat(375), 393, 402, 420, 440, 688] {
+                let width = DetailsCatalogSections.castItemWidth(container: container, circle: circle)
+                XCTAssertGreaterThanOrEqual(width, circle + DesignTokens.space4, "a name gets at least the face's width")
+                let step = width + spacing
+                let cut = ((container - margin) / step).rounded(.down)  // the item the edge cuts
+                let shown = (container - (margin + cut * step + (width - circle) / 2)) / circle
+                XCTAssertEqual(shown, 0.5, accuracy: 0.01, "\(container) pt, a \(circle) pt face")
+            }
+        }
+        XCTAssertEqual(DetailsCatalogSections.castItemWidth(container: 402, circle: 64), 71.56, accuracy: 0.01,
+                       "four and a half faces on a 402 pt phone")
+    }
+
+    /// critique r4: a franchise row is a 44 pt target, as Music's library rows; the current part, which opens nothing,
+    /// keeps the same height, so the rows line up.
+    func testFranchiseRowsAreAtLeast44PointsHigh() {
+        for current in [false, true] {
+            let part = MovieFranchisePart(id: current ? "" : "https://hdrezka.ag/films/action/1-part.html",
+                                          name: "Голодные игры", year: "2012 год", rating: 7.27, current: current, position: 1)
+            XCTAssertGreaterThanOrEqual(UIHostingController(rootView: FranchiseRowView(item: part))
+                .sizeThatFits(in: CGSize(width: 370, height: CGFloat.greatestFiniteMagnitude)).height, 44,
+                current ? "the current part" : "a link to another part")
+        }
+    }
+
     // MARK: what the primary button says
 
     func testBareNumbersReadAsSeasonAndEpisode() {
@@ -236,6 +376,52 @@ final class DetailsRedesignTests: XCTestCase {
         XCTAssertTrue(choice.isResume(1394))
         XCTAssertFalse(choice.isResume(5))
         XCTAssertFalse(choice.isResume(nil))
+    }
+
+    /// critique r1: with a remembered quality the button names it before the tap, as «до 1080p Ultra» in one piece. Since
+    /// 2026-11-13 it ends the title line and «с 23:14» joins the title, so the second line keeps the episode and voice.
+    func testButtonNamesTheRememberedQualityAndResumePointOnTheTitleLine() {
+        let choice = PlaybackChoice(acting: acting("111", "HDrezka Studio"),
+                                    season: MovieSeason(id: "2", name: "Сезон 2", episodes: [], isSelected: false, url: nil),
+                                    episode: MovieEpisode(id: "8", name: "Серия 8", isSelected: false, url: nil))
+        let upTo = String(format: NSLocalizedString("key_quality_up_to", comment: ""), "1080p Ultra")
+            .replacingOccurrences(of: " ", with: "\u{00A0}")
+        XCTAssertEqual(PlaybackChoice.upToText("1080p Ultra"), upTo)
+        let resumed = DetailsWatchPanel.primaryButton(choice: choice, resume: 1394, voiceName: nil, quality: "1080p Ultra") {}
+        XCTAssertEqual(resumed.title, "key_continue")
+        XCTAssertEqual(resumed.titleSuffix, PlaybackChoice.resumeText(1394))
+        XCTAssertEqual(resumed.detail, "Сезон 2, Серия 8\u{00A0}· HDrezka Studio")
+        XCTAssertEqual(resumed.trailing, upTo)
+        let fresh = DetailsWatchPanel.primaryButton(choice: choice, resume: 5, voiceName: nil, quality: nil) {}
+        XCTAssertEqual(fresh.title, "key_watch", "a few seconds is not a resume point")
+        XCTAssertNil(fresh.titleSuffix)
+        XCTAssertNil(fresh.trailing, "nothing remembered: the sheet asks")
+        XCTAssertEqual(fresh.detail, "Сезон 2, Серия 8\u{00A0}· HDrezka Studio")
+        XCTAssertNil(DetailsWatchPanel.primaryButton(choice: nil, resume: nil, voiceName: nil, quality: "720p") {}.trailing,
+                     "no choice yet: nothing to promise")
+    }
+
+    /// Layout tests measure what the owner reads: the scheme runs the suite in Russian (`test.language` in project.yml).
+    func testTheSuiteRunsInRussian() {
+        XCTAssertEqual(NSLocalizedString("key_watch", comment: ""), "Смотреть")
+    }
+
+    /// After the loop (2026-11-13): «до 1080p Ultra» (critique r1) grew a series' button to three lines. At the iPhone's
+    /// 370 pt, the page's button for a series, watched or resumed with a remembered quality, is as tall as a two-line one.
+    func testTheSeriesButtonKeepsTwoLines() {
+        let choice = PlaybackChoice(acting: acting("56", "колдфильм (Coldfilm)"),
+                                    season: MovieSeason(id: "1", name: "Сезон 1", episodes: [], isSelected: false, url: nil),
+                                    episode: MovieEpisode(id: "1", name: "Серия 1", isSelected: false, url: nil))
+        func height(_ button: PrimaryActionButton) -> CGFloat {
+            UIHostingController(rootView: button.environment(\.dynamicTypeSize, .large))
+                .sizeThatFits(in: CGSize(width: 370, height: CGFloat.greatestFiniteMagnitude)).height
+        }
+        let twoLines = height(PrimaryActionButton(title: "key_watch", detail: "Дубляж", systemImage: "play.fill") {})
+        for resume in [nil, 41] as [Double?] {
+            let button = DetailsWatchPanel.primaryButton(choice: choice, resume: resume, voiceName: nil,
+                                                         quality: "1080p Ultra") {}
+            XCTAssertEqual(height(button), twoLines, accuracy: 0.5, "resume: \(resume.map { "\($0)" } ?? "none")")
+        }
     }
 
     /// The player writes its last position as it closes, and nothing else on the page changes then: the button must

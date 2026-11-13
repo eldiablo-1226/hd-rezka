@@ -11,24 +11,23 @@ struct PersonView: View {
     var body: some View {
         if personDetails != nil {
             ScrollView(.vertical, showsIndicators: false) {
-                HStack(alignment: .bottom) {
+                // critique r4: the title page's header (DetailsHeaderBlock), the names at the photo's top edge.
+                HStack(alignment: .top, spacing: DesignTokens.space16) {
                     PersonPosterView(url: personDetails!.photo)
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: DesignTokens.space4) {
                         Text(personDetails!.nameRu)
-                            .font(.title)
+                            .font(.title2)
                             .bold()
-                            .padding(.bottom, 2)
+                            .accessibilityAddTraits(.isHeader)
                         Text(personDetails!.nameOrig ?? "")
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
-                            .fontWeight(.semibold)
                     }
-                    .padding(.bottom, 16)
-                    .padding(.leading, 8)
                     Spacer()
                 }
-                .padding(.bottom, 18)
-                .padding(.horizontal, 16)
-                VStack(alignment: .leading) {
+                .padding(.bottom, DesignTokens.space16)
+                .padding(.horizontal)
+                VStack(alignment: .leading, spacing: DesignTokens.space8) {
                     HStack { infoRow("key_career", personDetails!.career) }
                     if personDetails!.birthDate != nil {
                         HStack { infoRow("key_date+of+birth", personDetails!.birthDate!) }
@@ -47,8 +46,9 @@ struct PersonView: View {
                         HStack { infoRow("key_place+of+death", personDetails!.deathPlace!) }
                     }
                 }
+                .font(.subheadline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
+                .padding(.horizontal)
                 .padding(.bottom)
                 VStack {
                     if personDetails!.actorMovies != nil {
@@ -98,8 +98,9 @@ struct PersonView: View {
         }
     }
 
-    /// "<localized label>: " in bold, then the value in secondary color.
+    /// "<localized label>: " in secondary color, then the value, as the title page's facts (critique r4; 1.6.0 set the
+    /// label in bold and the value, the data, in the palest text of the screen).
     private func infoRow(_ key: String.LocalizationValue, _ value: String) -> Text {
-        Text(String(localized: key) + ": ").bold() + Text(value).foregroundColor(.secondary)
+        Text(String(localized: key) + ": ").foregroundColor(.secondary) + Text(value)
     }
 }

@@ -277,9 +277,19 @@ func withSiteTimeout(_ request: URLRequest) -> URLRequest {
     return request
 }
 
+/// improvement (critique r1): how long a site request may take in all. `siteTimeout` counts only a silence, so a mirror
+/// that kept trickling its answer held the page's orb for over a minute; past this the request fails as timed out and
+/// PageLoadFailedView offers «Сменить зеркало» and «Повторить».
+let siteDeadline: TimeInterval = 30
+
 /// Every site request goes through this session: Alamofire's defaults (the shared cookie store, so the login carries
-/// over, and the User-Agent the mirrors expect) plus the site timeout.
-let siteSession = Session(interceptor: Adapter { request, _, completion in completion(.success(withSiteTimeout(request))) })
+/// over, and the User-Agent the mirrors expect) plus the site timeout and deadline.
+let siteSession: Session = {
+    let configuration = URLSessionConfiguration.af.default
+    configuration.timeoutIntervalForResource = siteDeadline
+    return Session(configuration: configuration,
+                   interceptor: Adapter { request, _, completion in completion(.success(withSiteTimeout(request))) })
+}()
 
 /// Headers of every site request; most calls also send the form Content-Type, even GETs.
 func siteHeaders(version: String, contentType: Bool) -> HTTPHeaders {

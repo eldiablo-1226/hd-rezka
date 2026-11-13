@@ -24,7 +24,7 @@
 "downloaded" = "downloaded";
 "episode" = "Episode";
 "failed to download" = "failed to download";
-"key_actor" = "Actor";
+"key_actor" = "Roles";
 "key_actors" = "Actors";
 "key_all+franchise+parts" = "All franchise parts";
 "key_and+others" = "and others";
@@ -75,7 +75,6 @@
 "key_login_description" = "Authorize to synchronize your series viewing status and track the release of new episodes";
 "key_logout_description" = "Are you sure you want to log out?";
 "key_mail+not+valid" = "Mail is not valid";
-"key_more" = "more";
 "key_no" = "No";
 "key_no+cat" = "No categories yet. Create one and the film goes straight into it.";
 "key_no_subtitles" = "No subtitles";
@@ -169,7 +168,6 @@
 "key_last_watched" = "Selected";
 "key_premium_only" = "Premium only";
 "key_continue" = "Continue";
-"key_continue_watching" = "Continue watching";
 "key_all" = "All";
 "key_settings" = "Settings";
 "key_logout" = "Log out";
@@ -187,6 +185,7 @@
 "key_season_number" = "Season %@";
 "key_episode_number" = "Episode %@";
 "key_resume_from" = "from %@";
+"key_quality_up_to" = "up to %@";
 "key_all_voices %lld" = "All voice actings · %lld";
 "key_fewer_voices" = "Show fewer";
 "key_voice_camrip" = "Camrip";

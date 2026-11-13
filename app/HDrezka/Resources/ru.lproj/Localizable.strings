@@ -24,7 +24,7 @@
 "downloaded" = "загружено";
 "episode" = "Серия";
 "failed to download" = "не удалось загрузить";
-"key_actor" = "Актер";
+"key_actor" = "Роли";
 "key_actors" = "Актёры";
 "key_all+franchise+parts" = "Все части франшизы";
 "key_and+others" = "и другие";
@@ -75,7 +75,6 @@
 "key_login_description" = "Авторизуйтесь для синхронизации состояния просмотра сериалов и отслеживания выхода новых серий";
 "key_logout_description" = "Вы уверены, что хотите выйти?";
 "key_mail+not+valid" = "Некорректный почтовый адрес";
-"key_more" = "больше";
 "key_no" = "Нет";
 "key_no+cat" = "Категорий пока нет. Создайте первую — фильм сразу попадёт в неё.";
 "key_no_subtitles" = "Без субтитров";
@@ -169,7 +168,6 @@
 "key_last_watched" = "Выбрана";
 "key_premium_only" = "Только с Премиумом";
 "key_continue" = "Продолжить";
-"key_continue_watching" = "Продолжить просмотр";
 "key_all" = "Все";
 "key_settings" = "Настройки";
 "key_logout" = "Выйти из аккаунта";
@@ -187,6 +185,7 @@
 "key_season_number" = "Сезон %@";
 "key_episode_number" = "Серия %@";
 "key_resume_from" = "с %@";
+"key_quality_up_to" = "до %@";
 "key_all_voices %lld" = "Все озвучки · %lld";
 "key_fewer_voices" = "Свернуть";
 "key_voice_camrip" = "Экранка";

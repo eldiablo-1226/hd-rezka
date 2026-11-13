@@ -65,8 +65,19 @@ struct DetailsCatalogSections: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal)
+            // The margin castItemWidth counts on.
+            .padding(.horizontal, DesignTokens.space16)
         }
+    }
+
+    /// critique r3 (the App Store's and the TV app's shelves always cut their last item): a cast item's width, so the row
+    /// ends in half a face at any width and text size. As many whole items as fit, none narrower than the face plus
+    /// 4 pt, and half of the next: margin + n × (width + spacing) + width / 2 = container. A fixed 80 pt item ended on
+    /// four whole faces at 402 pt and on five at 440 pt, and the row looked finished.
+    static func castItemWidth(container: CGFloat, circle: CGFloat) -> CGFloat {
+        let margin = DesignTokens.space16, spacing = DesignTokens.space16, narrowest = circle + DesignTokens.space4
+        let whole = max(1, ((container - margin - narrowest / 2) / (narrowest + spacing)).rounded(.down))
+        return max(narrowest, (container - margin - whole * spacing) / (whole + 0.5))
     }
 
     private func trailerTile(_ trailer: String) -> some View {
@@ -280,7 +291,10 @@ private struct PersonAvatar: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .frame(width: size + DesignTokens.space16)
+        // The scroll view's width, so half of the next face shows at the row's end.
+        .containerRelativeFrame(.horizontal) { length, _ in
+            DetailsCatalogSections.castItemWidth(container: length, circle: size)
+        }
         .accessibilityElement(children: .combine)
     }
 }

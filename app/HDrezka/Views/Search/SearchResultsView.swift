@@ -1,40 +1,53 @@
 import SwiftUI
 import Alamofire
 
-/// Full search results for `request`. improvement: the loading orb until the answer arrives, then the results,
-/// "nothing found" or the error (1.6.0 said "nothing found" after 4 s even while the request was still running).
+/// Full search results for `query`, under the search field. improvement: the loading orb until the answer arrives, then
+/// the results, "nothing found" or the error (1.6.0 said "nothing found" after 4 s even while the request was still
+/// running). critique r2: no longer a page of its own without the field, and coming back from a title keeps the results
+/// instead of searching again.
 struct SearchResultsView: View {
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
     @EnvironmentObject var network: Network
     @State var phase: Phase = .loading
-    @Binding var request: String
+    /// Bumped by «Повторить».
+    @State private var attempt = 0
+    let query: String
 
     var body: some View {
-        NavigationStack {
+        // A ZStack, not a Group: the task belongs to the results, not to whichever state is on screen.
+        ZStack {
             if !network.search.isEmpty {
                 ScrollView {
-                    VStack {
-                        if UIDevice.current.userInterfaceIdiom == .phone {
-                            SearchGridComponent()
-                        } else {
-                            SearchGridComponentIpad()
-                        }
+                    if UIDevice.current.userInterfaceIdiom == .phone {
+                        SearchGridComponent()
+                    } else {
+                        SearchGridComponentIpad()
                     }
                 }
-                .navigationTitle(request)
             } else if case .failed(let failure) = phase {
-                PageLoadFailedView(failure: failure, retry: search)
+                PageLoadFailedView(failure: failure) {
+                    phase = .loading
+                    attempt += 1
+                }
             } else if phase == .loading {
                 LoadingOrb(state: .searching)
             } else {
-                ContentUnavailableView.search(text: request)
+                ContentUnavailableView.search(text: query)
             }
         }
-        .onAppear(perform: search)
-        .onDisappear {
-            network.search = []
-            phase = .loading
+        .task(id: attempt) {
+            guard phase == .loading else { return }
+            do {
+                let html = try await siteString(SearchView.Request.full(mirror: settingStore, query: query,
+                                                                        version: remoteVersion).asURLRequest())
+                // The text changed meanwhile: the field shows its suggestions, and this answer is not theirs.
+                guard !Task.isCancelled else { return }
+                phase = Self.receive(html, into: network)
+            } catch {
+                guard !Task.isCancelled else { return }
+                phase = .failed(PageLoadFailure(error: error, statusCode: nil))
+            }
         }
     }
 
@@ -43,20 +56,14 @@ struct SearchResultsView: View {
         case failed(PageLoadFailure)
     }
 
-    private func search() {
-        phase = .loading
-        siteSession.request(SearchView.Request.full(mirror: settingStore, query: request, version: remoteVersion))
-            .responseString { response in
-                print(response)
-                Task { @MainActor in
-                    guard let html = response.value, (200..<300).contains(response.response?.statusCode ?? 0),
-                          (try? network.parseSearch(html: html)) != nil else {
-                        phase = .failed(PageLoadFailure(error: response.error, statusCode: response.response?.statusCode))
-                        return
-                    }
-                    phase = .loaded
-                }
-            }
+    /// The results page into `network.search`. A page without cards is «nothing found» only when it is the site's own
+    /// (its header menu is on every page); anything else, such as a block page served with 200, is a failure.
+    @MainActor
+    static func receive(_ html: String, into network: Network) -> Phase {
+        network.search = []
+        guard (try? network.parseSearch(html: html)) != nil,
+              !network.search.isEmpty || html.contains("id=\"topnav-menu\"") else { return .failed(.other) }
+        return .loaded
     }
 
     /// The results request as sent (checked by ShellCatalogViewTests).

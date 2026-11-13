@@ -27,9 +27,21 @@ struct SeriesUpdateCardView: View {
             .joined(separator: " ")
     }
 
-    /// «Дубляж» from "(Дубляж)"; nil when the site names none.
+    /// «Дубляж» from "(Дубляж)", «FanVoxUA (Украинский)» from "(FanVoxUA (Украинский))"; nil when the site names none.
     static func voiceName(_ text: String) -> String? {
-        let name = text.trimmingCharacters(in: CharacterSet(charactersIn: "()").union(.whitespaces))
+        var name = text.trimmingCharacters(in: .whitespaces)
+        if name.hasPrefix("("), name.hasSuffix(")") { name = String(name.dropFirst().dropLast()) }
+        name = name.trimmingCharacters(in: .whitespaces)
         return name.isEmpty ? nil : name
+    }
+}
+
+extension SeriesUpdateItem {
+    /// The episode the row announces, for its page (critique r3): "(1 сезон)" and "10 серия " are the page's season and
+    /// episode ids "1" and "10"; nil when either number is missing.
+    var target: EpisodeTarget? {
+        guard let season = season.firstMatch(of: /\d+/), let episode = releasedEpisode.firstMatch(of: /\d+/) else { return nil }
+        return EpisodeTarget(season: String(season.output), episode: String(episode.output),
+                             voice: SeriesUpdateCardView.voiceName(chosenVoiceActing))
     }
 }

@@ -72,10 +72,15 @@ final class VideoServiceTests: XCTestCase {
         ])
     }
 
-    func testPreferredQualityFallsBackToHighest() {
+    /// critique r1: never above the setting, so the page's «до 1080p» holds before the list is known.
+    func testPreferredQualityIsTheSettingOrTheBestBelowIt() {
         let qualities = [Quality(name: "360p", url: "a"), Quality(name: "720p", url: "c"), Quality(name: "1080p Ultra", url: "e")]
         XCTAssertEqual(qualities.preferred(name: "720p"), Quality(name: "720p", url: "c"))
         XCTAssertEqual(qualities.preferred(name: "4K"), Quality(name: "1080p Ultra", url: "e"))
+        XCTAssertEqual(qualities.preferred(name: "1080p"), Quality(name: "720p", url: "c"),
+                       "1.6.0 jumped to 1080p Ultra, above the setting")
+        XCTAssertEqual([Quality(name: "720p", url: "c")].preferred(name: "480p"), Quality(name: "720p", url: "c"),
+                       "nothing at or below it: the lowest")
         XCTAssertNil([Quality]().preferred(name: "720p"))
     }
 

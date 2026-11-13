@@ -128,5 +128,8 @@ schemes:
         HDrezka: all
         HDrezkaTests: [test]
     test:
+      # In Russian, the app's language, so layout tests measure the strings the owner sees.
+      language: ru
+      region: RU
       targets:
         - HDrezkaTests

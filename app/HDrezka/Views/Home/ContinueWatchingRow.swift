@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// improvement: «Продолжить просмотр» at the top of Home. In 1.6.0 continuing meant Profile → «Досмотреть» → page →
-/// «Смотреть» → sheet → quality; a card here opens the page on its «Смотреть» half. Logged-in users only.
+/// improvement: «Досмотреть» at the top of Home. In 1.6.0 continuing meant Profile → «Досмотреть» → page →
+/// «Смотреть» → sheet → quality; a card here opens the page on its «Смотреть» half. Logged-in users only. It has the
+/// name of the list behind «Все» (critique r1; the TV app's Up Next row and screen share one): «Продолжить просмотр»
+/// promised a resume point the page has only for titles watched on this device.
 /// The last list is kept on the device and shown from the first frame, then refreshed, and before the first answer
 /// placeholder cards hold its place: the row used to arrive last and push the listing down under the thumb.
 struct ContinueWatchingRow: View {
@@ -18,14 +20,14 @@ struct ContinueWatchingRow: View {
             if isLoggedIn && (!items.isEmpty || !hasAnswer) {
                 VStack(alignment: .leading, spacing: DesignTokens.space8) {
                     HStack(alignment: .firstTextBaseline) {
-                        Text("key_continue_watching")
+                        Text("key_watch_later")
                             .font(.title3.bold())
+                            .accessibilityAddTraits(.isHeader)
                         Spacer()
-                        NavigationLink("key_all") {
+                        SeeAllLink {
                             WatchLaterView()
                                 .environmentObject(AccountParser())
                         }
-                        .font(.subheadline)
                     }
                     .padding(.horizontal)
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -76,7 +78,7 @@ struct ContinueWatchingRow: View {
     }
 }
 
-/// The last «Продолжить просмотр» answer, kept on the device so Home shows the row from its first frame.
+/// The last «Досмотреть» answer, kept on the device so Home shows the row from its first frame.
 enum ContinueWatchingCache {
     private static let key = "continueWatchingCache"
 
@@ -111,6 +113,26 @@ enum ContinueWatchingCache {
 }
 
 extension MovieWatchLater {
+    /// What the card's page will play (critique r1): the site's episode and voice acting, and «с 23:14» when this device
+    /// has the position the page's «Смотреть» resumes from. The site keeps no position (it is sent current_time 1), so a
+    /// title watched on another device names no time, and its page starts from the beginning.
+    /// shortcut: a position is matched by season and episode, not by voice acting, which the site's list names and the
+    /// key numbers; a position in another voice acting of the same episode shows here too. Upgrade if that shows up.
+    func caption(progress: PlaybackProgressStore = .shared) -> String {
+        let info = watchingInfo.trimmingCharacters(in: .whitespaces)
+        let (season, episode) = markedEpisode
+        guard let seconds = progress.latestTime(forTitle: id, season: season, episode: episode),
+              seconds >= PlaybackChoice.resumeThreshold else { return info }
+        return info + PlaybackChoice.separator + PlaybackChoice.resumeText(seconds)
+    }
+
+    /// "2 сезон 3 серия (Субтитры)" -> ("2", "3"), the progress key's season and episode ids; a film, which the site
+    /// names by its voice acting, -> ("0", "0").
+    var markedEpisode: (season: String, episode: String) {
+        guard let match = watchingInfo.firstMatch(of: /(\d+) сезон (\d+) серия/) else { return ("0", "0") }
+        return (String(match.1), String(match.2))
+    }
+
     /// A placeholder card while the row's first answer is on its way; the text is redacted.
     static let placeholder = MovieWatchLater(id: "", name: "Название фильма", details: "", watchingInfo: "1 сезон 1 серия",
                                              date: "", buttonText: nil, dataId: "")
@@ -118,6 +140,8 @@ extension MovieWatchLater {
 
 private struct ContinueWatchingCard: View {
     var item: MovieWatchLater
+    /// Redraws the caption when the player saves a position.
+    @ObservedObject private var progress = PlaybackProgressStore.shared
     @State private var poster: String? = nil
     /// The page had no poster for us: the card shows a film symbol instead of a fill that looks like loading.
     @State private var isPosterMissing = false
@@ -131,22 +155,18 @@ private struct ContinueWatchingCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.space4) {
+            // critique r2: no play symbol; a tap opens the page, where «Смотреть» plays.
             WatchLaterPoster(url: poster, width: cardWidth, isMissing: isPosterMissing)
-                .overlay(alignment: .bottomLeading) {
-                    Image(systemName: "play.circle.fill")
-                        .font(.title2)
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(.white, .black.opacity(0.5))
-                        .padding(DesignTokens.space4)
-                }
             Text(item.name)
                 .font(.caption.bold())
                 .lineLimit(2)
             // improvement: two lines, so the voice acting after the episode isn't cut to a letter.
-            Text(item.watchingInfo)
+            let caption = item.caption(progress: progress)
+            Text(verbatim: caption)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
+                .accessibilityLabel(Text(verbatim: PlaybackChoice.spoken(caption)))
         }
         .frame(width: cardWidth, alignment: .leading)
         .accessibilityElement(children: .combine)

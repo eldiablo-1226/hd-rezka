@@ -75,8 +75,8 @@ struct WatchLaterView: View {
         }
     }
 
-    /// Gone by id once the site confirms, so a reload or a second swipe can't take another row. Home's «Продолжить
-    /// просмотр» shows the same list from the device, so the device copy follows.
+    /// Gone by id once the site confirms, so a reload or a second swipe can't take another row. Home's «Досмотреть»
+    /// row shows the same list from the device, so the device copy follows.
     private func remove(_ movie: MovieWatchLater) {
         // The swipe and the menu still work on a row with a spinner: one request per row.
         guard pending.insert(movie.dataId).inserted else { return }

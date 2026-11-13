@@ -72,6 +72,38 @@ final class PlaybackSelection: ObservableObject {
         episode = newEpisode
     }
 
+    /// improvement (critique r3): the page opened from an «Обновления сериалов» row, once: the row's voice acting, then
+    /// its season and episode. Picked at once when the row's voice acting is the page's (the button never shows the
+    /// page's episode first); another one's seasons load first, and the returned task ends when they have. Each part the
+    /// page lacks stays the page's choice, and a voice acting tapped meanwhile wins.
+    @discardableResult
+    func open(_ target: EpisodeTarget) -> Task<Void, Never>? {
+        guard let wanted = Self.acting(named: target.voice, in: actings), wanted != acting else {
+            pick(target)
+            return nil
+        }
+        return Task {
+            await select(wanted)
+            if acting == wanted { pick(target) }
+        }
+    }
+
+    private func pick(_ target: EpisodeTarget) {
+        guard !isLoadingSeasons, !seasonsFailed, let season = seasons?.first(where: { $0.id == target.season }),
+              let episode = season.episodes.first(where: { $0.id == target.episode }) else { return }
+        self.season = season
+        self.episode = episode
+    }
+
+    /// The page's voice acting a row names, by its whole name or the name in brackets: the updates write «Coldfilm» for
+    /// the page's «колдфильм (Coldfilm)». Compared as the rating's names are (`VoiceActingSignals.key`).
+    static func acting(named name: String?, in actings: [MovieVoiceActing]) -> MovieVoiceActing? {
+        guard let name else { return nil }
+        let wanted = VoiceActingSignals.key(name)
+        return actings.first { VoiceActingSignals.key($0.name) == wanted }
+            ?? actings.first { $0.name.matches(of: /\(([^()]*)\)/).contains { VoiceActingSignals.key(String($0.1)) == wanted } }
+    }
+
     private func apply(_ fresh: [MovieSeason]?) {
         guard let fresh, !fresh.isEmpty else {
             seasonsFailed = true
@@ -97,6 +129,15 @@ final class PlaybackSelection: ObservableObject {
         }
         return visible
     }
+}
+
+/// improvement (critique r3): the episode an «Обновления сериалов» row announces, which its page opens on, as the TV app
+/// opens a new episode on that episode: season and episode numbers (`MovieSeason.id`, `MovieEpisode.id`) and the site's
+/// name for the voice acting, nil when the row names none.
+struct EpisodeTarget: Equatable {
+    let season: String
+    let episode: String
+    let voice: String?
 }
 
 /// improvement: what a voice acting row says besides «chosen» and «premium»: the site's share of viewers
@@ -204,17 +245,37 @@ extension PlaybackChoice {
     /// name, not with «·» («· с 0:29» used to sit alone on the button's third line).
     static let separator = "\u{00A0}· "
 
-    /// The primary button's second line: «Сезон 2, Серия 8 · HDrezka Studio · с 23:14»; a film names its voice acting.
-    /// `voiceName` stands in for a page without a translator list, whose one voice acting has no name of its own.
+    /// What a choice plays, «Сезон 2, Серия 8 · HDrezka Studio · с 23:14»: the second line of the page's button (which
+    /// names the resume point in its title instead) and of the sheets'. A film names its voice acting. `voiceName`
+    /// stands in for a page without a translator list, whose one voice acting has no name of its own.
     func detailLine(resume seconds: Double?, voiceName: String? = nil) -> String {
         let episodePart = [season.map(EpisodeNames.season), episode.map(EpisodeNames.episode)]
             .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")
         let voice = acting.name.isEmpty ? voiceName ?? "" : acting.name
-        // «с 23:14» stays in one piece.
-        let resume = isResume(seconds) ? String(format: NSLocalizedString("key_resume_from", comment: ""),
-                                                EpisodeNames.clock(seconds ?? 0))
-            .replacingOccurrences(of: " ", with: "\u{00A0}") : ""
+        let resume = isResume(seconds) ? Self.resumeText(seconds ?? 0) : ""
         return [episodePart, voice, resume].filter { !$0.isEmpty }.joined(separator: Self.separator)
+    }
+
+    /// «до 1080p Ultra», in one piece: the remembered quality the page's button plays without asking (critique r1).
+    /// The episode's list comes only with its links, and the player takes that quality or the best below it
+    /// (`preferred(name:)`).
+    static func upToText(_ quality: String) -> String {
+        unbroken(String(format: NSLocalizedString("key_quality_up_to", comment: ""), quality))
+    }
+
+    /// «с 23:14», in one piece.
+    static func resumeText(_ seconds: Double) -> String {
+        unbroken(String(format: NSLocalizedString("key_resume_from", comment: ""), EpisodeNames.clock(seconds)))
+    }
+
+    /// No-break spaces, so a wrap never splits «с 23:14» or «до 1080p Ultra».
+    private static func unbroken(_ text: String) -> String {
+        text.replacingOccurrences(of: " ", with: "\u{00A0}")
+    }
+
+    /// The line as VoiceOver reads it: "Сезон 2, Серия 8, HDrezka Studio, с 23:14", the dots as pauses.
+    static func spoken(_ line: String) -> String {
+        line.replacingOccurrences(of: separator, with: ", ").replacingOccurrences(of: "\u{00A0}", with: " ")
     }
 }
 

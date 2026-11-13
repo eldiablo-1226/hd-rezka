@@ -117,6 +117,73 @@ final class CatalogAccountTests: XCTestCase {
         XCTAssertEqual(network.quickSearch.count, 5)
     }
 
+    /// critique r2: a suggestion row reads like the TV app's, «Сериал · 2024» under the title; the site's brackets held
+    /// the original title, its word for the type (only for what isn't a film) and the year. Live answers of 2026-11-13.
+    @MainActor
+    func testSuggestionNamesTheOriginalTitleTheKindAndTheYear() throws {
+        let network = Network()
+        let matrix = try XCTUnwrap(network.parseQuickSearch(html: fixture("catalog-quick-search.html")).first)
+        XCTAssertEqual(matrix.originalTitle, "The Matrix")
+        XCTAssertEqual(matrix.kindAndYear, "Фильм · 1999")
+        let armitage = network.quickSearch[3]
+        XCTAssertEqual(armitage.originalTitle, "Armitage: Dual Matrix")
+        XCTAssertEqual(armitage.kindAndYear, "Аниме · 2002")
+
+        func result(_ path: String, _ details: String) -> SearchResult {
+            SearchResult(id: "https://ijobs.app/\(path)", name: "Название", details: details)
+        }
+        let prophecy = result("series/fiction/74658-dyuna-prorochestvo-2024.html", " (Dune: Prophecy, сериал, 2024 - ...)")
+        XCTAssertEqual(prophecy.originalTitle, "Dune: Prophecy")
+        XCTAssertEqual(prophecy.kindAndYear, "Сериал · 2024 - ...")
+        let rick = result("cartoons/comedy/2136-rik-i-morti-2013-latest.html", " (Rick and Morty, мультфильм, 2013 - ...)")
+        XCTAssertEqual(rick.originalTitle, "Rick and Morty")
+        XCTAssertEqual(rick.kindAndYear, "Мультфильм · 2013 - ...")
+        let robots = result("cartoons/fiction/30558-lyubov-smert-i-roboty-2019.html", " (Love, Death & Robots, мультфильм, 2019 - ...)")
+        XCTAssertEqual(robots.originalTitle, "Love, Death & Robots", "a comma inside the original title stays")
+        // A Russian title has no original one.
+        let brothers = result("series/melodrama/18039-bratya-2009.html", " (сериал, 2009)")
+        XCTAssertNil(brothers.originalTitle)
+        XCTAssertEqual(brothers.kindAndYear, "Сериал · 2009")
+        let kitchen = result("films/comedy/24205-kuhnya-poslednyaya-bitva-2017-latest.html", " (2017)")
+        XCTAssertNil(kitchen.originalTitle)
+        XCTAssertEqual(kitchen.kindAndYear, "Фильм · 2017")
+        XCTAssertEqual(result("films/fiction/1-x.html", " (1917, 2019)").originalTitle, "1917", "a number is a year only last")
+    }
+
+    /// critique r2: the site's «ничего не найдено» comes in the live-search block and is an empty answer; a page without
+    /// that block (a block page served with 200) is a failure, not an empty screen that reads as «the site has none».
+    @MainActor
+    func testQuickSearchTellsNothingFoundFromAPageThatIsNotTheAnswer() throws {
+        let network = Network()
+        XCTAssertEqual(SearchView.receiveSuggestions(try fixture("catalog-quick-search.html"), into: network), .loaded)
+        XCTAssertEqual(network.quickSearch.count, 5)
+        let notFound = """
+            <div class="b-search__live_section">
+                <div class="b-search__results_notfound">Нам не удалось ничего найти. Может стоит изменить поисковый запрос?</div>
+            </div>
+            """
+        XCTAssertEqual(SearchView.receiveSuggestions(notFound, into: network), .loaded)
+        XCTAssertTrue(network.quickSearch.isEmpty, "the earlier rows go")
+        XCTAssertEqual(SearchView.receiveSuggestions("<html><body>Доступ ограничен</body></html>", into: network),
+                       .failed(.other))
+        XCTAssertTrue(network.quickSearch.isEmpty)
+    }
+
+    /// The full results the same way: the site's own page (its header menu) with no cards is «nothing found».
+    @MainActor
+    func testFullSearchTellsNothingFoundFromAPageThatIsNotTheSite() throws {
+        let network = Network()
+        XCTAssertEqual(SearchResultsView.receive(try fixture("catalog-search.html"), into: network), .loaded)
+        XCTAssertEqual(network.search.count, 9)
+        let notFound = """
+            <html><body><ul id="topnav-menu"><li>Фильмы</li></ul>
+            <div class="b-info__message">Нам не удалось ничего найти. Нет ли грамматических ошибок в запросе?</div></body></html>
+            """
+        XCTAssertEqual(SearchResultsView.receive(notFound, into: network), .loaded)
+        XCTAssertTrue(network.search.isEmpty, "the earlier results go")
+        XCTAssertEqual(SearchResultsView.receive("<html><body>Доступ ограничен</body></html>", into: network), .failed(.other))
+    }
+
     // MARK: - Collections
 
     func testCollections() throws {
@@ -198,7 +265,22 @@ final class CatalogAccountTests: XCTestCase {
         XCTAssertEqual(SeriesUpdateCardView.episodeLine(item), "15 серия (1 сезон)")
         XCTAssertEqual(SeriesUpdateCardView.voiceName("(Дубляж)"), "Дубляж")
         XCTAssertEqual(SeriesUpdateCardView.voiceName("Субтитры"), "Субтитры")
+        XCTAssertEqual(SeriesUpdateCardView.voiceName("(FanVoxUA (Украинский))"), "FanVoxUA (Украинский)",
+                       "only the brackets the site wraps the name in")
         XCTAssertNil(SeriesUpdateCardView.voiceName(" "))
+    }
+
+    /// critique r3: a row opens its page on the episode it announces: "(1 сезон)" and "10 серия " are the page's season
+    /// and episode ids, "(Coldfilm)" names the voice acting.
+    func testSeriesUpdateRowNamesTheEpisodeItsPageOpensOn() {
+        func item(_ season: String, _ episode: String, _ voice: String) -> SeriesUpdateItem {
+            SeriesUpdateItem(id: "x", seriesName: "Сериал Б", season: season, releasedEpisode: episode,
+                             chosenVoiceActing: voice)
+        }
+        XCTAssertEqual(item("(1 сезон)", "10 серия ", "(Coldfilm)").target,
+                       EpisodeTarget(season: "1", episode: "10", voice: "Coldfilm"))
+        XCTAssertEqual(item("(3 сезон)", "6 серия", "").target, EpisodeTarget(season: "3", episode: "6", voice: nil))
+        XCTAssertNil(item("", "6 серия", "(Дубляж)").target, "no season to find the episode in")
     }
 
     @MainActor

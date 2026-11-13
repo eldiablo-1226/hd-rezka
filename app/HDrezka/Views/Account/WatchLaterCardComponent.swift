@@ -9,6 +9,8 @@ struct WatchLaterCardComponent: View {
     var movie: MovieWatchLater
     /// Its removal is on its way to the site.
     var isRemoving = false
+    /// Redraws the caption when the player saves a position.
+    @ObservedObject private var progress = PlaybackProgressStore.shared
     @State private var poster: String? = nil
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
@@ -24,9 +26,12 @@ struct WatchLaterCardComponent: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                Text(movie.watchingInfo)
+                // The Home card's words: what the site marks, and «с 23:14» when this device can resume it.
+                let caption = movie.caption(progress: progress)
+                Text(verbatim: caption)
                     .font(.subheadline)
                     .lineLimit(2)
+                    .accessibilityLabel(Text(verbatim: PlaybackChoice.spoken(caption)))
                 // The site's "смотреть ещё 5 серий в 1 сезоне": news, not what the row plays.
                 if let buttonText = movie.buttonText {
                     Text(verbatim: buttonText)

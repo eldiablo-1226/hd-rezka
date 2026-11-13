@@ -11,21 +11,21 @@ import NukeUI
 struct DetailsHeaderBlock: View {
     var detail: MovieDetailed
     var title: String
-    var posterWidth: CGFloat
-    var titleFont: Font = .title2.bold()
+    /// An iPad (regular width): the larger poster and title.
+    var isRegular: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
 
+    enum FactsPlacement { case beside, below, about }
+
     var body: some View {
+        let facts = Self.factsPlacement(typeSize, isRegular: isRegular)
+        let layout = Self.layout(typeSize)
         VStack(alignment: .leading, spacing: DesignTokens.space16) {
-            // Side by side at accessibility sizes the title would get a few letters per line: the poster goes above it.
-            let layout = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignTokens.space16))
-                : AnyLayout(HStackLayout(alignment: .top, spacing: DesignTokens.space16))
             layout {
-                DetailsPoster(detail: detail, width: posterWidth)
+                DetailsPoster(detail: detail, width: Self.posterWidth(typeSize, isRegular: isRegular))
                 VStack(alignment: .leading, spacing: DesignTokens.space4) {
                     Text(title)
-                        .font(titleFont)
+                        .font(isRegular ? .largeTitle.bold() : .title2.bold())
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
                     if let other = otherTitle {
@@ -33,14 +33,47 @@ struct DetailsHeaderBlock: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                    Text(detail.factsLine)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    if facts != .about {
+                        Text(detail.factsLine)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    if facts == .beside {
+                        InfoTabView(detail: detail)
+                            .padding(.top, DesignTokens.space8)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            InfoTabView(detail: detail)
+            if facts == .below {
+                InfoTabView(detail: detail)
+            }
         }
+    }
+
+    /// improvement (critique r1; the headers of App Store and the TV app): the facts sit in the column beside the poster,
+    /// under the names. Under the poster they pushed the segment about 420 pt down and left that column empty under three
+    /// lines of text. Under both from xxxLarge, where their two columns no longer fit beside a phone's poster. At
+    /// accessibility sizes a phone keeps only the names: the strip opens «О фильме», whose rows already give the date,
+    /// country and every genre of «Жанр · год · страна», so «Смотреть» and the buttons under it stay on the first screen.
+    /// An iPad has room for all of it beside its poster at every size.
+    static func factsPlacement(_ size: DynamicTypeSize, isRegular: Bool) -> FactsPlacement {
+        if isRegular { return .beside }
+        if size.isAccessibilitySize { return .about }
+        return size < .xxxLarge ? .beside : .below
+    }
+
+    /// 96 pt on a phone, 180 on an iPad; 64 on a phone at accessibility sizes, so the title keeps the width it needs.
+    static func posterWidth(_ size: DynamicTypeSize, isRegular: Bool) -> CGFloat {
+        isRegular ? 180 : size.isAccessibilitySize ? 64 : 96
+    }
+
+    /// The poster beside the names, and above them from AX4, where beside it the title would get a few letters a line
+    /// (from AX1 before, which put a 96 pt poster over the title and the buttons under the tab bar).
+    static func layout(_ size: DynamicTypeSize) -> AnyLayout {
+        size >= .accessibility4
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignTokens.space16))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: DesignTokens.space16))
     }
 
     /// The original title under the Russian one, or the Russian one when the original leads (a setting).
@@ -51,17 +84,20 @@ struct DetailsHeaderBlock: View {
     }
 }
 
-/// The page's poster: 2:3, a quiet fill while it loads (nothing loops).
+/// The page's poster: 2:3, a quiet fill while it loads (nothing loops). improvement (critique r1): the listing's smaller
+/// poster, which the tapped card has usually loaded already, stands in while the large one loads and stays if it fails,
+/// and when that fails too the poster ends as the film symbol (WatchLaterPoster). The fill stayed for good when the
+/// large poster didn't come, and read as still loading.
 struct DetailsPoster: View {
     var detail: MovieDetailed
     var width: CGFloat
 
     var body: some View {
-        LazyImage(url: URL(string: detail.hPoster.isEmpty ? detail.poster : detail.hPoster)) { state in
+        LazyImage(url: URL(string: detail.hPoster)) { state in
             if let image = state.image {
                 image.resizable().scaledToFill()
             } else {
-                Rectangle().foregroundStyle(.quinary)
+                WatchLaterPoster(url: detail.poster, width: width)
             }
         }
         .frame(width: width, height: width * 3 / 2)
@@ -83,6 +119,8 @@ struct DetailsWatchPanel: View {
     var download: () -> Void
     var bookmark: () -> Void
     @AppStorage("hasPremium") private var hasPremium: String = ""
+    @AppStorage("preferredQuality") private var preferredQuality: PlayerQualityPreference = .ask
+    @AppStorage("useInfuse") private var useInfuse: Bool = false
     /// Redraws the button when a position is saved: the player writes its last one only as it closes, after the page
     /// is back on screen, so «Смотреть» stayed until something else redrew the page.
     @ObservedObject private var progress = PlaybackProgressStore.shared
@@ -223,15 +261,30 @@ struct DetailsWatchPanel: View {
 
     private var primaryButton: some View {
         let choice = selection.choice
-        let resume = choice.flatMap(resumeSeconds)
-        return PrimaryActionButton(title: choice?.isResume(resume) == true ? "key_continue" : "key_watch",
-                                   detail: choice?.detailLine(resume: resume, voiceName: detail.singleVoiceActingName),
-                                   systemImage: "play.fill",
-                                   isLoading: selection.isLoadingSeasons) {
+        return Self.primaryButton(choice: choice, resume: choice.flatMap(resumeSeconds),
+                                  voiceName: detail.singleVoiceActingName, quality: rememberedQuality,
+                                  isLoading: selection.isLoadingSeasons) {
             if let choice { play(choice) }
         }
         .disabled(choice == nil)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: choice?.id)
+    }
+
+    /// The page's «Продолжить с 23:14 … до 1080p» over «Сезон 2, Серия 8 · HDrezka Studio»: the resume point joins the
+    /// title and the remembered quality ends its line, so a series' second line keeps the episode and voice acting.
+    static func primaryButton(choice: PlaybackChoice?, resume: Double?, voiceName: String?, quality: String?,
+                              isLoading: Bool = false, action: @escaping () -> Void) -> PrimaryActionButton {
+        let isResume = choice?.isResume(resume) == true
+        return PrimaryActionButton(title: isResume ? "key_continue" : "key_watch",
+                                   titleSuffix: isResume ? resume.map(PlaybackChoice.resumeText) : nil,
+                                   detail: choice?.detailLine(resume: nil, voiceName: voiceName),
+                                   trailing: choice == nil ? nil : quality.map(PlaybackChoice.upToText),
+                                   systemImage: "play.fill", isLoading: isLoading, action: action)
+    }
+
+    /// The quality «Смотреть» plays without asking; nil while the quality sheet asks (no preference, or Infuse).
+    private var rememberedQuality: String? {
+        preferredQuality == .ask || useInfuse ? nil : preferredQuality.rawValue
     }
 
     private var secondaryActions: some View {
@@ -314,6 +367,8 @@ struct VoiceActingRow: View {
             .font(.body)
             .foregroundStyle(Color.primary)
             .padding(.vertical, DesignTokens.space8 + 2)
+            // critique r3: 44 pt with the padding, as Settings' selection rows; at 40 pt a miss picked the neighbour.
+            .frame(minHeight: 44)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -345,7 +400,11 @@ struct VoiceActingRow: View {
 /// main actions; the second line names what the action plays or saves, and rewrites itself when the choice changes.
 struct PrimaryActionButton: View {
     var title: LocalizedStringKey
+    /// Follows the title in its line: «Продолжить с 23:14».
+    var titleSuffix: String? = nil
     var detail: String? = nil
+    /// Ends the title line like a row's value, «до 1080p Ultra»; under the title where the line can't hold both.
+    var trailing: String? = nil
     var systemImage: String
     var isLoading = false
     var action: () -> Void
@@ -363,8 +422,7 @@ struct PrimaryActionButton: View {
                 }
                 .frame(width: 22)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.headline)
+                    titleLine
                     if let detail, !detail.isEmpty {
                         Text(verbatim: detail)
                             .font(.subheadline)
@@ -385,11 +443,37 @@ struct PrimaryActionButton: View {
         .accessibilityLabel(accessibilityText)
     }
 
-    /// "Продолжить, Сезон 2, Серия 8, HDrezka Studio, с 23:14": the dots read as pauses.
+    /// The title and `trailing` on one line while it holds both, stacked at the sizes where it doesn't.
+    @ViewBuilder
+    private var titleLine: some View {
+        if let trailing, !trailing.isEmpty {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
+                    titleText
+                    Spacer(minLength: DesignTokens.space8)
+                    Text(verbatim: trailing).font(.subheadline)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    titleText
+                    Text(verbatim: trailing).font(.subheadline)
+                }
+            }
+        } else {
+            titleText
+        }
+    }
+
+    private var titleText: some View {
+        (Text(title) + Text(verbatim: titleSuffix.map { " " + $0 } ?? ""))
+            .font(.headline)
+            .contentTransition(reduceMotion ? .identity : .numericText())
+    }
+
+    /// "Продолжить с 23:14, Сезон 2, Серия 8, HDrezka Studio, до 1080p Ultra": the dots read as pauses.
     private var accessibilityText: Text {
-        guard let detail, !detail.isEmpty else { return Text(title) }
-        return Text(title) + Text(verbatim: ", " + detail.replacingOccurrences(of: PlaybackChoice.separator, with: ", ")
-            .replacingOccurrences(of: "\u{00A0}", with: " "))
+        let suffix = titleSuffix.map { " " + PlaybackChoice.spoken($0) } ?? ""
+        let rest = [detail, trailing].compactMap { $0 }.filter { !$0.isEmpty }.map { ", " + PlaybackChoice.spoken($0) }
+        return Text(title) + Text(verbatim: suffix + rest.joined())
     }
 }
 
@@ -405,6 +489,7 @@ struct DetailsAboutPanel: View {
     var openSchedule: () -> Void
     @State private var isDescriptionExpanded = false
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// About six lines of body text; longer descriptions fold.
@@ -412,6 +497,10 @@ struct DetailsAboutPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.space24) {
+            if DetailsHeaderBlock.factsPlacement(typeSize, isRegular: sizeClass == .regular) == .about {
+                InfoTabView(detail: detail)
+                    .padding(.horizontal)
+            }
             if !detail.description.isEmpty {
                 description
                     .padding(.horizontal)
@@ -428,8 +517,11 @@ struct DetailsAboutPanel: View {
                     Text("key_all+franchise+parts")
                         .font(.title3.bold())
                         .accessibilityAddTraits(.isHeader)
-                    ForEach(franchise, id: \.self) { part in
-                        FranchiseRowView(item: part)
+                    // Rows and their dividers touch, as in a list: each row's own 44 pt makes the rhythm.
+                    VStack(spacing: 0) {
+                        ForEach(franchise, id: \.self) { part in
+                            FranchiseRowView(item: part)
+                        }
                     }
                 }
                 .padding(.horizontal)

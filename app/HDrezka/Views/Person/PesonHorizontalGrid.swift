@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// One career block of a person: the first 15 titles in a row plus "more".
+/// One career block of a person: the first 15 titles in a row plus «Все». improvement (critique r2): its header as the
+/// title page heads its sections (title3 bold, a header for VoiceOver), with the same «Все» as Home's row.
 struct PesonHorizontalGrid: View {
     var movies: [MovieSimple]
     var title: LocalizedStringKey
@@ -8,21 +9,19 @@ struct PesonHorizontalGrid: View {
 
     var body: some View {
         VStack {
-            HStack {
+            HStack(alignment: .firstTextBaseline) {
                 Text(title)
-                    .font(.title2)
-                    .bold()
+                    .font(.title3.bold())
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
-                NavigationLink {
+                SeeAllLink {
                     PersonGridComponent(movies: movies, title: title)
                         .environmentObject(Network())
                         .onAppear { isNavigated = true }
                         .onDisappear { isNavigated = false }
-                } label: {
-                    Text("key_more")
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal)
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack {
                     ForEach(movies.prefix(15)) { movie in

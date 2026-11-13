@@ -81,6 +81,16 @@ final class PlaybackProgressStore: ObservableObject {
         return ((try? container.viewContext.count(for: request)) ?? 0) > 0
     }
 
+    /// improvement (critique r1): the newest position saved for the title at this season and episode ("0" and "0" for a
+    /// film), in any voice acting; the «Досмотреть» cards name it as «с 23:14».
+    func latestTime(forTitle id: String, season: String, episode: String) -> Double? {
+        let request = NSFetchRequest<NSManagedObject>(entityName: entityName)
+        request.predicate = NSPredicate(format: "key BEGINSWITH %@ AND key ENDSWITH %@", id + "|", "|\(season)|\(episode)")
+        request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
+        request.fetchLimit = 1
+        return (try? container.viewContext.fetch(request))?.first?.value(forKey: "time") as? Double
+    }
+
     func time(forKey key: String) -> Double? {
         guard let object = (try? container.viewContext.fetch(request(forKey: key)))?.first else { return nil }
         return object.value(forKey: "time") as? Double

@@ -18,6 +18,24 @@ final class ViewsD1ATests: XCTestCase {
         XCTAssertNil(HDRezkaApp.filmURL(fromDeepLink: URL(string: "hdr://")!))
     }
 
+    /// critique r1: a link opens in the tab on screen only (ContentView); the others keep their place.
+    func testLinkOpensInTheTabOnScreenOnly() {
+        var links = TabLinks()
+        links.profile.id = "https://ijobs.app/films/x/1-earlier.html"
+        links.open(filmPage, in: .profile)
+        XCTAssertTrue(links.profile.isPresented)
+        XCTAssertEqual(links.profile.id, filmPage)
+        for other in [links.home, links.catalog, links.search] {
+            XCTAssertFalse(other.isPresented)
+            XCTAssertEqual(other.id, "")
+        }
+        links.profile.isPresented = false
+        links.open(filmPage, in: .search)
+        XCTAssertFalse(links.profile.isPresented, "Back in one tab stays closed when the next link opens elsewhere")
+        XCTAssertEqual(links.profile.id, filmPage, "the popped page keeps its id")
+        XCTAssertTrue(links.search.isPresented)
+    }
+
     // MARK: ShareButton (0x10010f254)
 
     func testSiteLinkSwapsTheMirrorForThePublicDomain() {
@@ -120,6 +138,30 @@ final class ViewsD1ATests: XCTestCase {
         host.view.layoutIfNeeded()
         let title = try XCTUnwrap(accessibilityLeaves(in: host.view).first { $0.accessibilityLabel == "Дюна" })
         XCTAssertLessThan(title.accessibilityFrame.minX, 2, "the title starts \(title.accessibilityFrame.minX) pt in")
+    }
+
+    /// critique r2: the link to a row's whole list is «Все» on Home and on a person, with a 44 pt target and a header
+    /// VoiceOver can jump to. It was «Все» and «больше», each the size of its text.
+    @MainActor
+    func testSeeAllIsOneWordWithA44PointTarget() throws {
+        let wasOn = try setAccessibilityAutomation(true)
+        defer { _ = try? setAccessibilityAutomation(wasOn) }
+        let movie = MovieSimple(id: "x", name: "Дюна", details: "2021", poster: "")
+        let host = UIHostingController(rootView: NavigationStack {
+            PesonHorizontalGrid(movies: [movie], title: "key_actor", isNavigated: .constant(false))
+        })
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 874))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        host.view.layoutIfNeeded()
+        let leaves = accessibilityLeaves(in: host.view)
+        let all = try XCTUnwrap(leaves.first { $0.accessibilityLabel == NSLocalizedString("key_all", comment: "") },
+                                "\(leaves.map { $0.accessibilityLabel ?? "" })")
+        XCTAssertGreaterThanOrEqual(all.accessibilityFrame.width, 44)
+        XCTAssertGreaterThanOrEqual(all.accessibilityFrame.height, 44)
+        let header = try XCTUnwrap(leaves.first { $0.accessibilityLabel == NSLocalizedString("key_actor", comment: "") })
+        XCTAssertTrue(header.accessibilityTraits.contains(.header))
     }
 
     // MARK: strings used by the shell, home and share views

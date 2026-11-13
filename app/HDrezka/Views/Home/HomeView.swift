@@ -81,7 +81,7 @@ struct HomeView: View {
     }
 
     /// improvement: the listing's name heads the grid and is the menu that switches it; the screen is «Главная», with
-    /// «Продолжить просмотр» above the listing. 1.6.0 titled the screen after the listing (switched only in Settings), and
+    /// «Досмотреть» above the listing. 1.6.0 titled the screen after the listing (switched only in Settings), and
     /// «Последние поступления» didn't fit a large title. The chevron is the ember: the name is a control.
     static func listingMenu(_ selection: Binding<StartupPageVariation>) -> some View {
         Menu {

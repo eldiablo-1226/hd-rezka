@@ -1,4 +1,5 @@
 import XCTest
+import Nuke
 @testable import HDrezka
 
 /// The critique of 2026-11-11 (loading and bookmarks): the bookmark sheet, category management, request timeouts and
@@ -52,7 +53,43 @@ final class BookmarksLoadingTests: XCTestCase {
         XCTAssertEqual(withSiteTimeout(request).url, request.url)
     }
 
+    /// critique r1: a trickling mirror never trips the silence timeout above; the whole request ends at the deadline,
+    /// and posters give up after the same silence as pages.
+    func testSiteRequestsEndAtTheDeadlineAndPostersAfterTheSilence() throws {
+        XCTAssertEqual(siteSession.session.configuration.timeoutIntervalForResource, siteDeadline)
+        XCTAssertGreaterThan(siteDeadline, siteTimeout)
+        let images = try XCTUnwrap(ImagePipeline.shared.configuration.dataLoader as? DataLoader)
+        XCTAssertEqual(images.session.configuration.timeoutIntervalForRequest, siteTimeout)
+        XCTAssertNotNil(images.session.configuration.urlCache, "posters keep their disk cache")
+    }
+
     // MARK: Continue watching
+
+    /// critique r1: a «Досмотреть» card says what its page will do: the site's episode and voice acting, and «с 23:14»
+    /// only when this device has the position for that episode (the site keeps none).
+    func testContinueCardNamesTheResumePointOnlyWhenThisDeviceHasIt() {
+        let store = PlaybackProgressStore.shared
+        let id = "https://example.test/series/\(UUID().uuidString).html"
+        let series = MovieWatchLater(id: id, name: "Y", details: "", watchingInfo: "2 сезон 3 серия (Субтитры) ",
+                                     date: "", buttonText: nil, dataId: "1")
+        XCTAssertEqual(series.markedEpisode.season, "2")
+        XCTAssertEqual(series.markedEpisode.episode, "3")
+        XCTAssertEqual(series.caption(), "2 сезон 3 серия (Субтитры)", "nothing saved here: the site's words only")
+        store.save(time: 1394, forKey: id + "|111|2|2")
+        XCTAssertEqual(series.caption(), "2 сезон 3 серия (Субтитры)", "another episode's position isn't this one's")
+        store.save(time: 1394, forKey: id + "|111|2|3")
+        XCTAssertEqual(series.caption(), "2 сезон 3 серия (Субтитры)" + PlaybackChoice.separator + PlaybackChoice.resumeText(1394))
+
+        let film = MovieWatchLater(id: id + "-film", name: "Z", details: "", watchingInfo: "Дубляж", date: "",
+                                   buttonText: nil, dataId: "2")
+        XCTAssertEqual(film.markedEpisode.season, "0")
+        store.save(time: 5, forKey: film.id + "|7|0|0")
+        XCTAssertEqual(film.caption(), "Дубляж", "a few seconds is not a resume point")
+        store.save(time: 600, forKey: film.id + "|7|0|0")
+        XCTAssertEqual(film.caption(), "Дубляж" + PlaybackChoice.separator + PlaybackChoice.resumeText(600))
+        XCTAssertEqual(PlaybackChoice.spoken(film.caption()), "Дубляж, " + PlaybackChoice.resumeText(600)
+            .replacingOccurrences(of: "\u{00A0}", with: " "))
+    }
 
     func testContinueWatchingCacheKeepsTheLastListAndForgetsItOnClear() throws {
         let suite = "BookmarksLoadingTests.continueWatching"

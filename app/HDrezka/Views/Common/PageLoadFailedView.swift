@@ -93,21 +93,30 @@ struct LoadingOrb: View {
     }
 }
 
-/// improvement: after 8 s of loading it names the mirror that is slow, so a stall doesn't look like a frozen app. The
-/// request gives up at `siteTimeout` and PageLoadFailedView takes over.
+/// improvement: after 8 s of loading it names the mirror that is slow, so a stall doesn't look like a frozen app. With
+/// `retry` (the movie page; critique r1) a glass «Повторить» comes with it, so the way out isn't only Back. A request
+/// gives up after `siteTimeout` without data or `siteDeadline` in all, and PageLoadFailedView takes over.
 struct SlowLoadNotice: View {
+    var retry: (() -> Void)? = nil
     @AppStorage("mirror") private var mirror: String = DefaultSettings.mirror
     @State private var isSlow = false
 
     var body: some View {
         // A VStack, not a Group: an empty Group has no view for `.task` to run on.
-        VStack {
+        VStack(spacing: DesignTokens.space16) {
             if isSlow {
                 Text("key_slow_site \(mirror)")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .transition(.opacity)
+                if let retry {
+                    Button("key_retry", action: retry)
+                        .secondaryButtonStyle()
+                        .tint(.primary)
+                        .controlSize(.large)
+                        .transition(.opacity)
+                }
             }
         }
         .task {

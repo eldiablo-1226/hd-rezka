@@ -87,8 +87,13 @@ extension MovieVideo {
 }
 
 extension Array where Element == Quality {
-    /// The quality named `name` (the "preferredQuality" setting) or, when it is missing, the highest one.
+    /// The quality named `name` (the "preferredQuality" setting), else the best one below it, else the lowest.
+    /// improvement (critique r1): never above it, so «Смотреть» can say «до 1080p» before the episode's list is known;
+    /// 1.6.0 took the highest one when the named one was missing. The site's lists start at 360p, so the lowest one is
+    /// above the setting only for a list without the setting's own step or any below it.
     func preferred(name: String) -> Quality? {
-        first { $0.name == name } ?? last
+        let ranks = PlayerQualityPreference.allCases.map(\.rawValue)
+        guard let limit = ranks.firstIndex(of: name) else { return last }
+        return last { ranks.firstIndex(of: $0.name).map { $0 <= limit } ?? false } ?? first
     }
 }

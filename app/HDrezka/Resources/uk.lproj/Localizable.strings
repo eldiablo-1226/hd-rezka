@@ -24,7 +24,7 @@
 "downloaded" = "завантажено";
 "episode" = "Епізод";
 "failed to download" = "не вдалося завантажити";
-"key_actor" = "Актор";
+"key_actor" = "Ролі";
 "key_actors" = "Актори";
 "key_all+franchise+parts" = "Усі частини франшизи";
 "key_and+others" = "та інші";
@@ -75,7 +75,6 @@
 "key_login_description" = "Авторизуйтеся для синхронізації стану перегляду серіалів та відстежування виходу нових серій";
 "key_logout_description" = "Ви впевнені, що хочете вийти?";
 "key_mail+not+valid" = "Некоректна поштова адреса";
-"key_more" = "більше";
 "key_no" = "Ні";
 "key_no+cat" = "Категорій поки немає. Створіть першу — фільм одразу потрапить до неї.";
 "key_no_subtitles" = "Без субтитрів";
@@ -169,7 +168,6 @@
 "key_last_watched" = "Обрана";
 "key_premium_only" = "Лише з Преміумом";
 "key_continue" = "Продовжити";
-"key_continue_watching" = "Продовжити перегляд";
 "key_all" = "Усі";
 "key_settings" = "Налаштування";
 "key_logout" = "Вийти з акаунта";
@@ -187,6 +185,7 @@
 "key_season_number" = "Сезон %@";
 "key_episode_number" = "Серія %@";
 "key_resume_from" = "з %@";
+"key_quality_up_to" = "до %@";
 "key_all_voices %lld" = "Усі озвучення · %lld";
 "key_fewer_voices" = "Згорнути";
 "key_voice_camrip" = "Екранка";

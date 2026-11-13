@@ -1,7 +1,11 @@
 import SwiftUI
 import Alamofire
 
-/// Search tab: an invisible search field host, live quick-search rows, and the results page on submit.
+/// Search tab. improvement (critique r2, after the TV app's and the App Store's search): a large «Поиск» with the field
+/// under it, the suggestions as a list of titles while you type, and the full results under the same field after
+/// «Найти», so refining is editing the field. 1.6.0 hung the field on an invisible zero-size view, listed suggestions as
+/// magnifying-glass rows without posters, showed nothing while an answer was on its way or after it failed, and opened
+/// the results as a page of their own without the field.
 struct SearchView: View {
     @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
     @AppStorage("remoteVersion") var remoteVersion: String = ""
@@ -9,95 +13,176 @@ struct SearchView: View {
     @Binding var isPresented: Bool
     @Binding var id: String
     @State var search: String = ""
-    @State var isPresentedResult: Bool = false
+    /// The text «Найти» was pressed for: its results stay under the field until the text changes.
+    @State private var submitted: String? = nil
+    /// The suggestions' answer for the text in the field.
+    @State private var phase: SearchResultsView.Phase = .loading
+    /// The text whose suggestions are on screen, so coming back from a title or a tab doesn't ask again.
+    @State private var suggested: String? = nil
+    /// Bumped by «Повторить».
+    @State private var attempt = 0
 
     var body: some View {
         NavigationStack {
-            VStack {
-                Color.clear
-                    .foregroundStyle(.clear)
-                    .frame(width: 0, height: 0)
-                    // improvement: always shown, as in a search tab; with the hint below, the automatic placement
-                    // collapsed the field until the user pulled the page down.
-                    .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled(true)
-                    .onChange(of: search) { _, typed in
-                        // 0x100070cac: every edit fires its own request 0.2 s later with the text current then.
-                        // improvement: only when the text is still the same (a debounce), and an answer for older text
-                        // is dropped, so a slow reply can't replace the suggestions for what is typed now.
-                        guard !typed.isEmpty else {
-                            network.quickSearch = []
-                            return
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            guard typed == search else { return }
-                            siteSession.request(Request.quick(mirror: settingStore, query: typed, version: remoteVersion))
-                                .responseString { response in
-                                    Task { @MainActor in
-                                        guard typed == search else { return }
-                                        network.quickSearch = []
-                                        if let html = response.value {
-                                            _ = try? network.parseQuickSearch(html: html)
-                                        }
-                                    }
-                                }
-                        }
-                    }
-                    .submitLabel(.search)
-                    .onSubmit(of: .search) {
-                        network.search = []
-                        isPresentedResult.toggle()
-                    }
-                    .navigationDestination(isPresented: $isPresentedResult) {
-                        SearchResultsView(request: $search)
-                    }
-            }
-            ScrollView {
-                // improvement: an empty tab says what can be searched (1.6.0: a blank page under the field). Inside the
-                // scroll content: an overlay on this ScrollView never showed, the view gets no height of its own here.
-                if search.isEmpty && network.quickSearch.isEmpty {
-                    VStack(spacing: DesignTokens.space8) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                        Text("key_search_hint_title")
-                            .font(.title3.bold())
-                        Text("key_search_hint")
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, DesignTokens.space24)
-                    .padding(.top, 96)
+            // A ZStack, not a Group: the field and the task belong to the screen, not to whichever state is on it.
+            ZStack {
+                if search.isEmpty {
+                    // improvement: an empty tab says what can be searched (1.6.0: a blank page under the field).
+                    ContentUnavailableView("key_search_hint_title", systemImage: "magnifyingglass",
+                                           description: Text("key_search_hint"))
+                } else if let submitted {
+                    SearchResultsView(query: submitted)
+                } else {
+                    suggestions
                 }
-                ForEach(network.quickSearch) { result in
-                    HStack {
-                        NavigationLink(destination: DetailsView(id: result.id)) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundStyle(.secondary)
-                            VStack(alignment: .leading) {
-                                Text(result.name)
-                                    .padding(.leading, 5)
-                                    .foregroundStyle(.primary)
-                                    .lineLimit(2)
-                                Text(result.details)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(3)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .animation(.spring(response: 0.5, dampingFraction: 1, blendDuration: 0))
             }
             .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.large)
+            // improvement: always shown, as in a search tab; the automatic placement collapsed the field until the page
+            // was pulled down.
+            .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled(true)
+            .submitLabel(.search)
+            .onSubmit(of: .search) { submitted = search }
+            .onChange(of: search) {
+                submitted = nil
+                network.search = []
+            }
+            .task(id: "\(attempt) \(search)") { await suggest() }
             .navigationDestination(isPresented: $isPresented) {
                 DetailsView(id: id)
             }
         }
+    }
+
+    /// The system spinner in a row while an answer is on its way (the orb is for pages), «Нет результатов» when the site
+    /// found nothing, the cause and the fix when the request failed.
+    @ViewBuilder
+    private var suggestions: some View {
+        if case .failed(let failure) = phase {
+            PageLoadFailedView(failure: failure) { attempt += 1 }
+        } else if phase == .loaded && network.quickSearch.isEmpty {
+            ContentUnavailableView.search(text: search)
+        } else {
+            List {
+                if phase == .loading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .listRowSeparator(.hidden)
+                }
+                ForEach(network.quickSearch) { result in
+                    NavigationLink(destination: DetailsView(id: result.id)) {
+                        SearchSuggestionRow(result: result)
+                    }
+                }
+            }
+            .listStyle(.plain)
+        }
+    }
+
+    /// 0x100070cac sent a request for every edit 0.2 s later and dropped errors. improvement: the task restarts when the
+    /// text changes, so a pause sends one request and an answer for older text is dropped; a failure is shown.
+    private func suggest() async {
+        let text = search
+        guard !text.isEmpty else {
+            network.quickSearch = []
+            suggested = nil
+            return
+        }
+        guard text != suggested else { return }
+        suggested = nil
+        phase = .loading
+        try? await Task.sleep(nanoseconds: 200_000_000)
+        guard !Task.isCancelled else { return }
+        do {
+            let html = try await siteString(Request.quick(mirror: settingStore, query: text, version: remoteVersion)
+                .asURLRequest())
+            guard !Task.isCancelled else { return }
+            phase = Self.receiveSuggestions(html, into: network)
+        } catch {
+            guard !Task.isCancelled else { return }
+            network.quickSearch = []
+            phase = .failed(PageLoadFailure(error: error, statusCode: nil))
+        }
+        suggested = phase == .loaded ? text : nil
+    }
+
+    /// The quick-search answer into `network.quickSearch`. The site answers «ничего не найдено» inside its live-search
+    /// block, so an answer without that block (a block page served with 200) is a failure, not «nothing found».
+    @MainActor
+    static func receiveSuggestions(_ html: String, into network: Network) -> SearchResultsView.Phase {
+        network.quickSearch = []
+        guard html.contains("b-search__live_section"), (try? network.parseQuickSearch(html: html)) != nil else {
+            return .failed(.other)
+        }
+        return .loaded
+    }
+}
+
+/// A suggestion as the TV app lists one: a 2:3 poster, the title, the original title and «Сериал · 2024». The answer
+/// carries no posters, so a row reads its title's page once and keeps the poster (PosterCache), as the «Досмотреть»
+/// cards do.
+private struct SearchSuggestionRow: View {
+    var result: SearchResult
+    @State private var poster: String? = nil
+    @State private var isPosterMissing = false
+    @AppStorage("mirror") var settingStore: String = DefaultSettings.mirror
+    @AppStorage("remoteVersion") var remoteVersion: String = ""
+
+    var body: some View {
+        HStack(spacing: DesignTokens.space16) {
+            WatchLaterPoster(url: poster, width: 48, isMissing: isPosterMissing)
+            VStack(alignment: .leading, spacing: DesignTokens.space4) {
+                Text(verbatim: result.name)
+                    .lineLimit(2)
+                if let original = result.originalTitle {
+                    Text(verbatim: original)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                Text(verbatim: result.kindAndYear)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .task(id: result.id) {
+            poster = await PosterCache.shared.poster(loading: result.id, mirror: settingStore, version: remoteVersion)
+            isPosterMissing = poster == nil
+        }
+    }
+}
+
+extension SearchResult {
+    /// The words the site's cards use for its sections; the quick search writes them, lowercase, for all but films.
+    private static let kinds = ["films": "Фильм", "series": "Сериал", "cartoons": "Мультфильм", "animation": "Аниме"]
+
+    /// The section of the title's address: "https://ijobs.app/series/fiction/…" is a series.
+    private var kind: String? {
+        URL(string: id)?.pathComponents.dropFirst().first.flatMap { Self.kinds[$0] }
+    }
+
+    /// The site's " (Dune: Prophecy, сериал, 2024 - ...)" split from the end, since an original title can hold a comma:
+    /// the year, then the site's word for the type, then the original title, which a Russian title doesn't have.
+    private var detailParts: (original: [String], year: String?) {
+        var parts = details.trimmingCharacters(in: .whitespaces)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "()"))
+            .components(separatedBy: ", ")
+        let year = parts.last?.first?.isNumber == true ? parts.removeLast() : nil
+        if let kind, parts.last == kind.lowercased() { parts.removeLast() }
+        return (parts, year)
+    }
+
+    /// "Dune: Prophecy"; nil for a Russian title.
+    var originalTitle: String? {
+        let original = detailParts.original.joined(separator: ", ")
+        return original.isEmpty ? nil : original
+    }
+
+    /// «Сериал · 2024 - ...», in the cards' words.
+    var kindAndYear: String {
+        [kind, detailParts.year].compactMap { $0 }.joined(separator: " · ")
     }
 }
 
